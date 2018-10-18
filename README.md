@@ -1,4 +1,4 @@
 ### form-wrapper-js
 
-## JS abstraction of forms
+## JS abstraction for forms
 
