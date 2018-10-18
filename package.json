@@ -1,0 +1,15 @@
+{
+  "name": "form-wrapper-js",
+  "version": "0.0.1",
+  "description": "JS abstraction of forms",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "forms",
+    "js"
+  ],
+  "author": "Nevo Golan <nevos12@gmail.com>",
+  "license": "MIT"
+}
