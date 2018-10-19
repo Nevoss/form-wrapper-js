@@ -5,8 +5,17 @@
   "main": "lib/index.js",
   "scripts": {
     "test": "jest",
-    "build": "./node_modules/.bin/babel src --out-dir lib"
+    "build": "./node_modules/.bin/babel src --out-dir lib",
+    "prepublish": "npm run build"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Nevoss/form-wrapper-js"
+  },
+  "bugs": {
+    "url": "https://github.com/Nevoss/form-wrapper-js/issues"
+  },
+  "homepage": "https://github.com/Nevoss/form-wrapper-js",
   "keywords": [
     "forms",
     "js"
