@@ -2,9 +2,10 @@
   "name": "form-wrapper-js",
   "version": "0.1.0",
   "description": "JS abstraction for forms",
-  "main": "index.js",
+  "main": "lib/index.js",
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "build": "./node_modules/.bin/babel src --out-dir lib"
   },
   "keywords": [
     "forms",
