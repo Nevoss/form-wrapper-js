@@ -1,4 +1,4 @@
-import {Errors} from "../src/core/Errors";
+import {Errors} from "../../src/core/Errors";
 
 describe('Errors.js', () => {
 

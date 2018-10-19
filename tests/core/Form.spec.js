@@ -1,8 +1,8 @@
-import { Errors } from "../src/core/Errors"
-import { Form } from "../src/core/Form"
-import defaultOptionsSource from '../src/defaults'
+import { Errors } from "../../src/core/Errors"
+import { Form } from "../../src/core/Form"
+import defaultOptionsSource from '../../src/defaults'
 
-jest.mock('../src/core/Errors')
+jest.mock('../../src/core/Errors')
 
 describe('Form.js', () => {
 
