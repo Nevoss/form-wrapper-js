@@ -14,7 +14,7 @@ export class Errors {
    * @param errors
    * @returns {Errors}
    */
-  record = (errors) => {
+  record(errors) {
     this.$errors = errors
 
     return this;
@@ -27,7 +27,7 @@ export class Errors {
    * @param defaultValue
    * @returns {*}
    */
-  get = (fieldName, defaultValue = []) => {
+  get(fieldName, defaultValue = []) {
     if (!this.has(fieldName)) {
       return defaultValue
     }
@@ -41,7 +41,7 @@ export class Errors {
    * @param fieldName
    * @returns {Errors}
    */
-  delete = (fieldName) => {
+  delete(fieldName) {
     if (this.has(fieldName)) {
       delete this.$errors[fieldName]
     }
@@ -55,7 +55,7 @@ export class Errors {
    * @param fieldName
    * @returns {boolean}
    */
-  has = (fieldName) => {
+  has(fieldName) {
     return this.$errors.hasOwnProperty(fieldName)
   }
 
@@ -64,7 +64,7 @@ export class Errors {
    *
    * @returns {boolean}
    */
-  any = () => {
+  any() {
     return Object.keys(this.$errors).length > 0
   }
 
@@ -73,7 +73,7 @@ export class Errors {
    *
    * @returns {Errors}
    */
-  clear = () => {
+  clear() {
     this.$errors = {}
 
     return this

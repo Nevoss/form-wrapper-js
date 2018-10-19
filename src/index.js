@@ -1,2 +1,1 @@
-export { Form } from './Form'
-export { Errors } from './Errors'
+export { Form } from './core/Form'

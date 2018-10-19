@@ -1,4 +1,5 @@
 import { Errors } from "./Errors";
+import defaultsOptions from '../defaults'
 
 export class Form {
 
@@ -26,12 +27,9 @@ export class Form {
   /**
    * options
    *
-   * @type {{clearErrorsAfterSuccessfulSubmission: boolean, resetDataAfterSuccessfulSubmission: boolean}}
+   * @type {Object}
    */
-  $options = {
-    clearErrorsAfterSuccessfulSubmission: true,
-    resetDataAfterSuccessfulSubmission: true,
-  };
+  $options = defaultsOptions;
 
   /**
    * constructor
@@ -44,24 +42,22 @@ export class Form {
     this.$errors = new Errors()
 
     this.assignOptions($options)
+    this.$errors.clear();
     this.reset()
   }
 
   /**
    * reset the form
    * set all the fields value same as $originalData fields value
-   * and clear all the errors
    *
    * @returns {Form}
    */
-  reset = () => {
+  reset() {
     for (let fieldName in this.$originalData) {
       if (this.$originalData.hasOwnProperty(fieldName)) {
         this[fieldName] = this.$originalData[fieldName]
       }
     }
-
-    this.$errors.clear();
 
     return this
   }
@@ -71,7 +67,7 @@ export class Form {
    *
    * @returns {Object}
    */
-  data = () => {
+  data() {
     return Object.assign(
       {},
       ...Object.keys(this.$originalData).map(
@@ -86,7 +82,7 @@ export class Form {
    * @param newData
    * @returns {Form}
    */
-  fill = (newData) => {
+  fill(newData) {
     for (let fieldName in newData) {
       if (newData.hasOwnProperty(fieldName) && this.$originalData.hasOwnProperty(fieldName)) {
         this[fieldName] = newData[fieldName]
@@ -103,16 +99,16 @@ export class Form {
    * @param callback
    * @returns {Promise.<*>}
    */
-  submit = (callback) => {
+  submit(callback) {
     if (!this.$submitting) {
       this.$submitting = true
 
       return callback(this)
-        .then(this.successfulSubmission.bind(this))
-        .catch(this.unSuccessfulSubmission.bind(this))
+        .then(this._successfulSubmission.bind(this))
+        .catch(this._unSuccessfulSubmission.bind(this))
     }
 
-    return Promise.reject()
+    return Promise.reject('The form is already submitting')
   }
 
   /**
@@ -121,7 +117,7 @@ export class Form {
    * @param response
    * @returns {Promise.<*>}
    */
-  successfulSubmission = (response) => {
+  _successfulSubmission(response) {
     this.$submitting = false
 
     if (this.$options.clearErrorsAfterSuccessfulSubmission) {
@@ -132,9 +128,7 @@ export class Form {
       this.reset()
     }
 
-    Form.successfulSubmissionHook(response)
-
-    return Promise.resolve(response)
+    return Form.successfulSubmissionHook(response, this)
   }
 
   /**
@@ -143,12 +137,10 @@ export class Form {
    * @param error
    * @returns {Promise.<*>}
    */
-  unSuccessfulSubmission = (error) => {
+  _unSuccessfulSubmission(error) {
     this.$submitting = false
 
-    Form.unSuccessfulSubmissionHook(error)
-
-    return Promise.reject(error)
+    return Form.unSuccessfulSubmissionHook(error, this)
   }
 
   /**
@@ -156,29 +148,36 @@ export class Form {
    *
    * @param options
    */
-  assignOptions = (options) => {
-    this.$options = Object.assign(this.$options, options)
+  assignOptions(options) {
+    this.$options = {
+      ...this.$options,
+      ...options
+    }
   }
 
   /**
    * Hook for successful submission
-   * use Form.prototype.successfulSubmissionHook = () => {};
+   * use Form.successfulSubmissionHook = () => {};
    * for extending the successful submission handling
    *
    * @param response
+   * @param form
+   * @returns {Promise<any>}
    */
-  static successfulSubmissionHook(response) {
-    //
+  static successfulSubmissionHook(response, form) {
+    return Promise.resolve(response)
   }
 
   /**
    * Hook for un successful submission
-   * use Form.prototype.unSuccessfulSubmissionHook = () => {};
+   * use Form.unSuccessfulSubmissionHook = () => {};
    * for extending the un successful submission handling
    *
    * @param error
+   * @param form
+   * @returns {Promise<never>}
    */
-  static unSuccessfulSubmissionHook(error) {
-    //
+  static unSuccessfulSubmissionHook(error, form) {
+    return Promise.reject(error)
   }
 }
