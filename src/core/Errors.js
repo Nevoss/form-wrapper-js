@@ -9,13 +9,22 @@ export class Errors {
   $errors = {}
 
   /**
+   * constructor
+   *
+   * @param errors
+   */
+  constructor(errors = {}) {
+    this.record(errors)
+  }
+
+  /**
    * record errors in the $errors object
    *
    * @param errors
    * @returns {Errors}
    */
   record(errors) {
-    this.$errors = errors
+    this.$errors = Object.assign({}, errors)
 
     return this;
   }
@@ -33,6 +42,15 @@ export class Errors {
     }
 
     return this.$errors[fieldName]
+  }
+
+  /**
+   * returns all the errors array
+   *
+   * @returns {Object}
+   */
+  all() {
+    return this.$errors
   }
 
   /**
