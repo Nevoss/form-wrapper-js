@@ -1,8 +1,13 @@
 import { Errors } from "../../src/core/Errors"
+import { Validator } from "../../src/core/Validator"
 import { Form } from "../../src/core/Form"
+import generateDefaultLabel from '../../src/helpers/generateDefaultLabel'
 import defaultOptionsSource from '../../src/defaults'
+import { mergeDeep } from "../../src/utils";
 
 jest.mock('../../src/core/Errors')
+jest.mock('../../src/core/Validator')
+jest.mock('../../src/helpers/generateDefaultLabel', () => jest.fn().mockImplementation(() => 'a'))
 
 describe('Form.js', () => {
 
@@ -11,25 +16,66 @@ describe('Form.js', () => {
     last_name: null,
     is_developer: false,
   }
-  
+
   let defaultOptions = Object.assign({}, defaultOptionsSource)
 
 
   beforeEach(() => {
     Errors.mockClear()
+    Validator.mockClear()
+
+    Validator.prototype.validateField = jest.fn(() => [])
   })
 
-  
+
+  it('should init correctly', () => {
+    const rulesArray = [
+      () => true,
+    ]
+
+    let form = new Form({
+      name: {
+        value: 'Nevo',
+        label: 'Name',
+        rules: rulesArray,
+      },
+      last_name: 'Golan'
+    })
+
+    expect(form.name).toBe('Nevo')
+    expect(form.last_name).toBe('Golan')
+    expect(generateDefaultLabel.mock.calls).toHaveLength(1)
+    expect(generateDefaultLabel).toBeCalledWith('last_name')
+    expect(form.$labels).toEqual({
+      name: 'Name',
+      last_name: 'a'
+    })
+    expect(Validator).toHaveBeenCalledWith({name: rulesArray}, defaultOptions.validation)
+    expect(Errors).toHaveBeenCalled()
+  });
+
+
+  it('should access the form props', () => {
+    let form = new Form({
+      first_name: 'Nevo',
+      last_name: 'Golan',
+    })
+
+    expect(form.first_name).toBe('Nevo')
+    expect(form.last_name).toBe('Golan')
+  });
+
+
   it('should assign options to the form', () => {
     let form = new Form(data)
 
     expect(form.$options).toEqual(defaultOptions)
-    expect(form.$options.clearErrorsAfterSuccessfulSubmission).toBeTruthy()
+    expect(form.$options.successfulSubmission.clearErrors).toBe(true)
 
-    const newOptions = { clearErrorsAfterSuccessfulSubmission: false }
+    const newOptions = { successfulSubmission: { clearErrors: false } }
 
     form.assignOptions(newOptions)
-    expect(form.$options).toEqual(Object.assign({}, defaultOptions, newOptions))
+    expect(form.$options).toEqual(mergeDeep(defaultOptions, newOptions))
   });
 
 
@@ -95,7 +141,7 @@ describe('Form.js', () => {
     let response = await form.submit(mockCallable)
 
     expect(mockCallable.mock.calls.length).toBe(1)
-    expect(form.$errors.clear.mock.calls.length).toBe(2);
+    expect(form.$errors.clear.mock.calls.length).toBe(1);
     expect(form.reset.mock.calls.length).toBe(1);
     expect(Form.successfulSubmissionHook).toBeCalledWith(responseParam, form)
     expect(Form.unSuccessfulSubmissionHook.mock.calls.length).toBe(0)
@@ -128,51 +174,146 @@ describe('Form.js', () => {
 
     }
   })
-  
 
-  it('should not double submit the form until the promise is resolve or reject', async () => {
+
+  it('should set $submitting as true if submit method is called', async () => {
     let form = new Form(data)
 
     let mockCallable = jest.fn(() => Promise.resolve())
-
-    expect.assertions(3)
 
     form.submit(mockCallable)
 
     expect(form.$submitting).toBeTruthy()
 
-    try {
-      await form.submit(mockCallable)
-    } catch (e) {
-      expect(e).not.toBeUndefined()
-    }
-
     expect(mockCallable.mock.calls.length).toBe(1)
-
   });
 
 
   it('should not reset after success submission if resetDataAfterSuccessfulSubmission option is false', async () => {
     let form = new Form(data, {
-      resetDataAfterSuccessfulSubmission: false
+      successfulSubmission: {
+        resetData: false
+      },
     })
 
     form.reset = jest.fn()
 
     await form.submit(() => Promise.resolve())
 
+    expect(form.$errors.clear.mock.calls.length).toBe(1)
     expect(form.reset.mock.calls.length).toBe(0)
   });
 
 
   it('should not clear errors after success submission if clearErrorsAfterSuccessfulSubmission option is false', async () => {
     let form = new Form(data, {
-      clearErrorsAfterSuccessfulSubmission: false
+      successfulSubmission: {
+        clearErrors: false
+      },
     })
+
+    form.reset = jest.fn()
 
     await form.submit(() => Promise.resolve())
 
-    expect(form.$errors.clear.mock.calls.length).toBe(1)
+    expect(form.$errors.clear.mock.calls.length).toBe(0)
+    expect(form.reset.mock.calls.length).toBe(1)
+  });
+
+
+  it('should call to validate specific field or all the fields', () => {
+    let form = new Form(data)
+
+    form.validateAll = jest.fn()
+    form.validateField = jest.fn()
+
+    form.validate()
+
+    expect(form.validateAll.mock.calls).toHaveLength(1)
+    expect(form.validateField.mock.calls).toHaveLength(0)
+
+    form.validate('first_name')
+
+    expect(form.validateAll.mock.calls).toHaveLength(1)
+    expect(form.validateField.mock.calls).toHaveLength(1)
+  });
+
+
+  it('should validate specific field', () => {
+    let form = new Form({
+      name: {
+        value: 'a',
+        label: 'The Name',
+        rules: [ () => true ]
+      }
+    })
+
+    let callbackFunction = jest.fn(() => 'error')
+    form.$validator.validateField = jest.fn(() => [ callbackFunction ])
+
+    let isValid = form.validateField('name')
+
+    expect(isValid).toBe(false)
+    expect(form.$errors.record.mock.calls).toHaveLength(1)
+    expect(callbackFunction).toBeCalledWith({ label: 'The Name', value: 'a' }, form)
+    expect(form.$errors.record).toBeCalledWith({
+      name: [ 'error' ]
+    })
+
+    form.$validator.validateField = jest.fn(() => [])
+
+    isValid = form.validateField('name')
+    expect(isValid).toBe(true)
+    expect(form.$errors.record.mock.calls).toHaveLength(1)
+  });
+
+
+  it('should validate all the fields of the form', () => {
+    let form = new Form({
+      name: {
+        value: null,
+        rules: [ () => true ]
+      },
+      last_name: {
+        value: null,
+        rules: [ () => false ]
+      }
+    })
+
+    form.validateField = jest.fn().mockReturnValueOnce(true).mockReturnValueOnce(true)
+
+    expect(form.validateAll()).toBe(true)
+    expect(form.validateField.mock.calls[0][0]).toEqual('name')
+    expect(form.validateField.mock.calls[1][0]).toEqual('last_name')
+
+
+    form.validateField = jest.fn().mockReturnValueOnce(true).mockReturnValueOnce(false)
+    expect(form.validateAll()).toBe(false)
+
+  });
+
+
+  it('should validate the form on submission if the option is set to validate the form', async () => {
+    let form =  new Form({
+      name: 'Nevo',
+      rules: [ () => true ]
+    }, {
+      validation: {
+        onSubmission: true
+      }
+    })
+
+    form.validate = jest.fn(() => false)
+
+    expect.assertions(2)
+
+    try {
+      await form.submit(() => Promise.resolve())
+
+    } catch (e) {
+      expect(form.validate).toBeCalled()
+      expect(e.hasOwnProperty('message')).toBe(true)
+    }
   });
 
 })

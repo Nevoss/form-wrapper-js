@@ -2,6 +2,14 @@
  * Default options that provide to Form instance
  */
 export default {
-  clearErrorsAfterSuccessfulSubmission: true,
-  resetDataAfterSuccessfulSubmission: true,
+
+  successfulSubmission: {
+    clearErrors: true,
+    resetData: true,
+  },
+
+  validation: {
+    onSubmission: true,
+    defaultMessage: ({ label }) => `${label} is invalid.`
+  }
 }

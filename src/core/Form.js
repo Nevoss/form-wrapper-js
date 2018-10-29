@@ -1,4 +1,7 @@
 import { Errors } from "./Errors";
+import { Validator } from "./Validator";
+import generateDefaultLabel from '../helpers/generateDefaultLabel'
+import { isObject, mergeDeep } from "../utils";
 import defaultsOptions from '../defaults'
 
 export class Form {
@@ -18,11 +21,25 @@ export class Form {
   $errors = null
 
   /**
+   * Validator class
+   *
+   * @type {null|Validator}
+   */
+  $validator = null
+
+  /**
+   * labels of the fields
+   *
+   * @type {{}}
+   */
+  $labels = {}
+
+  /**
    * hold the original data that inject to the Form instance
    *
-   * @type {Array}
+   * @type {Object}
    */
-  $originalData = [];
+  $originalData = {};
 
   /**
    * options
@@ -35,15 +52,52 @@ export class Form {
    * constructor
    *
    * @param data
-   * @param $options
+   * @param options
    */
-  constructor(data, $options) {
-    this.$originalData = data
+  constructor(data, options) {
+    this.assignOptions(options)
+      ._init(data)
+      .reset()
+  }
+
+  /**
+   * init the bare bones of the Form class
+   *
+   * @param data
+   * @returns {Form}
+   * @private
+   */
+  _init(data) {
+    let rules = {}
+    let originalData = {}
+    let labels = {}
+
+    Object.keys(data).forEach(key => {
+
+      if (isObject(data[key])) {
+        originalData[key] = data[key].value
+
+        if (data[key].hasOwnProperty('rules')) {
+          rules[key] = data[key].rules
+        }
+
+        if (data[key].hasOwnProperty('label')) {
+          labels[key] = data[key].label
+        }
+
+        return
+      }
+
+      labels[key] = key in labels ? labels[key] : generateDefaultLabel(key)
+      originalData[key] = data[key]
+    })
+
+    this.$originalData = originalData
+    this.$labels = labels
+    this.$validator = new Validator(rules, this.$options.validation)
     this.$errors = new Errors()
 
-    this.assignOptions($options)
-    this.$errors.clear();
-    this.reset()
+    return this
   }
 
   /**
@@ -93,38 +147,88 @@ export class Form {
   }
 
   /**
+   * validate field of all form data
+   *
+   * @param fieldKey
+   * @returns {boolean}
+   */
+  validate(fieldKey = null) {
+    return fieldKey ? this.validateField(fieldKey) : this.validateAll()
+  }
+
+  /**
+   * validate one field
+   *
+   * @param fieldKey
+   * @returns {boolean}
+   */
+  validateField(fieldKey) {
+    if (!this.hasOwnProperty(fieldKey)) {
+      return true
+    }
+
+    const errors = this.$validator
+      .validateField(fieldKey, this[fieldKey])
+      .map(messageFunc => messageFunc({ label: this.$labels[fieldKey], value: this[fieldKey] }, this))
+    
+    if (errors.length > 0) {
+      this.$errors.record({ [fieldKey]: errors })
+    }
+
+    return errors.length === 0
+  }
+
+  /**
+   * validate all form data
+   *
+   * @returns {boolean}
+   */
+  validateAll() {
+    let isValid = true
+
+    Object.keys(this.data()).forEach(fieldKey => {
+      if (!this.validateField(fieldKey)) {
+        isValid = false
+      }
+    })
+
+    return isValid
+  }
+
+  /**
    * must be a callback that returns a promise determine
    * if the submit went successfully or not
    *
    * @param callback
-   * @returns {Promise.<*>}
+   * @returns {Promise<T | never>}
    */
   submit(callback) {
-    if (!this.$submitting) {
-      this.$submitting = true
+    this.$submitting = true
 
-      return callback(this)
-        .then(this._successfulSubmission.bind(this))
-        .catch(this._unSuccessfulSubmission.bind(this))
+    if (this.$options.validation.onSubmission && !this.validate()) {
+      return Promise.reject({ message: 'Form is not valid' })
     }
 
-    return Promise.reject('The form is already submitting')
+    return callback(this)
+      .then(this._successfulSubmission.bind(this))
+      .catch(this._unSuccessfulSubmission.bind(this))
   }
 
   /**
    * Successful Submission
    *
    * @param response
-   * @returns {Promise.<*>}
+   * @returns {Promise<any>}
+   * @private
    */
   _successfulSubmission(response) {
     this.$submitting = false
 
-    if (this.$options.clearErrorsAfterSuccessfulSubmission) {
+    if (this.$options.successfulSubmission.clearErrors) {
       this.$errors.clear()
     }
 
-    if (this.$options.resetDataAfterSuccessfulSubmission) {
+    if (this.$options.successfulSubmission.resetData) {
       this.reset()
     }
 
@@ -135,7 +239,8 @@ export class Form {
    * UnSuccessful submission
    *
    * @param error
-   * @returns {Promise.<*>}
+   * @returns {Promise<never>}
+   * @private
    */
   _unSuccessfulSubmission(error) {
     this.$submitting = false
@@ -147,12 +252,12 @@ export class Form {
    * assign options to $options object
    *
    * @param options
+   * @returns {Form}
    */
   assignOptions(options) {
-    this.$options = {
-      ...this.$options,
-      ...options
-    }
+    this.$options = mergeDeep(this.$options, options)
+
+    return this
   }
 
   /**
