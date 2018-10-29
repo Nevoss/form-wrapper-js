@@ -1,5 +1,3 @@
-import { capitalizeFirstLetter } from '../utils'
-
 /**
  * generate default label for field
  *
