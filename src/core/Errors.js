@@ -45,6 +45,20 @@ export class Errors {
   }
 
   /**
+   * returns first error of specific field
+   *
+   * @param fieldName
+   * @param defaultValue
+   * @returns {*}
+   */
+  getFirst(fieldName, defaultValue = null) {
+    const errors = this.get(fieldName)
+
+    return errors.length <= 0 ? defaultValue : errors[0]
+  }
+
+
+  /**
    * returns all the errors array
    *
    * @returns {Object}
