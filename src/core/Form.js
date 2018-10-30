@@ -84,12 +84,10 @@ export class Form {
         if (data[key].hasOwnProperty('label')) {
           labels[key] = data[key].label
         }
-
-        return
       }
 
       labels[key] = key in labels ? labels[key] : generateDefaultLabel(key)
-      originalData[key] = data[key]
+      originalData[key] = key in originalData ? originalData[key] : data[key]
     })
 
     this.$originalData = originalData

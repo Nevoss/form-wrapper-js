@@ -39,16 +39,22 @@ describe('Form.js', () => {
         label: 'Name',
         rules: rulesArray,
       },
-      last_name: 'Golan'
+      last_name: 'Golan',
+      is_developer: {
+        value: false,
+      },
     })
 
     expect(form.name).toBe('Nevo')
     expect(form.last_name).toBe('Golan')
-    expect(generateDefaultLabel.mock.calls).toHaveLength(1)
-    expect(generateDefaultLabel).toBeCalledWith('last_name')
+    expect(form.is_developer).toBe(false)
+    expect(generateDefaultLabel.mock.calls).toHaveLength(2)
+    expect(generateDefaultLabel.mock.calls[0][0]).toEqual('last_name')
+    expect(generateDefaultLabel.mock.calls[1][0]).toEqual('is_developer')
     expect(form.$labels).toEqual({
       name: 'Name',
-      last_name: 'a'
+      last_name: 'a',
+      is_developer: 'a',
     })
     expect(Validator).toHaveBeenCalledWith({name: rulesArray}, defaultOptions.validation)
     expect(Errors).toHaveBeenCalled()
