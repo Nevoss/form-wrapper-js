@@ -176,15 +176,19 @@ describe('Form.js', () => {
   })
 
 
-  it('should set $submitting as true if submit method is called', async () => {
+  it('should set $submitting as true if submit method is called and false if validation failed and callback method not called', async () => {
     let form = new Form(data)
 
     let mockCallable = jest.fn(() => Promise.resolve())
+    form.validate = jest.fn(() => false)
+    form.submit(mockCallable).catch(() => {})
 
+    expect(form.$submitting).toBe(false)
+
+    form.validate = jest.fn(() => true)
     form.submit(mockCallable)
 
-    expect(form.$submitting).toBeTruthy()
-
+    expect(form.$submitting).toBe(true)
     expect(mockCallable.mock.calls.length).toBe(1)
   });
 

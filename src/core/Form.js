@@ -203,11 +203,11 @@ export class Form {
    * @returns {Promise<T | never>}
    */
   submit(callback) {
-    this.$submitting = true
-
     if (this.$options.validation.onSubmission && !this.validate()) {
       return Promise.reject({ message: 'Form is not valid' })
     }
+
+    this.$submitting = true
 
     return callback(this)
       .then(this._successfulSubmission.bind(this))
