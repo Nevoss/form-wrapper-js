@@ -5,7 +5,7 @@
 A very light tool to create forms systems in a convenient and easy way, without dependencies and magic code.
 
 ---
-**this library is letting you as a developer, 😎 to create a powerfull form systems by chosing how to build it (GUI, validation, submission etc.)**
+**this library is letting you as a developer, 😎 to create a powerful form systems by choosing how to build it (GUI, validation, submission etc.)**
 
 ---
 
@@ -19,7 +19,7 @@ yarn add form-wrapper-js
 ```
 
 ## Documentation
-comming soon..
+coming soon..
 
 ## Basic Usage
 Basic examples in vue for now (react is coming soon...)
