@@ -2,12 +2,92 @@
 [![npm version](https://badge.fury.io/js/form-wrapper-js.svg)](https://badge.fury.io/js/form-wrapper-js)
 [![npm version](https://travis-ci.org/Nevoss/form-wrapper-js.svg?branch=master)](https://travis-ci.org/Nevoss/form-wrapper-js)
 
-JS abstraction for forms (framework agnostic)
+A very light tool to create forms systems in a convenient and easy way, without dependencies and magic code.
+
+---
+**this library is letting you as a developer, 😎 to create a powerfull form systems by chosing how to build it (GUI, validation, submission etc.)**
+
+---
 
 ## Installation
 ```
 npm install --save form-wrapper-js
 ```
+**or**
+```
+yarn add form-wrapper-js
+```
 
-## Usage
-Docs coming soon...
+## Documentation
+comming soon..
+
+## Basic Usage
+Basic examples in vue for now (react is coming soon...)
+
+### VueJS
+you can play around with basic example [Here](https://codesandbox.io/s/5x96q83yvp?module=%2Fsrc%2FApp.vue)
+
+or just take a look at this code:
+```html
+  <template>
+    <form @submit.prevent="submit">
+      <div>
+        <label> {{ form.$labels.first_name }} </label>
+        <input v-model="form.first_name" name="first_name" />
+        <span v-if="form.$errors.has('first_name')" class="text-red"> {{ form.$errors.get('first_name') }} </span>
+      </div>
+      <div>
+        <label> {{ form.$labels.last_name }} </label>
+        <input v-model="form.last_name" name="last_name" />
+        <span v-if="form.$errors.has('last_name')" class="text-red"> {{ form.$errors.get('last_name') }} </span>
+      </div>
+    </form>
+  </template>
+
+  <script>
+    import axios from 'axios'
+    import { Form } from 'from-wrapper-js'
+
+    const required = {
+      passes: (value) => value
+      message: ({ label }) => `${lable} is required` 
+    }
+
+    const minChars = (number) => {
+      return {
+        passes: (value) => value.length > number,
+        message: ({ label }) => `${label} must have more than ${number} characters`
+      }
+    }
+
+    export default {
+      data() {
+        form: new Form({
+          first_name: {
+            value: null,
+            label: 'First Name'
+            rules: [ required, minChars ]
+          },
+          last_name: null, // Label will be "Last name" and there is no client side validation rules to check on submit
+        })
+      },
+      methods: {
+        submit() {
+          this.form.submit(form => axios.post('https://example.com/form'), form.data())
+            .then(() => console.log('success'))
+            .catch(() => console.log('handle some errors from the server (there is hook for more standart way of handling errors from server)'))
+        }
+      }
+    }
+  </script>
+```
+
+## Contribute
+Eveybody is welcome from Code, to Docs, bug reports, ideas and even design. 
+
+it is very easy to run the project just take a look at CONTRIBUTING.md and follow the instructions.
+
+**The project is still on develop so ideas for features is more than welcome** ⭐
+
+## License
+The MIT License (MIT). Please see License File for more information.
