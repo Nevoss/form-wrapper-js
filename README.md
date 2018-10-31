@@ -50,7 +50,7 @@ or just take a look at this code:
 
     const required = {
       passes: (value) => value
-      message: ({ label }) => `${lable} is required` 
+      message: ({ label }) => `${label} is required` 
     }
 
     const minChars = (number) => {
@@ -66,7 +66,7 @@ or just take a look at this code:
           first_name: {
             value: null,
             label: 'First Name'
-            rules: [ required, minChars ]
+            rules: [ required, minChars(2) ]
           },
           last_name: null, // Label will be "Last name" and there is no client side validation rules to check on submit
         })
@@ -75,7 +75,7 @@ or just take a look at this code:
         submit() {
           this.form.submit(form => axios.post('https://example.com/form'), form.data())
             .then(() => console.log('success'))
-            .catch(() => console.log('handle some errors from the server (there is hook for more standart way of handling errors from server)'))
+            .catch(() => console.log('handle some errors from the server (there is hook for more standard way of handling errors from server)'))
         }
       }
     }
@@ -83,9 +83,9 @@ or just take a look at this code:
 ```
 
 ## Contribute
-Eveybody is welcome from Code, to Docs, bug reports, ideas and even design. 
+Evey body is welcome, you can contribute some Code, Docs, bug reports, ideas and even design. 
 
-it is very easy to run the project just take a look at CONTRIBUTING.md and follow the instructions.
+it is very easy to install the project just take a look at CONTRIBUTING.md and follow the instructions.
 
 **The project is still on develop so ideas for features is more than welcome** ⭐
 
