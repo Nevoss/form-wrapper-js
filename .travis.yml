@@ -1,7 +1,15 @@
 language: node_js
-node_js: 
-  - "stable"
+node_js:
+  - stable
 before_script:
   - npm install
 script:
   - npm run test
+deploy:
+  provider: npm
+  email: nevos12@gmail.com
+  api_key: $NPM_API_TOKEN
+  on:
+    tags: true
+    branch: master
+    repo: Nevoss/form-wrapper-js
