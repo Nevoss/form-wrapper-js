@@ -40,6 +40,7 @@ describe('Errors.js', () => {
     expect(errors.get('other', [])).toEqual([])
   });
 
+
   it('should delete a key from the errors object', () => {
     let errors = new Errors(errorsData)
 
@@ -74,6 +75,15 @@ describe('Errors.js', () => {
     errors.clear()
 
     expect(errors.all()).toEqual({})
+  });
+
+
+  it('should returns the first error of the field key or default value', () => {
+    let errors = new Errors(errorsData)
+
+    expect(errors.getFirst('name')).toEqual('Error1')
+    expect(errors.getFirst('other1')).toEqual(null)
+    expect(errors.getFirst('other2', 'not error')).toEqual('not error')
   });
 
 })

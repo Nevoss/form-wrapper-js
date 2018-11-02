@@ -165,9 +165,10 @@ export class Form {
       return true
     }
 
-    const errors = this.$validator
-      .validateField(fieldKey, this[fieldKey])
-      .map(messageFunc => messageFunc({ label: this.$labels[fieldKey], value: this[fieldKey] }, this))
+    const errors = this.$validator.validateField(
+      this._buildFieldObject(fieldKey),
+      this
+    )
     
     if (errors.length > 0) {
       this.$errors.record({ [fieldKey]: errors })
@@ -256,6 +257,21 @@ export class Form {
     this.$options = mergeDeep(this.$options, options)
 
     return this
+  }
+
+  /**
+   * create field object
+   *
+   * @param fieldKey
+   * @returns {{key: *, value: *, label: *}}
+   * @private
+   */
+  _buildFieldObject(fieldKey) {
+    return {
+      key: fieldKey,
+      value: this[fieldKey],
+      label: this.$labels[fieldKey]
+    }
   }
 
   /**

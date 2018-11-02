@@ -258,14 +258,13 @@ describe('Form.js', () => {
       }
     })
 
-    let callbackFunction = jest.fn(() => 'error')
-    form.$validator.validateField = jest.fn(() => [ callbackFunction ])
+    form.$validator.validateField = jest.fn(() => [ 'error' ])
 
     let isValid = form.validateField('name')
 
     expect(isValid).toBe(false)
     expect(form.$errors.record.mock.calls).toHaveLength(1)
-    expect(callbackFunction).toBeCalledWith({ label: 'The Name', value: 'a' }, form)
+    expect(form.$validator.validateField).toBeCalledWith({ label: 'The Name', value: 'a', key: 'name' }, form)
     expect(form.$errors.record).toBeCalledWith({
       name: [ 'error' ]
     })
