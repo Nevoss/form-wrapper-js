@@ -49,13 +49,13 @@ or just take a look at this code:
     import { Form } from 'from-wrapper-js'
 
     const required = {
-      passes: (value) => value
+      passes: ({ value }) => value
       message: ({ label }) => `${label} is required` 
     }
 
     const minChars = (number) => {
       return {
-        passes: (value) => value.length > number,
+        passes: ({ value }) => value.length > number,
         message: ({ label }) => `${label} must have more than ${number} characters`
       }
     }

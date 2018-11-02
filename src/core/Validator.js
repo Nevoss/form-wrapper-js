@@ -48,7 +48,7 @@ export class Validator {
 
         return {
           passes,
-          message: message instanceof Function ? message : () => message
+          message: typeof message === 'function' ? message : () => message
         }
       })
     })
@@ -77,37 +77,21 @@ export class Validator {
   }
 
   /**
-   * validate one field and returns the errors message if there is
+   * validate specific field.
    *
-   * @param fieldKey
-   * @param value
+   * @param fieldObj
+   * @param form
    * @returns {*}
    */
-  validateField(fieldKey, value) {
-    if (!this.has(fieldKey)) {
+  validateField(fieldObj, form) {
+    const { key } = fieldObj
+
+    if (!this.has(key)) {
       return []
     }
 
-    return this.get(fieldKey)
-      .filter(fieldRules => !fieldRules.passes(value))
-      .map(fieldRules => fieldRules.message)
+    return this.get(key)
+      .filter(fieldRules => !fieldRules.passes(fieldObj, form))
+      .map(fieldRules => fieldRules.message(fieldObj, form))
   }
-
-  /**
-   * validate all the rules
-   *
-   * @param values
-   * @returns {Object}
-   */
-  validate(values) {
-    let errors = {}
-
-    Object.keys(this.$rules)
-      .forEach(key => {
-        errors[key] = this.validateField(key, values[key])
-      })
-
-    return errors
-  }
-
 }
