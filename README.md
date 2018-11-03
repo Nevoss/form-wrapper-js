@@ -1,6 +1,6 @@
 # Form Wrapper JS
 [![npm version](https://badge.fury.io/js/form-wrapper-js.svg)](https://badge.fury.io/js/form-wrapper-js)
-[![npm version](https://travis-ci.org/Nevoss/form-wrapper-js.svg?branch=master)](https://travis-ci.org/Nevoss/form-wrapper-js)
+[![CircleCI](https://circleci.com/gh/Nevoss/form-wrapper-js.svg?style=svg)](https://circleci.com/gh/Nevoss/form-wrapper-js)
 
 A very light tool to create forms systems in a convenient and easy way, without dependencies and magic code.
 
