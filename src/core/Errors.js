@@ -26,7 +26,22 @@ export class Errors {
   record(errors) {
     this.$errors = Object.assign({}, errors)
 
-    return this;
+    return this
+  }
+
+  /**
+   * append some errors to the errors array
+   *
+   * @param errors
+   * @returns {Errors}
+   */
+  append(errors) {
+    this.$errors = {
+      ...this.$errors,
+      ...errors
+    }
+
+    return this
   }
 
   /**

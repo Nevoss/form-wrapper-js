@@ -165,13 +165,15 @@ export class Form {
       return true
     }
 
+    this.$errors.delete(fieldKey)
+
     const errors = this.$validator.validateField(
       this._buildFieldObject(fieldKey),
       this
     )
-    
+
     if (errors.length > 0) {
-      this.$errors.record({ [fieldKey]: errors })
+      this.$errors.append({ [fieldKey]: errors })
     }
 
     return errors.length === 0

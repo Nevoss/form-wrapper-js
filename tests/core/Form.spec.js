@@ -263,17 +263,21 @@ describe('Form.js', () => {
     let isValid = form.validateField('name')
 
     expect(isValid).toBe(false)
-    expect(form.$errors.record.mock.calls).toHaveLength(1)
-    expect(form.$validator.validateField).toBeCalledWith({ label: 'The Name', value: 'a', key: 'name' }, form)
-    expect(form.$errors.record).toBeCalledWith({
+    expect(form.$errors.delete.mock.calls).toHaveLength(1)
+    expect(form.$errors.delete).toBeCalledWith('name')
+    expect(form.$errors.append.mock.calls).toHaveLength(1)
+    expect(form.$errors.append).toBeCalledWith({
       name: [ 'error' ]
     })
+    expect(form.$validator.validateField).toBeCalledWith({ label: 'The Name', value: 'a', key: 'name' }, form)
+
 
     form.$validator.validateField = jest.fn(() => [])
 
     isValid = form.validateField('name')
     expect(isValid).toBe(true)
-    expect(form.$errors.record.mock.calls).toHaveLength(1)
+    expect(form.$errors.append.mock.calls).toHaveLength(1)
+    expect(form.$errors.delete.mock.calls).toHaveLength(2)
   });
 
 

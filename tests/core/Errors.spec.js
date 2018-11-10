@@ -2,7 +2,7 @@ import {Errors} from "../../src/core/Errors";
 
 describe('Errors.js', () => {
 
-  
+
   let errorsData = {
     name: [
       'Error1',
@@ -49,7 +49,7 @@ describe('Errors.js', () => {
     expect(errors.all()).not.toHaveProperty('name')
   });
 
-  
+
   it('should check if there is a key inside the errors array', () => {
     let errors = new Errors(errorsData)
 
@@ -57,7 +57,7 @@ describe('Errors.js', () => {
     expect(errors.has('other')).toBeFalsy()
   });
 
-  
+
   it('should check if there any error in errors array', () => {
     let errors = new Errors()
 
@@ -84,6 +84,15 @@ describe('Errors.js', () => {
     expect(errors.getFirst('name')).toEqual('Error1')
     expect(errors.getFirst('other1')).toEqual(null)
     expect(errors.getFirst('other2', 'not error')).toEqual('not error')
+  });
+
+  it('should append error to the errors stack', function () {
+    let errors = new Errors(errorsData)
+
+    errors.append({ name: [ 'another error' ], is_developer: [ 'boolean' ] })
+    expect(errors.get('name')).toEqual([ 'another error' ])
+    expect(errors.get('is_developer')).toEqual([ 'boolean' ])
+    expect(errors.get('email')).toEqual([ 'Error1' ])
   });
 
 })
