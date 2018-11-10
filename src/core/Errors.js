@@ -91,6 +91,7 @@ export class Errors {
   delete(fieldName) {
     if (this.has(fieldName)) {
       delete this.$errors[fieldName]
+      this.$errors = { ...this.$errors }
     }
 
     return this
