@@ -91,7 +91,7 @@ export class Errors {
   delete(fieldName) {
     if (this.has(fieldName)) {
       delete this.$errors[fieldName]
-      this.$errors = { ...this.$errors }
+      this.$errors = Object.assign({}, this.$errors)
     }
 
     return this

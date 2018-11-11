@@ -29,7 +29,7 @@ describe('Validator.js', () => {
 
   it('should construct as it should', () => {
     let validator = new Validator(rules, defaultOptions.validation)
-    
+
     expect(validator.$rules.first_name[0].passes()).toBe(true)
     expect(validator.$rules.first_name[0].message({ label: 'First Name' })).toEqual(defaultOptions.validation.defaultMessage({ label: 'First Name' }))
 
@@ -90,10 +90,28 @@ describe('Validator.js', () => {
     let mockForm = new Form()
 
     let fieldObj = { key: 'name', value: 'Nevo', label: 'Name' }
-    
+
     validator.validateField(fieldObj, mockForm)
     expect(validator.$rules.name[0].passes).toBeCalledWith(fieldObj, mockForm)
     expect(validator.$rules.name[0].message).toBeCalledWith(fieldObj, mockForm)
+  });
+
+  it('should stop validate spesific field after the first rule was failed if the option say so', () => {
+    let mockForm = new Form()
+
+    let validator = new Validator({
+      name: [ () => false, () => false ]
+    }, { ...defaultOptions.validation, stopAfterFirstRuleFailed: true })
+
+    let errors = validator.validateField({ key: 'name', value: 'string', label: 'name' }, mockForm)
+    expect(errors).toHaveLength(1)
+
+    validator = new Validator({
+      name: [ () => false, () => false ]
+    }, { ...defaultOptions.validation, stopAfterFirstRuleFailed: false })
+
+    errors = validator.validateField({ key: 'name', value: 'string', label: 'name' }, mockForm)
+    expect(errors).toHaveLength(2)
   });
 
 })

@@ -9,6 +9,7 @@ export default {
   },
 
   validation: {
+    stopAfterFirstRuleFailed: true,
     onSubmission: true,
     defaultMessage: ({ label }) => `${label} is invalid.`
   }

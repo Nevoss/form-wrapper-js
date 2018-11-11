@@ -90,8 +90,20 @@ export class Validator {
       return []
     }
 
-    return this.get(key)
-      .filter(fieldRules => !fieldRules.passes(fieldObj, form))
-      .map(fieldRules => fieldRules.message(fieldObj, form))
+    let messages = [];
+
+    for (let fieldRules of this.get(key)) {
+      if (fieldRules.passes(fieldObj, form)) {
+        continue
+      }
+
+      messages.push(fieldRules.message(fieldObj, form))
+
+      if (this.$options.stopAfterFirstRuleFailed) {
+        break
+      }
+    }
+
+    return messages
   }
 }
