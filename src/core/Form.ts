@@ -5,7 +5,12 @@ import {isObject, mergeDeep} from "../utils";
 import generateDefaultLabel from "../helpers/generateDefaultLabel";
 import defaultsOptions from '../defaults'
 
-export class Form{
+export class Form {
+
+  /**
+   * Defaults options for the Form instance
+   */
+  public static defaults: Options = defaultsOptions
 
   /**
    * determine if the form is on submitting mode
@@ -35,7 +40,7 @@ export class Form{
   /**
    * Options of the Form
    */
-  public $options: Options = defaultsOptions
+  public $options: Options = Form.defaults
 
   /**
    * constructor of the class

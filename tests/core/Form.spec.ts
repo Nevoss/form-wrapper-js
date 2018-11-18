@@ -328,4 +328,17 @@ describe('Form.js', () => {
     }
   });
 
+
+  it('should change the defaults options of the Form', () => {
+    Form.defaults.validation.defaultMessage = ({label, value}) => `${label}: ${value}`
+    Form.defaults.successfulSubmission.clearErrors = false
+    Form.defaults.successfulSubmission.resetData = false
+
+    let form = new Form(data)
+
+    expect(form.$options.validation.defaultMessage({ label: 'a', value: 'b', key: 'c' }, form)).toEqual('a: b')
+    expect(form.$options.successfulSubmission.clearErrors).toBe(false)
+    expect(form.$options.successfulSubmission.resetData).toBe(false)
+  });
+
 })
