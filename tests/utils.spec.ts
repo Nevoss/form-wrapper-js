@@ -1,4 +1,4 @@
-import { isObject, mergeDeep } from "../src/utils";
+import {isObject} from "../src/utils";
 
 describe('utils.js', () => {
 
@@ -11,13 +11,4 @@ describe('utils.js', () => {
     expect(isObject('aa')).toBe(false)
   });
 
-
-  it('should merge deep 2 objects', () => {
-    expect(mergeDeep(
-      { a: 1, b: { c: 3, d: 4 }, e: 5 },
-      { a: 'a', b: { d: 'd' } }
-    )).toEqual({
-      a: 'a', b: { c: 3, d: 'd' }, e: 5
-    })
-  });
 })

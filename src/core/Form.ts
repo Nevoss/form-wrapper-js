@@ -1,8 +1,9 @@
-import {Errors} from "./Errors";
-import {Validator} from "./Validator";
-import {Field, Options, SubmitCallback} from "../types";
-import {isObject, mergeDeep} from "../utils";
-import generateDefaultLabel from "../helpers/generateDefaultLabel";
+import {Errors} from "./Errors"
+import {Validator} from "./Validator"
+import {Field, Options, SubmitCallback} from "../types"
+import {isObject} from "../utils"
+import generateDefaultLabel from "../helpers/generateDefaultLabel"
+import generateOptions from '../helpers/generateOptions'
 import defaultsOptions from '../defaults'
 
 export class Form {
@@ -48,7 +49,7 @@ export class Form {
    * @param data
    * @param options
    */
-  constructor(data: Object, options: Object = {}) {
+  constructor(data: Object, options: Options = {}) {
     this.assignOptions(options)
       .init(data)
       .reset()
@@ -201,8 +202,8 @@ export class Form {
    *
    * @param options
    */
-  public assignOptions(options: Object) {
-    this.$options = mergeDeep(this.$options, options)
+  public assignOptions(options: Options) {
+    this.$options = generateOptions(this.$options, options)
 
     return this
   }

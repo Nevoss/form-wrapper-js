@@ -1,8 +1,8 @@
 import {Errors} from "../../src/core/Errors"
 import {Validator} from "../../src/core/Validator"
 import {Form} from "../../src"
+import generateOptions from '../../src/helpers/generateOptions'
 import defaultOptionsSource from '../../src/defaults'
-import {mergeDeep} from "../../src/utils";
 
 jest.mock('../../src/core/Errors')
 jest.mock('../../src/core/Validator')
@@ -79,7 +79,7 @@ describe('Form.js', () => {
     const newOptions = { successfulSubmission: { clearErrors: false } }
 
     form.assignOptions(newOptions)
-    expect(form.$options).toEqual(mergeDeep(defaultOptions, newOptions))
+    expect(form.$options).toEqual(generateOptions(defaultOptions, newOptions))
   });
 
 
