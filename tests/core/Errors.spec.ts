@@ -1,6 +1,6 @@
 import {Errors} from "../../src/core/Errors";
 
-describe('Errors.js', () => {
+describe('Errors.ts', () => {
 
 
   let errorsData = {

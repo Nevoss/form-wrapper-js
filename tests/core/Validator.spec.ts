@@ -1,15 +1,10 @@
-import { Form } from "../../src/core/Form";
+import { Form } from "../../src";
 import { Validator } from "../../src/core/Validator"
 import defaultOptions from '../../src/defaults'
 
 jest.mock('../../src/core/Form')
 
 describe('Validator.js', () => {
-
-  beforeEach(() => {
-    Form.mockClear()
-  })
-
 
   let rules = {
     first_name: [() => true],
@@ -30,17 +25,22 @@ describe('Validator.js', () => {
   it('should construct as it should', () => {
     let validator = new Validator(rules, defaultOptions.validation)
 
-    expect(validator.$rules.first_name[0].passes()).toBe(true)
-    expect(validator.$rules.first_name[0].message({ label: 'First Name' })).toEqual(defaultOptions.validation.defaultMessage({ label: 'First Name' }))
+    let mockFormField = { key: 'a', value: null, label: 'A' }
+    let mockForm = new Form({})
 
-    expect(validator.$rules.last_name[0].passes()).toBe(false)
-    expect(validator.$rules.last_name[0].message()).toEqual('Invalid')
+    expect(validator.$rules.first_name[0].passes(mockFormField, mockForm)).toBe(true)
+    expect(validator.$rules.first_name[0].message({ ...mockFormField, label: 'First Name' }, mockForm))
+      .toEqual(defaultOptions.validation.defaultMessage({ ...mockFormField, label: 'First Name' }, mockForm))
 
-    expect(validator.$rules.last_name[1].passes()).toBe(true)
-    expect(validator.$rules.last_name[1].message({ label: 'Last Name' })).toEqual(defaultOptions.validation.defaultMessage({ label: 'Last Name' }))
+    expect(validator.$rules.last_name[0].passes(mockFormField, mockForm)).toBe(false)
+    expect(validator.$rules.last_name[0].message(mockFormField, mockForm)).toEqual('Invalid')
 
-    expect(validator.$rules.is_developer[0].passes({ value: false })).toBe(false)
-    expect(validator.$rules.is_developer[0].message({ label: 'Developer', value: true })).toEqual('Developer is invalid. the true is incorrect')
+    expect(validator.$rules.last_name[1].passes(mockFormField, mockForm)).toBe(true)
+    expect(validator.$rules.last_name[1].message({ ...mockFormField, label: 'Last Name' }, mockForm))
+      .toEqual(defaultOptions.validation.defaultMessage({ ...mockFormField, label: 'Last Name' }, mockForm))
+
+    expect(validator.$rules.is_developer[0].passes({ ...mockFormField, value: false }, mockForm)).toBe(false)
+    expect(validator.$rules.is_developer[0].message({ ...mockFormField, label: 'Developer', value: true }, mockForm)).toEqual('Developer is invalid. the true is incorrect')
   });
 
 
@@ -65,7 +65,7 @@ describe('Validator.js', () => {
 
   it('should validate specific field', () => {
     let validator = new Validator(rules, defaultOptions.validation)
-    let mockForm = new Form()
+    let mockForm = new Form({})
 
     let errors = validator.validateField({ key: 'last_name', value: 'string', label: 'Last Name' }, mockForm)
     expect(errors).toHaveLength(1)
@@ -87,7 +87,7 @@ describe('Validator.js', () => {
     let validator = new Validator({
       name: [ { passes: jest.fn(() => false), message: jest.fn() } ]
     }, defaultOptions.validation)
-    let mockForm = new Form()
+    let mockForm = new Form({})
 
     let fieldObj = { key: 'name', value: 'Nevo', label: 'Name' }
 
@@ -97,7 +97,7 @@ describe('Validator.js', () => {
   });
 
   it('should stop validate spesific field after the first rule was failed if the option say so', () => {
-    let mockForm = new Form()
+    let mockForm = new Form({})
 
     let validator = new Validator({
       name: [ () => false, () => false ]

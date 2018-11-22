@@ -2,9 +2,8 @@
  * generate default label for field
  *
  * @param fieldKey
- * @returns {*|void|string}
  */
-export default fieldKey => {
+export default (fieldKey: string): string => {
   return fieldKey
     .replace(/_/g, ' ')
     .replace(/([a-z])([A-Z])/g, '$1 $2')

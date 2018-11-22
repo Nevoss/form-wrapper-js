@@ -3,9 +3,10 @@
   "version": "0.3.1",
   "description": "JS abstraction for forms",
   "main": "lib/index.js",
+  "types": "lib/index.d.ts",
   "scripts": {
     "test": "jest",
-    "build": "./node_modules/.bin/babel src --out-dir lib",
+    "build": "tsc",
     "prepublishOnly": "npm run build"
   },
   "repository": {
@@ -27,14 +28,9 @@
   "author": "Nevo Golan <nevos12@gmail.com>",
   "license": "MIT",
   "devDependencies": {
-    "@babel/cli": "^7.1.5",
-    "@babel/core": "^7.1.5",
-    "@babel/plugin-proposal-class-properties": "^7.1.0",
-    "@babel/preset-env": "^7.1.5",
-    "babel-core": "^7.0.0-bridge.0",
-    "babel-jest": "^23.6.0",
-    "babel-preset-env": "^1.7.0",
+    "@types/jest": "^23.3.9",
     "jest": "^23.6.0",
-    "regenerator-runtime": "^0.12.1"
+    "ts-jest": "^23.10.4",
+    "typescript": "^3.1.6"
   }
 }
