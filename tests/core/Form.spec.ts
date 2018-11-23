@@ -43,6 +43,9 @@ describe('Form.js', () => {
       last_name: 'Golan',
       is_developer: {
         value: false,
+        extra: {
+          options: [1, 0]
+        }
       },
     }) as Form & FormData
 
@@ -53,6 +56,13 @@ describe('Form.js', () => {
       first_name: 'Name',
       last_name: 'Last name',
       is_developer: 'Is developer',
+    })
+    expect(form.$extra).toEqual({
+      first_name: {},
+      last_name: {},
+      is_developer: {
+        options: [1, 0]
+      }
     })
     expect(Validator).toHaveBeenCalledWith({first_name: rulesArray}, defaultOptions.validation)
     expect(Errors).toHaveBeenCalled()

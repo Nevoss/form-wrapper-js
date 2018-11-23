@@ -27,6 +27,11 @@ export declare class Form {
      */
     $originalData: Object;
     /**
+     * all the extra data that provide in the construction of this class
+     * will be hold here.
+     */
+    $extra: Object;
+    /**
      * Options of the Form
      */
     $options: Options;
