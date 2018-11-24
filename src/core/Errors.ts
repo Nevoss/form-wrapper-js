@@ -90,7 +90,7 @@ export class Errors {
    *
    * @param fieldKey
    */
-  public delete(fieldKey: string): Errors {
+  public clearField(fieldKey: string): Errors {
     if (this.has(fieldKey)) {
       delete this.$errors[fieldKey]
 

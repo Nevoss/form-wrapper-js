@@ -39,6 +39,12 @@ export class Form {
   public $originalData: Object
 
   /**
+   * all the extra data that provide in the construction of this class
+   * will be hold here.
+   */
+  public $extra: Object
+
+  /**
    * Options of the Form
    */
   public $options: Options = Form.defaults
@@ -65,6 +71,7 @@ export class Form {
     let rules = {}
     let originalData = {}
     let labels = {}
+    let extra = {}
 
     Object.keys(data).forEach(key => {
 
@@ -78,14 +85,20 @@ export class Form {
         if (data[key].hasOwnProperty('label')) {
           labels[key] = data[key].label
         }
+
+        if (data[key].hasOwnProperty('extra')) {
+          extra[key] = data[key].extra
+        }
       }
 
       labels[key] = key in labels ? labels[key] : generateDefaultLabel(key)
       originalData[key] = key in originalData ? originalData[key] : data[key]
+      extra[key] = key in extra ? extra[key] : {}
     })
 
     this.$originalData = originalData
     this.$labels = labels
+    this.$extra = extra
     this.$validator = new Validator(rules, this.$options.validation)
     this.$errors = new Errors()
 
@@ -155,7 +168,7 @@ export class Form {
       return true
     }
 
-    this.$errors.delete(fieldKey)
+    this.$errors.clearField(fieldKey)
 
     const errors = this.$validator.validateField(
       this.buildFieldObject(fieldKey),

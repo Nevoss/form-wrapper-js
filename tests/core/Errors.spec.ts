@@ -44,7 +44,7 @@ describe('Errors.ts', () => {
   it('should delete a key from the errors object', () => {
     let errors = new Errors(errorsData)
 
-    errors.delete('name')
+    errors.clearField('name')
 
     expect(errors.all()).not.toHaveProperty('name')
   });

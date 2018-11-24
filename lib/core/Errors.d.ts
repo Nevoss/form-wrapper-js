@@ -51,7 +51,7 @@ export declare class Errors {
      *
      * @param fieldKey
      */
-    delete(fieldKey: string): Errors;
+    clearField(fieldKey: string): Errors;
     /**
      * check if there is any error in the ErrorsStack
      */
