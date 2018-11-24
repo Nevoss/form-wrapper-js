@@ -272,8 +272,8 @@ describe('Form.js', () => {
     let isValid = form.validateField('name')
 
     expect(isValid).toBe(false)
-    expect(form.$errors.delete).toHaveBeenCalledTimes(1)
-    expect(form.$errors.delete).toBeCalledWith('name')
+    expect(form.$errors.clearField).toHaveBeenCalledTimes(1)
+    expect(form.$errors.clearField).toBeCalledWith('name')
     expect(form.$errors.append).toHaveBeenCalledTimes(1)
     expect(form.$errors.append).toBeCalledWith({
       name: [ 'error' ]
@@ -286,7 +286,7 @@ describe('Form.js', () => {
     isValid = form.validateField('name')
     expect(isValid).toBe(true)
     expect(form.$errors.append).toHaveBeenCalledTimes(1)
-    expect(form.$errors.delete).toHaveBeenCalledTimes(2)
+    expect(form.$errors.clearField).toHaveBeenCalledTimes(2)
   });
 
 

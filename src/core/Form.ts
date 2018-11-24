@@ -168,7 +168,7 @@ export class Form {
       return true
     }
 
-    this.$errors.delete(fieldKey)
+    this.$errors.clearField(fieldKey)
 
     const errors = this.$validator.validateField(
       this.buildFieldObject(fieldKey),
