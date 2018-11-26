@@ -1,76 +1,77 @@
-import { Errors } from "./Errors";
-import { Validator } from "./Validator";
-import generateDefaultLabel from '../helpers/generateDefaultLabel'
-import { isObject, mergeDeep } from "../utils";
+import {Errors} from "./Errors"
+import {Validator} from "./Validator"
+import {Field, Options, SubmitCallback} from "../types"
+import {isObject} from "../utils"
+import generateDefaultLabel from "../helpers/generateDefaultLabel"
+import generateOptions from '../helpers/generateOptions'
 import defaultsOptions from '../defaults'
 
 export class Form {
 
   /**
+   * Defaults options for the Form instance
+   */
+  public static defaults: Options = defaultsOptions
+
+  /**
    * determine if the form is on submitting mode
-   *
-   * @type {boolean}
    */
-  $submitting = false
+  public $submitting: boolean = false
 
   /**
-   * Errors class
-   *
-   * @type {null|Errors}
+   * Errors class - handling all the errors of the fields
    */
-  $errors = null
+  public $errors: Errors
 
   /**
-   * Validator class
-   *
-   * @type {null|Validator}
+   * Validator class - handling all the validations stuff
    */
-  $validator = null
+  public $validator: Validator
 
   /**
-   * labels of the fields
-   *
-   * @type {{}}
+   * Holds all the labels of the fields
    */
-  $labels = {}
+  public $labels: Object
 
   /**
-   * hold the original data that inject to the Form instance
-   *
-   * @type {Object}
+   * The initiate data that was provide to the form
    */
-  $originalData = {};
+  public $originalData: Object
 
   /**
-   * options
-   *
-   * @type {Object}
+   * all the extra data that provide in the construction of this class
+   * will be hold here.
    */
-  $options = defaultsOptions;
+  public $extra: Object
 
   /**
-   * constructor
+   * Options of the Form
+   */
+  public $options: Options = Form.defaults
+
+  /**
+   * constructor of the class
    *
    * @param data
    * @param options
    */
-  constructor(data, options) {
+  constructor(data: Object, options: Options = {}) {
     this.assignOptions(options)
-      ._init(data)
+      .init(data)
       .reset()
   }
 
   /**
-   * init the bare bones of the Form class
+   * Init the form
+   * fill all the data that should be filled (Validator, OriginalData etc..(
    *
    * @param data
-   * @returns {Form}
-   * @private
    */
-  _init(data) {
+  private init(data: Object): Form {
     let rules = {}
     let originalData = {}
     let labels = {}
+    let extra = {}
 
     Object.keys(data).forEach(key => {
 
@@ -84,14 +85,20 @@ export class Form {
         if (data[key].hasOwnProperty('label')) {
           labels[key] = data[key].label
         }
+
+        if (data[key].hasOwnProperty('extra')) {
+          extra[key] = data[key].extra
+        }
       }
 
       labels[key] = key in labels ? labels[key] : generateDefaultLabel(key)
       originalData[key] = key in originalData ? originalData[key] : data[key]
+      extra[key] = key in extra ? extra[key] : {}
     })
 
     this.$originalData = originalData
     this.$labels = labels
+    this.$extra = extra
     this.$validator = new Validator(rules, this.$options.validation)
     this.$errors = new Errors()
 
@@ -99,12 +106,9 @@ export class Form {
   }
 
   /**
-   * reset the form
-   * set all the fields value same as $originalData fields value
-   *
-   * @returns {Form}
+   * Set all the fields value same as $originalData fields value
    */
-  reset() {
+  public reset(): Form {
     for (let fieldName in this.$originalData) {
       if (this.$originalData.hasOwnProperty(fieldName)) {
         this[fieldName] = this.$originalData[fieldName]
@@ -116,25 +120,26 @@ export class Form {
 
   /**
    * get all the data of the form
-   *
-   * @returns {Object}
    */
-  data() {
-    return Object.assign(
-      {},
-      ...Object.keys(this.$originalData).map(
-        key => this.hasOwnProperty(key) ? {[key]: this[key]} : {}
-      )
-    )
+  public data(): Object {
+    let dataObj = {}
+
+    Object.keys(this.$originalData).forEach(fieldKey => {
+      if (this.hasOwnProperty(fieldKey)) {
+        dataObj[fieldKey] = this[fieldKey]
+      }
+    })
+
+    return dataObj
   }
 
   /**
-   * fill Form with an object of data
+   * fill the Form data with new data.
+   * without remove another fields data.
    *
    * @param newData
-   * @returns {Form}
    */
-  fill(newData) {
+  public fill(newData: Object): Form {
     for (let fieldName in newData) {
       if (newData.hasOwnProperty(fieldName) && this.$originalData.hasOwnProperty(fieldName)) {
         this[fieldName] = newData[fieldName]
@@ -145,44 +150,42 @@ export class Form {
   }
 
   /**
-   * validate field of all form data
+   * validate specific key or the whole form.
    *
    * @param fieldKey
-   * @returns {boolean}
    */
-  validate(fieldKey = null) {
+  public validate(fieldKey: string | null = null): boolean {
     return fieldKey ? this.validateField(fieldKey) : this.validateAll()
   }
 
   /**
-   * validate one field
+   * validate specific field
    *
    * @param fieldKey
-   * @returns {boolean}
    */
-  validateField(fieldKey) {
+  public validateField(fieldKey: string): boolean {
     if (!this.hasOwnProperty(fieldKey)) {
       return true
     }
 
+    this.$errors.clearField(fieldKey)
+
     const errors = this.$validator.validateField(
-      this._buildFieldObject(fieldKey),
+      this.buildFieldObject(fieldKey),
       this
     )
-    
+
     if (errors.length > 0) {
-      this.$errors.record({ [fieldKey]: errors })
+      this.$errors.append({ [fieldKey]: errors })
     }
 
     return errors.length === 0
   }
 
   /**
-   * validate all form data
-   *
-   * @returns {boolean}
+   * validate all the fields of the form
    */
-  validateAll() {
+  public validateAll(): boolean {
     let isValid = true
 
     Object.keys(this.data()).forEach(fieldKey => {
@@ -195,13 +198,36 @@ export class Form {
   }
 
   /**
-   * must be a callback that returns a promise determine
-   * if the submit went successfully or not
+   * build Field object
+   *
+   * @param fieldKey
+   */
+  private buildFieldObject(fieldKey: string): Field {
+    return {
+      key: fieldKey,
+      value: this[fieldKey],
+      label: this.$labels[fieldKey]
+    }
+  }
+
+  /**
+   * assign options to Options object
+   *
+   * @param options
+   */
+  public assignOptions(options: Options) {
+    this.$options = generateOptions(this.$options, options)
+
+    return this
+  }
+
+  /**
+   * submit the form, this method received a callback that
+   * will submit the form and must return a Promise.
    *
    * @param callback
-   * @returns {Promise<T | never>}
    */
-  submit(callback) {
+  public submit(callback: SubmitCallback): Promise<any> {
     if (this.$options.validation.onSubmission && !this.validate()) {
       return Promise.reject({ message: 'Form is not valid' })
     }
@@ -209,18 +235,16 @@ export class Form {
     this.$submitting = true
 
     return callback(this)
-      .then(this._successfulSubmission.bind(this))
-      .catch(this._unSuccessfulSubmission.bind(this))
+      .then(this.successfulSubmission.bind(this))
+      .catch(this.unSuccessfulSubmission.bind(this))
   }
 
   /**
-   * Successful Submission
+   * Successful submission method
    *
    * @param response
-   * @returns {Promise<any>}
-   * @private
    */
-  _successfulSubmission(response) {
+  private successfulSubmission(response: any): Promise<any> {
     this.$submitting = false
 
     if (this.$options.successfulSubmission.clearErrors) {
@@ -235,43 +259,14 @@ export class Form {
   }
 
   /**
-   * UnSuccessful submission
+   * UnSuccessful submission method
    *
    * @param error
-   * @returns {Promise<never>}
-   * @private
    */
-  _unSuccessfulSubmission(error) {
+  private unSuccessfulSubmission(error: any): Promise<any> {
     this.$submitting = false
 
     return Form.unSuccessfulSubmissionHook(error, this)
-  }
-
-  /**
-   * assign options to $options object
-   *
-   * @param options
-   * @returns {Form}
-   */
-  assignOptions(options) {
-    this.$options = mergeDeep(this.$options, options)
-
-    return this
-  }
-
-  /**
-   * create field object
-   *
-   * @param fieldKey
-   * @returns {{key: *, value: *, label: *}}
-   * @private
-   */
-  _buildFieldObject(fieldKey) {
-    return {
-      key: fieldKey,
-      value: this[fieldKey],
-      label: this.$labels[fieldKey]
-    }
   }
 
   /**
@@ -281,9 +276,8 @@ export class Form {
    *
    * @param response
    * @param form
-   * @returns {Promise<any>}
    */
-  static successfulSubmissionHook(response, form) {
+  static successfulSubmissionHook(response: any, form: Form): Promise<any> {
     return Promise.resolve(response)
   }
 
@@ -294,9 +288,8 @@ export class Form {
    *
    * @param error
    * @param form
-   * @returns {Promise<never>}
    */
-  static unSuccessfulSubmissionHook(error, form) {
+  static unSuccessfulSubmissionHook(error: any, form: Form): Promise<any> {
     return Promise.reject(error)
   }
 }

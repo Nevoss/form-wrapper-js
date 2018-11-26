@@ -1,20 +1,21 @@
-import { isObject } from "../utils";
+import {isObject} from "../utils";
+import {Field, Rule, RulesStack, ValidationOptions} from "../types";
+import {Form} from "./Form";
 
+/**
+ * Validator Class
+ */
 export class Validator {
 
   /**
-   * fields rules
-   *
-   * @type {{}}
+   * Holds all the rules
    */
-  $rules = {}
+  $rules: RulesStack = {}
 
   /**
-   * validations options
-   *
-   * @type {{}}
+   * Validations options
    */
-  $options = {}
+  $options: ValidationOptions
 
   /**
    * constructor
@@ -22,19 +23,18 @@ export class Validator {
    * @param rules
    * @param options
    */
-  constructor(rules, options) {
-    this.$options = Object.assign({}, options)
+  constructor(rules: Object, options: ValidationOptions) {
+    this.$options = { ...options }
 
-    this._buildRules(rules)
+    this.buildRules(rules)
   }
 
   /**
    * building rules object
    *
    * @param rules
-   * @private
    */
-  _buildRules(rules) {
+  private buildRules(rules: Object): Validator {
     Object.keys(rules).forEach(key => {
       this.$rules[key] = rules[key].map(rule => {
 
@@ -57,12 +57,11 @@ export class Validator {
   }
 
   /**
-   * check if field has rules
+   * heck if field has rules
    *
    * @param fieldKey
-   * @returns {boolean}
    */
-  has(fieldKey) {
+  public has(fieldKey: string): boolean {
     return this.$rules.hasOwnProperty(fieldKey)
   }
 
@@ -70,28 +69,38 @@ export class Validator {
    * get the rules of specific filedKey
    *
    * @param fieldKey
-   * @returns {*}
    */
-  get(fieldKey) {
+  public get(fieldKey: string): Rule[] {
     return this.$rules[fieldKey]
   }
 
   /**
    * validate specific field.
    *
-   * @param fieldObj
+   * @param field
    * @param form
-   * @returns {*}
    */
-  validateField(fieldObj, form) {
-    const { key } = fieldObj
+  public validateField(field: Field, form: Form): string[] {
+    const { key } = field
 
     if (!this.has(key)) {
       return []
     }
 
-    return this.get(key)
-      .filter(fieldRules => !fieldRules.passes(fieldObj, form))
-      .map(fieldRules => fieldRules.message(fieldObj, form))
+    let messages = [];
+
+    for (let fieldRules of this.get(key)) {
+      if (fieldRules.passes(field, form)) {
+        continue
+      }
+
+      messages.push(fieldRules.message(field, form))
+
+      if (this.$options.stopAfterFirstRuleFailed) {
+        break
+      }
+    }
+
+    return messages
   }
 }

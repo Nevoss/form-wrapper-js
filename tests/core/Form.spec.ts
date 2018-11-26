@@ -1,17 +1,21 @@
-import { Errors } from "../../src/core/Errors"
-import { Validator } from "../../src/core/Validator"
-import { Form } from "../../src/core/Form"
-import generateDefaultLabel from '../../src/helpers/generateDefaultLabel'
+import {Errors} from "../../src/core/Errors"
+import {Validator} from "../../src/core/Validator"
+import {Form} from "../../src"
+import generateOptions from '../../src/helpers/generateOptions'
 import defaultOptionsSource from '../../src/defaults'
-import { mergeDeep } from "../../src/utils";
 
 jest.mock('../../src/core/Errors')
 jest.mock('../../src/core/Validator')
-jest.mock('../../src/helpers/generateDefaultLabel', () => jest.fn().mockImplementation(() => 'a'))
 
 describe('Form.js', () => {
 
-  let data = {
+  interface FormData {
+    first_name: string | null
+    last_name: string | null
+    is_developer: boolean
+  }
+
+  let data: FormData = {
     first_name: null,
     last_name: null,
     is_developer: false,
@@ -21,9 +25,6 @@ describe('Form.js', () => {
 
 
   beforeEach(() => {
-    Errors.mockClear()
-    Validator.mockClear()
-
     Validator.prototype.validateField = jest.fn(() => [])
   })
 
@@ -34,7 +35,7 @@ describe('Form.js', () => {
     ]
 
     let form = new Form({
-      name: {
+      first_name: {
         value: 'Nevo',
         label: 'Name',
         rules: rulesArray,
@@ -42,21 +43,28 @@ describe('Form.js', () => {
       last_name: 'Golan',
       is_developer: {
         value: false,
+        extra: {
+          options: [1, 0]
+        }
       },
-    })
+    }) as Form & FormData
 
-    expect(form.name).toBe('Nevo')
+    expect(form.first_name).toBe('Nevo')
     expect(form.last_name).toBe('Golan')
     expect(form.is_developer).toBe(false)
-    expect(generateDefaultLabel.mock.calls).toHaveLength(2)
-    expect(generateDefaultLabel.mock.calls[0][0]).toEqual('last_name')
-    expect(generateDefaultLabel.mock.calls[1][0]).toEqual('is_developer')
     expect(form.$labels).toEqual({
-      name: 'Name',
-      last_name: 'a',
-      is_developer: 'a',
+      first_name: 'Name',
+      last_name: 'Last name',
+      is_developer: 'Is developer',
     })
-    expect(Validator).toHaveBeenCalledWith({name: rulesArray}, defaultOptions.validation)
+    expect(form.$extra).toEqual({
+      first_name: {},
+      last_name: {},
+      is_developer: {
+        options: [1, 0]
+      }
+    })
+    expect(Validator).toHaveBeenCalledWith({first_name: rulesArray}, defaultOptions.validation)
     expect(Errors).toHaveBeenCalled()
   });
 
@@ -65,7 +73,7 @@ describe('Form.js', () => {
     let form = new Form({
       first_name: 'Nevo',
       last_name: 'Golan',
-    })
+    }) as Form & FormData
 
     expect(form.first_name).toBe('Nevo')
     expect(form.last_name).toBe('Golan')
@@ -73,7 +81,7 @@ describe('Form.js', () => {
 
 
   it('should assign options to the form', () => {
-    let form = new Form(data)
+    let form = new Form(data) as Form & FormData
 
     expect(form.$options).toEqual(defaultOptions)
     expect(form.$options.successfulSubmission.clearErrors).toBe(true)
@@ -81,27 +89,28 @@ describe('Form.js', () => {
     const newOptions = { successfulSubmission: { clearErrors: false } }
 
     form.assignOptions(newOptions)
-    expect(form.$options).toEqual(mergeDeep(defaultOptions, newOptions))
+    expect(form.$options).toEqual(generateOptions(defaultOptions, newOptions))
   });
 
 
   it('should returns the data on call', function () {
-    let form = new Form(data)
+    let form = new Form(data) as Form & { [key: string]: any }
 
     form.first_name = 'Nevo'
     form.last_name = 'Golan'
 
     form.not_real_prop = 'Somthing'
 
-    expect(form.data()).toEqual(Object.assign({}, data, {
+    expect(form.data()).toEqual({
+      ...data,
       first_name: 'Nevo',
       last_name: 'Golan',
-    }))
+    })
   })
 
 
   it('should reset the data of the form', () => {
-    let form = new Form(data)
+    let form = new Form(data) as Form & FormData
 
     form.first_name = 'Nevo'
     form.last_name = 'Golan'
@@ -113,7 +122,7 @@ describe('Form.js', () => {
 
 
   it('should fill the form with new data', () => {
-    let form = new Form(data)
+    let form = new Form(data) as Form & FormData
 
     let newData = {
       first_name: 'Nevo',
@@ -131,7 +140,7 @@ describe('Form.js', () => {
 
 
   it('should successfully submitted if the callback returns Promise.resolve', async () => {
-    let form = new Form(data)
+    let form = new Form(data) as Form & FormData
 
     let responseParam = {
       status: 200,
@@ -147,16 +156,16 @@ describe('Form.js', () => {
     let response = await form.submit(mockCallable)
 
     expect(mockCallable.mock.calls.length).toBe(1)
-    expect(form.$errors.clear.mock.calls.length).toBe(1);
-    expect(form.reset.mock.calls.length).toBe(1);
+    expect(form.$errors.clear).toHaveBeenCalledTimes(1);
+    expect(form.reset).toHaveBeenCalledTimes(1);
     expect(Form.successfulSubmissionHook).toBeCalledWith(responseParam, form)
-    expect(Form.unSuccessfulSubmissionHook.mock.calls.length).toBe(0)
+    expect(Form.unSuccessfulSubmissionHook).not.toHaveBeenCalledTimes(1)
     expect(response).toBe(responseParam);
   })
 
 
   it('should send reject promise if the callback was send reject promise', async () => {
-    let form = new Form(data)
+    let form = new Form(data) as Form & FormData
 
     let responseParam = {
       status: 404,
@@ -175,7 +184,7 @@ describe('Form.js', () => {
     } catch (e) {
       expect(mockCallable.mock.calls.length).toBe(1)
       expect(Form.unSuccessfulSubmissionHook).toBeCalledWith(responseParam, form)
-      expect(Form.successfulSubmissionHook.mock.calls.length).toBe(0)
+      expect(Form.successfulSubmissionHook).not.toHaveBeenCalled()
       expect(e).toBe(responseParam)
 
     }
@@ -183,7 +192,7 @@ describe('Form.js', () => {
 
 
   it('should set $submitting as true if submit method is called and false if validation failed and callback method not called', async () => {
-    let form = new Form(data)
+    let form = new Form(data) as Form & FormData
 
     let mockCallable = jest.fn(() => Promise.resolve())
     form.validate = jest.fn(() => false)
@@ -204,14 +213,14 @@ describe('Form.js', () => {
       successfulSubmission: {
         resetData: false
       },
-    })
+    }) as Form & FormData
 
     form.reset = jest.fn()
 
     await form.submit(() => Promise.resolve())
 
-    expect(form.$errors.clear.mock.calls.length).toBe(1)
-    expect(form.reset.mock.calls.length).toBe(0)
+    expect(form.$errors.clear).toHaveBeenCalledTimes(1)
+    expect(form.reset).not.toHaveBeenCalled()
   });
 
 
@@ -220,32 +229,32 @@ describe('Form.js', () => {
       successfulSubmission: {
         clearErrors: false
       },
-    })
+    }) as Form & FormData
 
     form.reset = jest.fn()
 
     await form.submit(() => Promise.resolve())
 
-    expect(form.$errors.clear.mock.calls.length).toBe(0)
-    expect(form.reset.mock.calls.length).toBe(1)
+    expect(form.$errors.clear).not.toHaveBeenCalled()
+    expect(form.reset).toHaveBeenCalledTimes(1)
   });
 
 
   it('should call to validate specific field or all the fields', () => {
-    let form = new Form(data)
+    let form = new Form(data) as Form & FormData
 
     form.validateAll = jest.fn()
     form.validateField = jest.fn()
 
     form.validate()
 
-    expect(form.validateAll.mock.calls).toHaveLength(1)
-    expect(form.validateField.mock.calls).toHaveLength(0)
+    expect(form.validateAll).toHaveBeenCalledTimes(1)
+    expect(form.validateField).not.toHaveBeenCalled()
 
     form.validate('first_name')
 
-    expect(form.validateAll.mock.calls).toHaveLength(1)
-    expect(form.validateField.mock.calls).toHaveLength(1)
+    expect(form.validateAll).toHaveBeenCalledTimes(1)
+    expect(form.validateField).toHaveBeenCalledTimes(1)
   });
 
 
@@ -256,24 +265,28 @@ describe('Form.js', () => {
         label: 'The Name',
         rules: [ () => true ]
       }
-    })
+    }) as Form & { name: string }
 
     form.$validator.validateField = jest.fn(() => [ 'error' ])
 
     let isValid = form.validateField('name')
 
     expect(isValid).toBe(false)
-    expect(form.$errors.record.mock.calls).toHaveLength(1)
-    expect(form.$validator.validateField).toBeCalledWith({ label: 'The Name', value: 'a', key: 'name' }, form)
-    expect(form.$errors.record).toBeCalledWith({
+    expect(form.$errors.clearField).toHaveBeenCalledTimes(1)
+    expect(form.$errors.clearField).toBeCalledWith('name')
+    expect(form.$errors.append).toHaveBeenCalledTimes(1)
+    expect(form.$errors.append).toBeCalledWith({
       name: [ 'error' ]
     })
+    expect(form.$validator.validateField).toBeCalledWith({ label: 'The Name', value: 'a', key: 'name' }, form)
+
 
     form.$validator.validateField = jest.fn(() => [])
 
     isValid = form.validateField('name')
     expect(isValid).toBe(true)
-    expect(form.$errors.record.mock.calls).toHaveLength(1)
+    expect(form.$errors.append).toHaveBeenCalledTimes(1)
+    expect(form.$errors.clearField).toHaveBeenCalledTimes(2)
   });
 
 
@@ -292,8 +305,8 @@ describe('Form.js', () => {
     form.validateField = jest.fn().mockReturnValueOnce(true).mockReturnValueOnce(true)
 
     expect(form.validateAll()).toBe(true)
-    expect(form.validateField.mock.calls[0][0]).toEqual('name')
-    expect(form.validateField.mock.calls[1][0]).toEqual('last_name')
+    expect(form.validateField).toHaveBeenNthCalledWith(1, 'name')
+    expect(form.validateField).toHaveBeenNthCalledWith(2, 'last_name')
 
 
     form.validateField = jest.fn().mockReturnValueOnce(true).mockReturnValueOnce(false)
@@ -323,6 +336,19 @@ describe('Form.js', () => {
       expect(form.validate).toBeCalled()
       expect(e.hasOwnProperty('message')).toBe(true)
     }
+  });
+
+
+  it('should change the defaults options of the Form', () => {
+    Form.defaults.validation.defaultMessage = ({label, value}) => `${label}: ${value}`
+    Form.defaults.successfulSubmission.clearErrors = false
+    Form.defaults.successfulSubmission.resetData = false
+
+    let form = new Form(data)
+
+    expect(form.$options.validation.defaultMessage({ label: 'a', value: 'b', key: 'c' }, form)).toEqual('a: b')
+    expect(form.$options.successfulSubmission.clearErrors).toBe(false)
+    expect(form.$options.successfulSubmission.resetData).toBe(false)
   });
 
 })
