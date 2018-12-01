@@ -57,7 +57,7 @@ export class Validator {
   }
 
   /**
-   * heck if field has rules
+   * check if field has rules
    *
    * @param fieldKey
    */

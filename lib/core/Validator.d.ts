@@ -26,7 +26,7 @@ export declare class Validator {
      */
     private buildRules;
     /**
-     * heck if field has rules
+     * check if field has rules
      *
      * @param fieldKey
      */
