@@ -62,47 +62,27 @@ export class Form {
   }
 
   /**
-   * Init the form
-   * fill all the data that should be filled (Validator, OriginalData etc..(
+   * Hook for successful submission
+   * use Form.successfulSubmissionHook = () => {};
+   * for extending the successful submission handling
    *
-   * @param data
+   * @param response
+   * @param form
    */
-  private init(data: Object): Form {
-    let rules = {}
-    let originalData = {}
-    let labels = {}
-    let extra = {}
+  public static successfulSubmissionHook(response: any, form: Form): Promise<any> {
+    return Promise.resolve(response)
+  }
 
-    Object.keys(data).forEach(key => {
-
-      if (isObject(data[key])) {
-        originalData[key] = data[key].value
-
-        if (data[key].hasOwnProperty('rules')) {
-          rules[key] = data[key].rules
-        }
-
-        if (data[key].hasOwnProperty('label')) {
-          labels[key] = data[key].label
-        }
-
-        if (data[key].hasOwnProperty('extra')) {
-          extra[key] = data[key].extra
-        }
-      }
-
-      labels[key] = key in labels ? labels[key] : generateDefaultLabel(key)
-      originalData[key] = key in originalData ? originalData[key] : data[key]
-      extra[key] = key in extra ? extra[key] : {}
-    })
-
-    this.$originalData = originalData
-    this.$labels = labels
-    this.$extra = extra
-    this.$validator = new Validator(rules, this.$options.validation)
-    this.$errors = new Errors()
-
-    return this
+  /**
+   * Hook for un successful submission
+   * use Form.unSuccessfulSubmissionHook = () => {};
+   * for extending the un successful submission handling
+   *
+   * @param error
+   * @param form
+   */
+  public static unSuccessfulSubmissionHook(error: any, form: Form): Promise<any> {
+    return Promise.reject(error)
   }
 
   /**
@@ -198,16 +178,40 @@ export class Form {
   }
 
   /**
-   * build Field object
+   * its run isFieldDirty if "fieldKey" is passed
+   * if not its check all the fields and if one is dirty the whole form
+   * is dirty
    *
    * @param fieldKey
    */
-  private buildFieldObject(fieldKey: string): Field {
-    return {
-      key: fieldKey,
-      value: this[fieldKey],
-      label: this.$labels[fieldKey]
+  public isDirty(fieldKey: string | null = null): boolean {
+    if (fieldKey) {
+      return this.isFieldDirty(fieldKey)
     }
+
+    let dirty = false
+
+    for (let originalFieldKey in this.$originalData) {
+      if (this.isFieldDirty(originalFieldKey)) {
+        dirty = true
+        break
+      }
+    }
+
+    return dirty
+  }
+
+  /**
+   * determine if field is dirty
+   *
+   * @param fieldKey
+   */
+  public isFieldDirty(fieldKey: string): boolean {
+    if (!this.hasOwnProperty(fieldKey)) {
+      return false
+    }
+
+    return this[fieldKey] !== this.$originalData[fieldKey]
   }
 
   /**
@@ -240,6 +244,63 @@ export class Form {
   }
 
   /**
+   * Init the form
+   * fill all the data that should be filled (Validator, OriginalData etc..(
+   *
+   * @param data
+   */
+  private init(data: Object): Form {
+    let rules = {}
+    let originalData = {}
+    let labels = {}
+    let extra = {}
+
+    Object.keys(data).forEach(key => {
+
+      if (isObject(data[key])) {
+        originalData[key] = data[key].value
+
+        if (data[key].hasOwnProperty('rules')) {
+          rules[key] = data[key].rules
+        }
+
+        if (data[key].hasOwnProperty('label')) {
+          labels[key] = data[key].label
+        }
+
+        if (data[key].hasOwnProperty('extra')) {
+          extra[key] = data[key].extra
+        }
+      }
+
+      labels[key] = key in labels ? labels[key] : generateDefaultLabel(key)
+      originalData[key] = key in originalData ? originalData[key] : data[key]
+      extra[key] = key in extra ? extra[key] : {}
+    })
+
+    this.$originalData = originalData
+    this.$labels = labels
+    this.$extra = extra
+    this.$validator = new Validator(rules, this.$options.validation)
+    this.$errors = new Errors()
+
+    return this
+  }
+
+  /**
+   * build Field object
+   *
+   * @param fieldKey
+   */
+  private buildFieldObject(fieldKey: string): Field {
+    return {
+      key: fieldKey,
+      value: this[fieldKey],
+      label: this.$labels[fieldKey]
+    }
+  }
+
+  /**
    * Successful submission method
    *
    * @param response
@@ -267,29 +328,5 @@ export class Form {
     this.$submitting = false
 
     return Form.unSuccessfulSubmissionHook(error, this)
-  }
-
-  /**
-   * Hook for successful submission
-   * use Form.successfulSubmissionHook = () => {};
-   * for extending the successful submission handling
-   *
-   * @param response
-   * @param form
-   */
-  static successfulSubmissionHook(response: any, form: Form): Promise<any> {
-    return Promise.resolve(response)
-  }
-
-  /**
-   * Hook for un successful submission
-   * use Form.unSuccessfulSubmissionHook = () => {};
-   * for extending the un successful submission handling
-   *
-   * @param error
-   * @param form
-   */
-  static unSuccessfulSubmissionHook(error: any, form: Form): Promise<any> {
-    return Promise.reject(error)
   }
 }

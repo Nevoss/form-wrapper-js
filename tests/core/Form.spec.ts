@@ -351,4 +351,36 @@ describe('Form.js', () => {
     expect(form.$options.successfulSubmission.resetData).toBe(false)
   });
 
+
+  it('should determine if field is dirty', () => {
+    let form = new Form(data) as Form & FormData
+
+    form.first_name = 'something else';
+
+    expect(form.isFieldDirty('first_name')).toBe(true)
+    expect(form.isFieldDirty('last_name')).toBe(false)
+  });
+
+
+  it('should run isFieldDirty (argument passes to "isDirty")', () => {
+    let form = new Form(data) as Form & FormData
+
+    form.isFieldDirty = jest.fn(() => false)
+
+    let res = form.isDirty('first_name')
+    expect(form.isFieldDirty).toHaveBeenCalledWith('first_name')
+    expect(res).toBe(false)
+  });
+
+
+  it('should determine if the whold form is dirty or not', () => {
+    let form = new Form(data) as Form & FormData
+
+    expect(form.isDirty()).toBe(false)
+
+    form.last_name = 'somthing else'
+
+    expect(form.isDirty()).toBe(true)
+  });
+
 })
