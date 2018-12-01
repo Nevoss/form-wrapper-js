@@ -256,26 +256,12 @@ export class Form {
     let extra = {}
 
     Object.keys(data).forEach(key => {
+      let isKeyObject = isObject(data[key])
 
-      if (isObject(data[key])) {
-        originalData[key] = data[key].value
-
-        if (data[key].hasOwnProperty('rules')) {
-          rules[key] = data[key].rules
-        }
-
-        if (data[key].hasOwnProperty('label')) {
-          labels[key] = data[key].label
-        }
-
-        if (data[key].hasOwnProperty('extra')) {
-          extra[key] = data[key].extra
-        }
-      }
-
-      labels[key] = key in labels ? labels[key] : generateDefaultLabel(key)
-      originalData[key] = key in originalData ? originalData[key] : data[key]
-      extra[key] = key in extra ? extra[key] : {}
+      originalData[key] = isKeyObject ? data[key].value : data[key]
+      labels[key] = isKeyObject && data[key].hasOwnProperty('label') ? data[key].label : generateDefaultLabel(key)
+      extra[key] = isKeyObject && data[key].hasOwnProperty('extra') ? data[key].extra : {}
+      rules = { ...rules, ...(isKeyObject && data[key].hasOwnProperty('label') && {[key]: data[key].rules}) }
     })
 
     this.$originalData = originalData
