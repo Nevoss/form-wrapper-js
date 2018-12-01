@@ -43,12 +43,23 @@ export declare class Form {
      */
     constructor(data: Object, options?: Options);
     /**
-     * Init the form
-     * fill all the data that should be filled (Validator, OriginalData etc..(
+     * Hook for successful submission
+     * use Form.successfulSubmissionHook = () => {};
+     * for extending the successful submission handling
      *
-     * @param data
+     * @param response
+     * @param form
      */
-    private init;
+    static successfulSubmissionHook(response: any, form: Form): Promise<any>;
+    /**
+     * Hook for un successful submission
+     * use Form.unSuccessfulSubmissionHook = () => {};
+     * for extending the un successful submission handling
+     *
+     * @param error
+     * @param form
+     */
+    static unSuccessfulSubmissionHook(error: any, form: Form): Promise<any>;
     /**
      * Set all the fields value same as $originalData fields value
      */
@@ -81,11 +92,19 @@ export declare class Form {
      */
     validateAll(): boolean;
     /**
-     * build Field object
+     * its run isFieldDirty if "fieldKey" is passed
+     * if not its check all the fields and if one is dirty the whole form
+     * is dirty
      *
      * @param fieldKey
      */
-    private buildFieldObject;
+    isDirty(fieldKey?: string | null): boolean;
+    /**
+     * determine if field is dirty
+     *
+     * @param fieldKey
+     */
+    isFieldDirty(fieldKey: string): boolean;
     /**
      * assign options to Options object
      *
@@ -100,6 +119,19 @@ export declare class Form {
      */
     submit(callback: SubmitCallback): Promise<any>;
     /**
+     * Init the form
+     * fill all the data that should be filled (Validator, OriginalData etc..(
+     *
+     * @param data
+     */
+    private init;
+    /**
+     * build Field object
+     *
+     * @param fieldKey
+     */
+    private buildFieldObject;
+    /**
      * Successful submission method
      *
      * @param response
@@ -111,22 +143,4 @@ export declare class Form {
      * @param error
      */
     private unSuccessfulSubmission;
-    /**
-     * Hook for successful submission
-     * use Form.successfulSubmissionHook = () => {};
-     * for extending the successful submission handling
-     *
-     * @param response
-     * @param form
-     */
-    static successfulSubmissionHook(response: any, form: Form): Promise<any>;
-    /**
-     * Hook for un successful submission
-     * use Form.unSuccessfulSubmissionHook = () => {};
-     * for extending the un successful submission handling
-     *
-     * @param error
-     * @param form
-     */
-    static unSuccessfulSubmissionHook(error: any, form: Form): Promise<any>;
 }

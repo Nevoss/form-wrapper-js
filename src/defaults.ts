@@ -9,8 +9,8 @@ const defaults: Options = {
     resetData: true,
   },
   validation: {
-    stopAfterFirstRuleFailed: true,
     onSubmission: true,
+    stopAfterFirstRuleFailed: true,
     defaultMessage: ({ label }) => `${label} is invalid.`
   }
 }
