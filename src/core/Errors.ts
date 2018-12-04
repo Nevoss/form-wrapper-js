@@ -34,7 +34,7 @@ export class Errors {
    *
    * @param errors
    */
-  public append(errors: ErrorsStack): Errors {
+  public push(errors: ErrorsStack): Errors {
     this.$errors = {
       ...this.$errors,
       ...errors
@@ -90,7 +90,7 @@ export class Errors {
    *
    * @param fieldKey
    */
-  public clearField(fieldKey: string): Errors {
+  public unset(fieldKey: string): Errors {
     if (this.has(fieldKey)) {
       delete this.$errors[fieldKey]
 

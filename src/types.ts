@@ -92,7 +92,7 @@ export interface ValidationOptions {
   /**
    * when calling "fieldChanged" method the errors of the field will be removed
    */
-  clearFieldErrorsOnFieldChange?: boolean
+  unsetFieldErrorsOnFieldChange?: boolean
 
   /**
    * when validation field with a chain of validation rules if this option assigned as true,

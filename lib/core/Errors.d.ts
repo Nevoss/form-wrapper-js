@@ -21,7 +21,7 @@ export declare class Errors {
      *
      * @param errors
      */
-    append(errors: ErrorsStack): Errors;
+    push(errors: ErrorsStack): Errors;
     /**
      * checks if fieldKey exists in the ErrorsStack
      *
@@ -51,7 +51,7 @@ export declare class Errors {
      *
      * @param fieldKey
      */
-    clearField(fieldKey: string): Errors;
+    unset(fieldKey: string): Errors;
     /**
      * check if there is any error in the ErrorsStack
      */
