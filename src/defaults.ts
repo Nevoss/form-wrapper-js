@@ -10,6 +10,8 @@ const defaults: Options = {
     resetData: true,
   },
   validation: {
+    onFieldBlurred: false,
+    onFieldChanged: false,
     onSubmission: true,
     stopAfterFirstRuleFailed: true,
     defaultMessage: ({ label }) => `${label} is invalid.`

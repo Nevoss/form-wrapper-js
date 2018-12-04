@@ -128,6 +128,30 @@ export declare class Form {
      */
     submit(callback: SubmitCallback): Promise<any>;
     /**
+     * checks if field exits or not in the form class
+     *
+     * @param fieldKey
+     */
+    hasField(fieldKey: string): boolean;
+    /**
+     * handle change/input on field
+     *
+     * @param fieldKey
+     */
+    fieldChanged(fieldKey: string): Form;
+    /**
+     * handle focus on field
+     *
+     * @param fieldKey
+     */
+    fieldFocused(fieldKey: string): Form;
+    /**
+     * handle blur on field
+     *
+     * @param fieldKey
+     */
+    fieldBlurred(fieldKey: string): Form;
+    /**
      * Init the form
      * fill all the data that should be filled (Validator, OriginalData etc..(
      *

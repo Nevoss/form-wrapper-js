@@ -9,7 +9,7 @@ jest.mock('../../src/core/Errors')
 jest.mock('../../src/core/Validator')
 jest.mock('../../src/core/Touched')
 
-describe('Form.js', () => {
+describe('Form.ts', () => {
 
   interface FormData {
     first_name: string | null
@@ -396,7 +396,7 @@ describe('Form.js', () => {
   });
 
 
-  it('should determine if the whold form is dirty or not', () => {
+  it('should determine if the whole form is dirty or not', () => {
     let form = new Form(data) as Form & FormData
 
     expect(form.isDirty()).toBe(false)
@@ -404,6 +404,70 @@ describe('Form.js', () => {
     form.last_name = 'somthing else'
 
     expect(form.isDirty()).toBe(true)
+  });
+
+  it('should validate field that was change if the "validation.onFieldChanged" set as true', () => {
+    let form = new Form(data, {
+      validation: {
+        onFieldChanged: true
+      }
+    })
+
+    form.validateField = jest.fn()
+
+    form.fieldChanged('first_name')
+
+    expect(form.validateField).toHaveBeenCalledTimes(1)
+    expect(form.validateField).toHaveBeenCalledWith('first_name')
+
+    form.assignOptions({
+      validation: {
+        onFieldChanged: false
+      }
+    })
+
+    form.fieldChanged('first_name')
+
+    expect(form.validateField).toHaveBeenCalledTimes(1)
+  });
+
+
+  it('should push to touched and set $onFocus when field is on focus', () => {
+    let form = new Form(data)
+
+    form.fieldFocused('first_name')
+
+    expect(form.$onFocus).toBe('first_name')
+    expect(form.$touched.push).toHaveBeenCalledTimes(1)
+    expect(form.$touched.push).toHaveBeenCalledWith('first_name')
+  });
+
+
+  it('should reset $onFocus if the field is on focus and validate the field if "validation.onFieldBlurred" is set', () => {
+    let form = new Form(data, {
+      validation: {
+        onFieldBlurred: false
+      }
+    })
+
+    form.validateField = jest.fn()
+    form.$onFocus = 'first_name'
+    form.fieldBlurred('first_name')
+
+    expect(form.$onFocus).toBe(null)
+    expect(form.validateField).toHaveBeenCalledTimes(0)
+
+    form.assignOptions({
+      validation: {
+        onFieldBlurred: true
+      }
+    })
+    form.$onFocus = 'last_name'
+    form.fieldBlurred('first_name')
+
+    expect(form.$onFocus).toBe('last_name')
+    expect(form.validateField).toHaveBeenCalledTimes(1)
+    expect(form.validateField).toHaveBeenCalledWith('first_name')
   });
 
 })

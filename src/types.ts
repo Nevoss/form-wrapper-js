@@ -73,16 +73,27 @@ export interface SuccessfulSubmissionOptions {
  * options that related to validation
  */
 export interface ValidationOptions {
+
   /**
-   * when validation field with a chain of validation rules if this option assigned as true,
-   * for this specific field it is stopping to validate the other rules
+   * validate the field on field changed
    */
-  stopAfterFirstRuleFailed?: boolean
+  onFieldChanged?: boolean
+
+  /**
+   * validate the field on field blurred
+   */
+  onFieldBlurred?: boolean
 
   /**
    * should or not should validate the form on submission
    */
   onSubmission?: boolean
+
+  /**
+   * when validation field with a chain of validation rules if this option assigned as true,
+   * for this specific field it is stopping to validate the other rules
+   */
+  stopAfterFirstRuleFailed?: boolean
 
   /***
    * Default message for errors

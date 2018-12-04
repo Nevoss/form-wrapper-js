@@ -42,7 +42,7 @@ export class Form {
   /**
    * hold the input that is on focus right now
    */
-  public $onFocus: string | null
+  public $onFocus: string | null = null
 
   /**
    * The initiate data that was provide to the form
@@ -116,7 +116,7 @@ export class Form {
     let dataObj = {}
 
     Object.keys(this.$originalData).forEach(fieldKey => {
-      if (this.hasOwnProperty(fieldKey)) {
+      if (this.hasField(fieldKey)) {
         dataObj[fieldKey] = this[fieldKey]
       }
     })
@@ -155,7 +155,7 @@ export class Form {
    * @param fieldKey
    */
   public validateField(fieldKey: string): boolean {
-    if (!this.hasOwnProperty(fieldKey)) {
+    if (!this.hasField(fieldKey)) {
       return true
     }
 
@@ -218,7 +218,7 @@ export class Form {
    * @param fieldKey
    */
   public isFieldDirty(fieldKey: string): boolean {
-    if (!this.hasOwnProperty(fieldKey)) {
+    if (!this.hasField(fieldKey)) {
       return false
     }
 
@@ -252,6 +252,63 @@ export class Form {
     return callback(this)
       .then(this.successfulSubmission.bind(this))
       .catch(this.unSuccessfulSubmission.bind(this))
+  }
+
+  /**
+   * checks if field exits or not in the form class
+   *
+   * @param fieldKey
+   */
+  public hasField(fieldKey: string): boolean {
+    return this.hasOwnProperty(fieldKey);
+  }
+
+  /**
+   * handle change/input on field
+   *
+   * @param fieldKey
+   */
+  public fieldChanged(fieldKey: string): Form {
+    if (!this.hasField(fieldKey)) {
+      return this
+    }
+
+    this.$options.validation.onFieldChanged && this.validateField(fieldKey)
+
+    return this
+  }
+
+  /**
+   * handle focus on field
+   *
+   * @param fieldKey
+   */
+  public fieldFocused(fieldKey: string): Form {
+    if (!this.hasField(fieldKey)) {
+      return this
+    }
+
+    this.$touched.push(fieldKey)
+    this.$onFocus = fieldKey
+  }
+
+  /**
+   * handle blur on field
+   *
+   * @param fieldKey
+   */
+  public fieldBlurred(fieldKey: string): Form {
+    if (!this.hasField(fieldKey)) {
+      return this
+    }
+
+    if (this.$onFocus === fieldKey) {
+      this.$onFocus = null
+    }
+
+    this.$options.validation.onFieldBlurred && this.validateField(fieldKey)
+
+    return this
   }
 
   /**
