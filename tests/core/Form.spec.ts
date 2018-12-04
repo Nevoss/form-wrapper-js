@@ -406,6 +406,7 @@ describe('Form.ts', () => {
     expect(form.isDirty()).toBe(true)
   });
 
+
   it('should validate field that was change if the "validation.onFieldChanged" set as true', () => {
     let form = new Form(data, {
       validation: {
@@ -429,6 +430,30 @@ describe('Form.ts', () => {
     form.fieldChanged('first_name')
 
     expect(form.validateField).toHaveBeenCalledTimes(1)
+  });
+
+
+  it('should clear field errors after field changed', () => {
+    let form = new Form(data, {
+      validation: {
+        clearFieldErrorsOnFieldChange: false
+      }
+    })
+
+    form.fieldChanged('first_name')
+
+    expect(form.$errors.clearField).toHaveBeenCalledTimes(0)
+
+    form.assignOptions({
+      validation: {
+        clearFieldErrorsOnFieldChange: true
+      }
+    })
+
+    form.fieldChanged('first_name')
+
+    expect(form.$errors.clearField).toHaveBeenCalledTimes(1)
+    expect(form.$errors.clearField).toHaveBeenCalledWith('first_name')
   });
 
 

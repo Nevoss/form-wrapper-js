@@ -90,6 +90,11 @@ export interface ValidationOptions {
   onSubmission?: boolean
 
   /**
+   * when calling "fieldChanged" method the errors of the field will be removed
+   */
+  clearFieldErrorsOnFieldChange?: boolean
+
+  /**
    * when validation field with a chain of validation rules if this option assigned as true,
    * for this specific field it is stopping to validate the other rules
    */

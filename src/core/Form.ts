@@ -273,6 +273,7 @@ export class Form {
       return this
     }
 
+    this.$options.validation.clearFieldErrorsOnFieldChange && this.$errors.clearField(fieldKey)
     this.$options.validation.onFieldChanged && this.validateField(fieldKey)
 
     return this

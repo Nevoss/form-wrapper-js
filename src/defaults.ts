@@ -13,6 +13,7 @@ const defaults: Options = {
     onFieldBlurred: false,
     onFieldChanged: false,
     onSubmission: true,
+    clearFieldErrorsOnFieldChange: false,
     stopAfterFirstRuleFailed: true,
     defaultMessage: ({ label }) => `${label} is invalid.`
   }
