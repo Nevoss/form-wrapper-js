@@ -1,11 +1,13 @@
 import {Errors} from "../../src/core/Errors"
 import {Validator} from "../../src/core/Validator"
+import {Touched} from "../../src/core/Touched"
 import {Form} from "../../src"
 import generateOptions from '../../src/helpers/generateOptions'
 import defaultOptionsSource from '../../src/defaults'
 
 jest.mock('../../src/core/Errors')
 jest.mock('../../src/core/Validator')
+jest.mock('../../src/core/Touched')
 
 describe('Form.js', () => {
 
@@ -66,6 +68,7 @@ describe('Form.js', () => {
     })
     expect(Validator).toHaveBeenCalledWith({first_name: rulesArray}, defaultOptions.validation)
     expect(Errors).toHaveBeenCalled()
+    expect(Touched).toHaveBeenCalled()
   });
 
 
@@ -156,7 +159,8 @@ describe('Form.js', () => {
     let response = await form.submit(mockCallable)
 
     expect(mockCallable.mock.calls.length).toBe(1)
-    expect(form.$errors.clear).toHaveBeenCalledTimes(1);
+    expect(form.$errors.clear).toHaveBeenCalledTimes(1)
+    expect(form.$touched.clear).toHaveBeenCalledTimes(1)
     expect(form.reset).toHaveBeenCalledTimes(1);
     expect(Form.successfulSubmissionHook).toBeCalledWith(responseParam, form)
     expect(Form.unSuccessfulSubmissionHook).not.toHaveBeenCalledTimes(1)
@@ -164,7 +168,7 @@ describe('Form.js', () => {
   })
 
 
-  it('should send reject promise if the callback was send reject promise', async () => {
+  it('should send reject promise if the callback was return reject promise', async () => {
     let form = new Form(data) as Form & FormData
 
     let responseParam = {
@@ -220,6 +224,7 @@ describe('Form.js', () => {
     await form.submit(() => Promise.resolve())
 
     expect(form.$errors.clear).toHaveBeenCalledTimes(1)
+    expect(form.$touched.clear).toHaveBeenCalledTimes(1)
     expect(form.reset).not.toHaveBeenCalled()
   });
 
@@ -236,6 +241,24 @@ describe('Form.js', () => {
     await form.submit(() => Promise.resolve())
 
     expect(form.$errors.clear).not.toHaveBeenCalled()
+    expect(form.$touched.clear).toHaveBeenCalledTimes(1)
+    expect(form.reset).toHaveBeenCalledTimes(1)
+  });
+
+
+  it('should not clear touched after success submission if successfulSubmission.clearTouched set to false', async () => {
+    let form = new Form(data, {
+      successfulSubmission: {
+        clearTouched: false
+      },
+    }) as Form & FormData
+
+    form.reset = jest.fn()
+
+    await form.submit(() => Promise.resolve())
+
+    expect(form.$errors.clear).toHaveBeenCalledTimes(1)
+    expect(form.$touched.clear).not.toHaveBeenCalled()
     expect(form.reset).toHaveBeenCalledTimes(1)
   });
 

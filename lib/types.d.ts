@@ -50,6 +50,10 @@ export interface SuccessfulSubmissionOptions {
      */
     clearErrors?: boolean;
     /**
+     * Clear all the touched array after successful submission
+     */
+    clearTouched?: boolean;
+    /**
      * Set the data to $originalData after successful submission
      */
     resetData?: boolean;

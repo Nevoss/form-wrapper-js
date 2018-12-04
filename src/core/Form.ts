@@ -1,5 +1,6 @@
 import {Errors} from "./Errors"
 import {Validator} from "./Validator"
+import {Touched} from "./Touched";
 import {Field, Options, SubmitCallback} from "../types"
 import {isObject} from "../utils"
 import generateDefaultLabel from "../helpers/generateDefaultLabel"
@@ -29,9 +30,19 @@ export class Form {
   public $validator: Validator
 
   /**
+   * Touched class - holds all the fields that was touched
+   */
+  public $touched: Touched
+
+  /**
    * Holds all the labels of the fields
    */
   public $labels: Object
+
+  /**
+   * hold the input that is on focus right now
+   */
+  public $onFocus: string | null
 
   /**
    * The initiate data that was provide to the form
@@ -269,6 +280,7 @@ export class Form {
     this.$extra = extra
     this.$validator = new Validator(rules, this.$options.validation)
     this.$errors = new Errors()
+    this.$touched = new Touched()
 
     return this
   }
@@ -294,13 +306,9 @@ export class Form {
   private successfulSubmission(response: any): Promise<any> {
     this.$submitting = false
 
-    if (this.$options.successfulSubmission.clearErrors) {
-      this.$errors.clear()
-    }
-
-    if (this.$options.successfulSubmission.resetData) {
-      this.reset()
-    }
+    this.$options.successfulSubmission.clearErrors && this.$errors.clear()
+    this.$options.successfulSubmission.clearTouched && this.$touched.clear()
+    this.$options.successfulSubmission.resetData && this.reset()
 
     return Form.successfulSubmissionHook(response, this)
   }

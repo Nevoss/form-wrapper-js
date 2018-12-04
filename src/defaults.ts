@@ -6,6 +6,7 @@ import {Options} from "./types";
 const defaults: Options = {
   successfulSubmission: {
     clearErrors: true,
+    clearTouched: true,
     resetData: true,
   },
   validation: {

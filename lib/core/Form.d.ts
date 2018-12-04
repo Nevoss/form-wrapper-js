@@ -1,5 +1,6 @@
 import { Errors } from "./Errors";
 import { Validator } from "./Validator";
+import { Touched } from "./Touched";
 import { Options, SubmitCallback } from "../types";
 export declare class Form {
     /**
@@ -19,9 +20,17 @@ export declare class Form {
      */
     $validator: Validator;
     /**
+     * Touched class - holds all the fields that was touched
+     */
+    $touched: Touched;
+    /**
      * Holds all the labels of the fields
      */
     $labels: Object;
+    /**
+     * hold the input that is on focus right now
+     */
+    $onFocus: string | null;
     /**
      * The initiate data that was provide to the form
      */
