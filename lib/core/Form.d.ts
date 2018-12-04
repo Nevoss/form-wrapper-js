@@ -1,5 +1,6 @@
 import { Errors } from "./Errors";
 import { Validator } from "./Validator";
+import { Touched } from "./Touched";
 import { Options, SubmitCallback } from "../types";
 export declare class Form {
     /**
@@ -19,9 +20,17 @@ export declare class Form {
      */
     $validator: Validator;
     /**
+     * Touched class - holds all the fields that was touched
+     */
+    $touched: Touched;
+    /**
      * Holds all the labels of the fields
      */
     $labels: Object;
+    /**
+     * hold the input that is on focus right now
+     */
+    $onFocus: string | null;
     /**
      * The initiate data that was provide to the form
      */
@@ -118,6 +127,30 @@ export declare class Form {
      * @param callback
      */
     submit(callback: SubmitCallback): Promise<any>;
+    /**
+     * checks if field exits or not in the form class
+     *
+     * @param fieldKey
+     */
+    hasField(fieldKey: string): boolean;
+    /**
+     * handle change/input on field
+     *
+     * @param fieldKey
+     */
+    fieldChanged(fieldKey: string): Form;
+    /**
+     * handle focus on field
+     *
+     * @param fieldKey
+     */
+    fieldFocused(fieldKey: string): Form;
+    /**
+     * handle blur on field
+     *
+     * @param fieldKey
+     */
+    fieldBlurred(fieldKey: string): Form;
     /**
      * Init the form
      * fill all the data that should be filled (Validator, OriginalData etc..(

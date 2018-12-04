@@ -1,5 +1,6 @@
 import {Errors} from "./Errors"
 import {Validator} from "./Validator"
+import {Touched} from "./Touched";
 import {Field, Options, SubmitCallback} from "../types"
 import {isObject} from "../utils"
 import generateDefaultLabel from "../helpers/generateDefaultLabel"
@@ -29,9 +30,19 @@ export class Form {
   public $validator: Validator
 
   /**
+   * Touched class - holds all the fields that was touched
+   */
+  public $touched: Touched
+
+  /**
    * Holds all the labels of the fields
    */
   public $labels: Object
+
+  /**
+   * hold the input that is on focus right now
+   */
+  public $onFocus: string | null = null
 
   /**
    * The initiate data that was provide to the form
@@ -105,7 +116,7 @@ export class Form {
     let dataObj = {}
 
     Object.keys(this.$originalData).forEach(fieldKey => {
-      if (this.hasOwnProperty(fieldKey)) {
+      if (this.hasField(fieldKey)) {
         dataObj[fieldKey] = this[fieldKey]
       }
     })
@@ -144,7 +155,7 @@ export class Form {
    * @param fieldKey
    */
   public validateField(fieldKey: string): boolean {
-    if (!this.hasOwnProperty(fieldKey)) {
+    if (!this.hasField(fieldKey)) {
       return true
     }
 
@@ -207,7 +218,7 @@ export class Form {
    * @param fieldKey
    */
   public isFieldDirty(fieldKey: string): boolean {
-    if (!this.hasOwnProperty(fieldKey)) {
+    if (!this.hasField(fieldKey)) {
       return false
     }
 
@@ -244,6 +255,64 @@ export class Form {
   }
 
   /**
+   * checks if field exits or not in the form class
+   *
+   * @param fieldKey
+   */
+  public hasField(fieldKey: string): boolean {
+    return this.hasOwnProperty(fieldKey);
+  }
+
+  /**
+   * handle change/input on field
+   *
+   * @param fieldKey
+   */
+  public fieldChanged(fieldKey: string): Form {
+    if (!this.hasField(fieldKey)) {
+      return this
+    }
+
+    this.$options.validation.clearFieldErrorsOnFieldChange && this.$errors.clearField(fieldKey)
+    this.$options.validation.onFieldChanged && this.validateField(fieldKey)
+
+    return this
+  }
+
+  /**
+   * handle focus on field
+   *
+   * @param fieldKey
+   */
+  public fieldFocused(fieldKey: string): Form {
+    if (!this.hasField(fieldKey)) {
+      return this
+    }
+
+    this.$touched.push(fieldKey)
+    this.$onFocus = fieldKey
+  }
+
+  /**
+   * handle blur on field
+   *
+   * @param fieldKey
+   */
+  public fieldBlurred(fieldKey: string): Form {
+    if (!this.hasField(fieldKey)) {
+      return this
+    }
+
+    if (this.$onFocus === fieldKey) {
+      this.$onFocus = null
+    }
+
+    this.$options.validation.onFieldBlurred && this.validateField(fieldKey)
+
+    return this
+  }
+
+  /**
    * Init the form
    * fill all the data that should be filled (Validator, OriginalData etc..(
    *
@@ -269,6 +338,7 @@ export class Form {
     this.$extra = extra
     this.$validator = new Validator(rules, this.$options.validation)
     this.$errors = new Errors()
+    this.$touched = new Touched()
 
     return this
   }
@@ -294,13 +364,9 @@ export class Form {
   private successfulSubmission(response: any): Promise<any> {
     this.$submitting = false
 
-    if (this.$options.successfulSubmission.clearErrors) {
-      this.$errors.clear()
-    }
-
-    if (this.$options.successfulSubmission.resetData) {
-      this.reset()
-    }
+    this.$options.successfulSubmission.clearErrors && this.$errors.clear()
+    this.$options.successfulSubmission.clearTouched && this.$touched.clear()
+    this.$options.successfulSubmission.resetData && this.reset()
 
     return Form.successfulSubmissionHook(response, this)
   }
