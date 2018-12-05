@@ -44,7 +44,7 @@ describe('Errors.ts', () => {
   it('should delete a key from the errors object', () => {
     let errors = new Errors(errorsData)
 
-    errors.clearField('name')
+    errors.unset('name')
 
     expect(errors.all()).not.toHaveProperty('name')
   });
@@ -89,7 +89,7 @@ describe('Errors.ts', () => {
   it('should append error to the errors stack', function () {
     let errors = new Errors(errorsData)
 
-    errors.append({ name: [ 'another error' ], is_developer: [ 'boolean' ] })
+    errors.push({ name: [ 'another error' ], is_developer: [ 'boolean' ] })
     expect(errors.get('name')).toEqual([ 'another error' ])
     expect(errors.get('is_developer')).toEqual([ 'boolean' ])
     expect(errors.get('email')).toEqual([ 'Error1' ])

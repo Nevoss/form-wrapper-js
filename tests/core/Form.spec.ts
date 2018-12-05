@@ -295,10 +295,10 @@ describe('Form.ts', () => {
     let isValid = form.validateField('name')
 
     expect(isValid).toBe(false)
-    expect(form.$errors.clearField).toHaveBeenCalledTimes(1)
-    expect(form.$errors.clearField).toBeCalledWith('name')
-    expect(form.$errors.append).toHaveBeenCalledTimes(1)
-    expect(form.$errors.append).toBeCalledWith({
+    expect(form.$errors.unset).toHaveBeenCalledTimes(1)
+    expect(form.$errors.unset).toBeCalledWith('name')
+    expect(form.$errors.push).toHaveBeenCalledTimes(1)
+    expect(form.$errors.push).toBeCalledWith({
       name: [ 'error' ]
     })
     expect(form.$validator.validateField).toBeCalledWith({ label: 'The Name', value: 'a', key: 'name' }, form)
@@ -308,8 +308,8 @@ describe('Form.ts', () => {
 
     isValid = form.validateField('name')
     expect(isValid).toBe(true)
-    expect(form.$errors.append).toHaveBeenCalledTimes(1)
-    expect(form.$errors.clearField).toHaveBeenCalledTimes(2)
+    expect(form.$errors.push).toHaveBeenCalledTimes(1)
+    expect(form.$errors.unset).toHaveBeenCalledTimes(2)
   });
 
 
@@ -436,24 +436,24 @@ describe('Form.ts', () => {
   it('should clear field errors after field changed', () => {
     let form = new Form(data, {
       validation: {
-        clearFieldErrorsOnFieldChange: false
+        unsetFieldErrorsOnFieldChange: false
       }
     })
 
     form.fieldChanged('first_name')
 
-    expect(form.$errors.clearField).toHaveBeenCalledTimes(0)
+    expect(form.$errors.unset).toHaveBeenCalledTimes(0)
 
     form.assignOptions({
       validation: {
-        clearFieldErrorsOnFieldChange: true
+        unsetFieldErrorsOnFieldChange: true
       }
     })
 
     form.fieldChanged('first_name')
 
-    expect(form.$errors.clearField).toHaveBeenCalledTimes(1)
-    expect(form.$errors.clearField).toHaveBeenCalledWith('first_name')
+    expect(form.$errors.unset).toHaveBeenCalledTimes(1)
+    expect(form.$errors.unset).toHaveBeenCalledWith('first_name')
   });
 
 

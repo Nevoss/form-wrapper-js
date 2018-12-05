@@ -159,7 +159,7 @@ export class Form {
       return true
     }
 
-    this.$errors.clearField(fieldKey)
+    this.$errors.unset(fieldKey)
 
     const errors = this.$validator.validateField(
       this.buildFieldObject(fieldKey),
@@ -167,7 +167,7 @@ export class Form {
     )
 
     if (errors.length > 0) {
-      this.$errors.append({ [fieldKey]: errors })
+      this.$errors.push({ [fieldKey]: errors })
     }
 
     return errors.length === 0
@@ -273,7 +273,7 @@ export class Form {
       return this
     }
 
-    this.$options.validation.clearFieldErrorsOnFieldChange && this.$errors.clearField(fieldKey)
+    this.$options.validation.unsetFieldErrorsOnFieldChange && this.$errors.unset(fieldKey)
     this.$options.validation.onFieldChanged && this.validateField(fieldKey)
 
     return this

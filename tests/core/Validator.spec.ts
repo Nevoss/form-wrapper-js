@@ -96,6 +96,7 @@ describe('Validator.js', () => {
     expect(validator.$rules.name[0].message).toBeCalledWith(fieldObj, mockForm)
   });
 
+
   it('should stop validate spesific field after the first rule was failed if the option say so', () => {
     let mockForm = new Form({})
 
