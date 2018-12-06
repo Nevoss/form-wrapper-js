@@ -32,9 +32,9 @@ describe('Form.ts', () => {
 
 
   it('should init correctly', () => {
-    const rulesArray = [
-      () => true,
-    ]
+    const rulesArray = [() => true]
+    const isDeveloperRulesArray = [() => false]
+
 
     let form = new Form({
       first_name: {
@@ -45,6 +45,7 @@ describe('Form.ts', () => {
       last_name: 'Golan',
       is_developer: {
         value: false,
+        rules: isDeveloperRulesArray,
         extra: {
           options: [1, 0]
         }
@@ -66,7 +67,7 @@ describe('Form.ts', () => {
         options: [1, 0]
       }
     })
-    expect(Validator).toHaveBeenCalledWith({first_name: rulesArray}, defaultOptions.validation)
+    expect(Validator).toHaveBeenCalledWith({first_name: rulesArray, is_developer: isDeveloperRulesArray}, defaultOptions.validation)
     expect(Errors).toHaveBeenCalled()
     expect(Touched).toHaveBeenCalled()
   });

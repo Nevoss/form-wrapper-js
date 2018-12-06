@@ -330,7 +330,7 @@ export class Form {
       originalData[key] = isKeyObject ? data[key].value : data[key]
       labels[key] = isKeyObject && data[key].hasOwnProperty('label') ? data[key].label : generateDefaultLabel(key)
       extra[key] = isKeyObject && data[key].hasOwnProperty('extra') ? data[key].extra : {}
-      rules = { ...rules, ...(isKeyObject && data[key].hasOwnProperty('label') && {[key]: data[key].rules}) }
+      rules = { ...rules, ...(isKeyObject && data[key].hasOwnProperty('rules') && {[key]: data[key].rules}) }
     })
 
     this.$originalData = originalData
