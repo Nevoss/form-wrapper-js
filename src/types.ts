@@ -1,4 +1,4 @@
-import {Form} from "./core/Form";
+import { Form } from './core/Form'
 
 /**
  * Field object that passes the PassesFunction and MessageFunction,
@@ -6,8 +6,8 @@ import {Form} from "./core/Form";
  */
 export interface Field {
   key: string
-  label: string,
-  value: any,
+  label: string
+  value: any
 }
 
 /**
@@ -55,7 +55,7 @@ export interface SuccessfulSubmissionOptions {
   /**
    * Clear errors after successful submission
    */
-  clearErrors?: boolean,
+  clearErrors?: boolean
 
   /**
    * Clear all the touched array after successful submission
@@ -65,15 +65,13 @@ export interface SuccessfulSubmissionOptions {
   /**
    * Set the data to $originalData after successful submission
    */
-  resetData?: boolean,
+  resetData?: boolean
 }
-
 
 /**
  * options that related to validation
  */
 export interface ValidationOptions {
-
   /**
    * validate the field on field changed
    */

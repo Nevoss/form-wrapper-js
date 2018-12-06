@@ -1,1 +1,1 @@
-export { Form } from './core/Form';
+export { Form } from './core/Form'

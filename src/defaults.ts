@@ -1,7 +1,7 @@
 /**
  * Default options that provide to Form instance
  */
-import {Options} from "./types";
+import { Options } from './types'
 
 const defaults: Options = {
   successfulSubmission: {
@@ -15,8 +15,8 @@ const defaults: Options = {
     onSubmission: true,
     unsetFieldErrorsOnFieldChange: false,
     stopAfterFirstRuleFailed: true,
-    defaultMessage: ({ label }) => `${label} is invalid.`
-  }
+    defaultMessage: ({ label }) => `${label} is invalid.`,
+  },
 }
 
 export default defaults

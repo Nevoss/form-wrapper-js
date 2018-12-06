@@ -1,5 +1,5 @@
-import {Options} from "../types";
-import {isObject} from "../utils";
+import { Options } from '../types'
+import { isObject } from '../utils'
 
 /**
  * generate Options base on the defaults Options and new options
@@ -7,7 +7,10 @@ import {isObject} from "../utils";
  * @param defaultOptions
  * @param overwriteOptions
  */
-export default (defaultOptions: Options, overwriteOptions: Options): Options => {
+export default (
+  defaultOptions: Options,
+  overwriteOptions: Options
+): Options => {
   return assignNewOptions(defaultOptions, overwriteOptions)
 }
 
@@ -17,10 +20,13 @@ export default (defaultOptions: Options, overwriteOptions: Options): Options => 
  * @param originOptions
  * @param newOptions
  */
-const assignNewOptions = (originOptions: Object, newOptions: Object): Object => {
+const assignNewOptions = (
+  originOptions: Object,
+  newOptions: Object
+): Object => {
   let options = {}
 
-  Object.keys(originOptions).forEach((key) => {
+  Object.keys(originOptions).forEach(key => {
     if (!newOptions.hasOwnProperty(key)) {
       options[key] = originOptions[key]
       return

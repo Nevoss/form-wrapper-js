@@ -1,14 +1,13 @@
-import {Errors} from "./Errors"
-import {Validator} from "./Validator"
-import {Touched} from "./Touched";
-import {Field, Options, SubmitCallback} from "../types"
-import {isObject} from "../utils"
-import generateDefaultLabel from "../helpers/generateDefaultLabel"
+import { Errors } from './Errors'
+import { Validator } from './Validator'
+import { Touched } from './Touched'
+import { Field, Options, SubmitCallback } from '../types'
+import { isObject } from '../utils'
+import generateDefaultLabel from '../helpers/generateDefaultLabel'
 import generateOptions from '../helpers/generateOptions'
 import defaultsOptions from '../defaults'
 
 export class Form {
-
   /**
    * Defaults options for the Form instance
    */
@@ -80,7 +79,10 @@ export class Form {
    * @param response
    * @param form
    */
-  public static successfulSubmissionHook(response: any, form: Form): Promise<any> {
+  public static successfulSubmissionHook(
+    response: any,
+    form: Form
+  ): Promise<any> {
     return Promise.resolve(response)
   }
 
@@ -92,7 +94,10 @@ export class Form {
    * @param error
    * @param form
    */
-  public static unSuccessfulSubmissionHook(error: any, form: Form): Promise<any> {
+  public static unSuccessfulSubmissionHook(
+    error: any,
+    form: Form
+  ): Promise<any> {
     return Promise.reject(error)
   }
 
@@ -132,7 +137,10 @@ export class Form {
    */
   public fill(newData: Object): Form {
     for (let fieldName in newData) {
-      if (newData.hasOwnProperty(fieldName) && this.$originalData.hasOwnProperty(fieldName)) {
+      if (
+        newData.hasOwnProperty(fieldName) &&
+        this.$originalData.hasOwnProperty(fieldName)
+      ) {
         this[fieldName] = newData[fieldName]
       }
     }
@@ -260,7 +268,7 @@ export class Form {
    * @param fieldKey
    */
   public hasField(fieldKey: string): boolean {
-    return this.hasOwnProperty(fieldKey);
+    return this.hasOwnProperty(fieldKey)
   }
 
   /**
@@ -273,7 +281,8 @@ export class Form {
       return this
     }
 
-    this.$options.validation.unsetFieldErrorsOnFieldChange && this.$errors.unset(fieldKey)
+    this.$options.validation.unsetFieldErrorsOnFieldChange &&
+      this.$errors.unset(fieldKey)
     this.$options.validation.onFieldChanged && this.validateField(fieldKey)
 
     return this
@@ -328,9 +337,17 @@ export class Form {
       let isKeyObject = isObject(data[key])
 
       originalData[key] = isKeyObject ? data[key].value : data[key]
-      labels[key] = isKeyObject && data[key].hasOwnProperty('label') ? data[key].label : generateDefaultLabel(key)
-      extra[key] = isKeyObject && data[key].hasOwnProperty('extra') ? data[key].extra : {}
-      rules = { ...rules, ...(isKeyObject && data[key].hasOwnProperty('rules') && {[key]: data[key].rules}) }
+      labels[key] =
+        isKeyObject && data[key].hasOwnProperty('label')
+          ? data[key].label
+          : generateDefaultLabel(key)
+      extra[key] =
+        isKeyObject && data[key].hasOwnProperty('extra') ? data[key].extra : {}
+      rules = {
+        ...rules,
+        ...(isKeyObject &&
+          data[key].hasOwnProperty('rules') && { [key]: data[key].rules }),
+      }
     })
 
     this.$originalData = originalData
@@ -352,7 +369,7 @@ export class Form {
     return {
       key: fieldKey,
       value: this[fieldKey],
-      label: this.$labels[fieldKey]
+      label: this.$labels[fieldKey],
     }
   }
 

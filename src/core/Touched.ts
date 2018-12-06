@@ -1,5 +1,4 @@
 export class Touched {
-
   /**
    * holds all the touched fields
    */
@@ -68,7 +67,9 @@ export class Touched {
    */
   public unset(fieldKey: string): Touched {
     if (this.has(fieldKey)) {
-      this.$touched = this.$touched.filter((touchedFieldKey) => touchedFieldKey !== fieldKey)
+      this.$touched = this.$touched.filter(
+        touchedFieldKey => touchedFieldKey !== fieldKey
+      )
     }
 
     return this

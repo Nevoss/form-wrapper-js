@@ -1,7 +1,6 @@
-import {ErrorsStack} from "../types";
+import { ErrorsStack } from '../types'
 
 export class Errors {
-
   /**
    * Errors stack, holds all the form errors
    */
@@ -23,7 +22,7 @@ export class Errors {
    */
   public record(errors: ErrorsStack): Errors {
     this.$errors = {
-      ...errors
+      ...errors,
     }
 
     return this
@@ -37,7 +36,7 @@ export class Errors {
   public push(errors: ErrorsStack): Errors {
     this.$errors = {
       ...this.$errors,
-      ...errors
+      ...errors,
     }
 
     return this

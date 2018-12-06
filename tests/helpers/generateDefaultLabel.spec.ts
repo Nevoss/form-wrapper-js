@@ -5,5 +5,5 @@ describe('generateDefaultLabel.ts', () => {
     expect(generateDefaultLabel('name')).toBe('Name')
     expect(generateDefaultLabel('last_name')).toBe('Last name')
     expect(generateDefaultLabel('lastName')).toBe('Last name')
-  });
+  })
 })

@@ -10,16 +10,16 @@ describe('generateOptions.ts', () => {
 
     const newOptions = generateOptions(defaultOptions, {
       successfulSubmission: {
-        resetData: false
+        resetData: false,
       },
       validation: {
-        onSubmission: false
-      }
+        onSubmission: false,
+      },
     })
 
     expect(newOptions.successfulSubmission.resetData).toBe(false)
     expect(newOptions.successfulSubmission.clearErrors).toBe(true)
     expect(newOptions.validation.onSubmission).toBe(false)
     expect(newOptions.validation.stopAfterFirstRuleFailed).toBe(true)
-  });
+  })
 })
