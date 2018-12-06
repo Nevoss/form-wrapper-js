@@ -38,7 +38,9 @@ export class Touched {
    * @param fieldKey
    */
   public push(fieldKey: string): Touched {
-    this.$touched.push(fieldKey)
+    if (this.$touched.indexOf(fieldKey) < 0) {
+      this.$touched.push(fieldKey)
+    }
 
     return this
   }

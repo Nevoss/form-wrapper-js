@@ -18,6 +18,7 @@ describe('Touched.ts', () => {
     expect(touched.all()).toEqual(['a', 'b'])
   });
 
+
   it('should check if field key is touched', () => {
     let touched = new Touched()
     touched.record(['a', 'b'])
@@ -27,14 +28,17 @@ describe('Touched.ts', () => {
     expect(touched.has('c')).toBe(false)
   });
 
+
   it('should add field to the touched array', () => {
     let touched = new Touched()
     touched.record(['a', 'b'])
 
     touched.push('c')
+    touched.push('c')
 
     expect(touched.all()).toEqual(['a', 'b', 'c'])
   });
+
 
   it('should clear all the touched array', () => {
     let touched = new Touched()
@@ -45,6 +49,7 @@ describe('Touched.ts', () => {
     expect(touched.all()).toEqual([])
   });
 
+
   it('should check if there is any field touched', () => {
     let touched = new Touched()
 
@@ -54,6 +59,7 @@ describe('Touched.ts', () => {
 
     expect(touched.any()).toBe(true)
   });
+
 
   it('should unset field from the touched array', () => {
     let touched = new Touched()
