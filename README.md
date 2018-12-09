@@ -1,4 +1,5 @@
 # Form Wrapper JS
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/827bd5c5c37242629a2afb5e6cfa7d22)](https://app.codacy.com/app/Nevoss/form-wrapper-js?utm_source=github.com&utm_medium=referral&utm_content=Nevoss/form-wrapper-js&utm_campaign=Badge_Grade_Dashboard)
 [![npm version](https://badge.fury.io/js/form-wrapper-js.svg)](https://badge.fury.io/js/form-wrapper-js)
 [![CircleCI](https://circleci.com/gh/Nevoss/form-wrapper-js.svg?style=svg)](https://circleci.com/gh/Nevoss/form-wrapper-js)
 
