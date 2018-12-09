@@ -7,7 +7,7 @@ const defaults: Options = {
   successfulSubmission: {
     clearErrors: true,
     clearTouched: true,
-    resetData: true,
+    resetValues: true,
   },
   validation: {
     onFieldBlurred: false,

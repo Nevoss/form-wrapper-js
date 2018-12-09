@@ -2,19 +2,6 @@ import { Options } from '../types'
 import { isObject } from '../utils'
 
 /**
- * generate Options base on the defaults Options and new options
- *
- * @param defaultOptions
- * @param overwriteOptions
- */
-export default (
-  defaultOptions: Options,
-  overwriteOptions: Options
-): Options => {
-  return assignNewOptions(defaultOptions, overwriteOptions)
-}
-
-/**
  * recursive functions that overwrite the Options object
  *
  * @param originOptions
@@ -41,4 +28,17 @@ const assignNewOptions = (
   })
 
   return options
+}
+
+/**
+ * generate Options base on the defaults Options and new options
+ *
+ * @param defaultOptions
+ * @param overwriteOptions
+ */
+export default (
+  defaultOptions: Options,
+  overwriteOptions: Options
+): Options => {
+  return assignNewOptions(defaultOptions, overwriteOptions)
 }

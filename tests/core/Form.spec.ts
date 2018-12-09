@@ -96,7 +96,7 @@ describe('Form.ts', () => {
     expect(form.$options).toEqual(generateOptions(defaultOptions, newOptions))
   })
 
-  it('should returns the data on call', function() {
+  it('should returns the values on call', function() {
     let form = new Form(data) as Form & { [key: string]: any }
 
     form.first_name = 'Nevo'
@@ -104,25 +104,25 @@ describe('Form.ts', () => {
 
     form.not_real_prop = 'Somthing'
 
-    expect(form.data()).toEqual({
+    expect(form.values()).toEqual({
       ...data,
       first_name: 'Nevo',
       last_name: 'Golan',
     })
   })
 
-  it('should reset the data of the form', () => {
+  it('should resetValues the values of the form', () => {
     let form = new Form(data) as Form & FormData
 
     form.first_name = 'Nevo'
     form.last_name = 'Golan'
 
-    form.reset()
+    form.resetValues()
 
-    expect(form.data()).toEqual(data)
+    expect(form.values()).toEqual(data)
   })
 
-  it('should fill the form with new data', () => {
+  it('should fill the form with new values', () => {
     let form = new Form(data) as Form & FormData
 
     let newData = {
@@ -133,7 +133,7 @@ describe('Form.ts', () => {
 
     form.fill(newData)
 
-    expect(form.data()).toEqual(
+    expect(form.values()).toEqual(
       Object.assign({}, data, {
         first_name: 'Nevo',
         last_name: 'Golan',
@@ -153,7 +153,7 @@ describe('Form.ts', () => {
       Promise.resolve(responseParam)
     )
     Form.unSuccessfulSubmissionHook = jest.fn()
-    form.reset = jest.fn()
+    form.resetValues = jest.fn()
 
     let mockCallable = jest.fn(() => Promise.resolve(responseParam))
 
@@ -162,7 +162,7 @@ describe('Form.ts', () => {
     expect(mockCallable.mock.calls.length).toBe(1)
     expect(form.$errors.clear).toHaveBeenCalledTimes(1)
     expect(form.$touched.clear).toHaveBeenCalledTimes(1)
-    expect(form.reset).toHaveBeenCalledTimes(1)
+    expect(form.resetValues).toHaveBeenCalledTimes(1)
     expect(Form.successfulSubmissionHook).toBeCalledWith(responseParam, form)
     expect(Form.unSuccessfulSubmissionHook).not.toHaveBeenCalledTimes(1)
     expect(response).toBe(responseParam)
@@ -213,20 +213,20 @@ describe('Form.ts', () => {
     expect(mockCallable.mock.calls.length).toBe(1)
   })
 
-  it('should not reset after success submission if resetDataAfterSuccessfulSubmission option is false', async () => {
+  it('should not resetValues after success submission if resetValues option is false', async () => {
     let form = new Form(data, {
       successfulSubmission: {
-        resetData: false,
+        resetValues: false,
       },
     }) as Form & FormData
 
-    form.reset = jest.fn()
+    form.resetValues = jest.fn()
 
     await form.submit(() => Promise.resolve())
 
     expect(form.$errors.clear).toHaveBeenCalledTimes(1)
     expect(form.$touched.clear).toHaveBeenCalledTimes(1)
-    expect(form.reset).not.toHaveBeenCalled()
+    expect(form.resetValues).not.toHaveBeenCalled()
   })
 
   it('should not clear errors after success submission if clearErrorsAfterSuccessfulSubmission option is false', async () => {
@@ -236,13 +236,13 @@ describe('Form.ts', () => {
       },
     }) as Form & FormData
 
-    form.reset = jest.fn()
+    form.resetValues = jest.fn()
 
     await form.submit(() => Promise.resolve())
 
     expect(form.$errors.clear).not.toHaveBeenCalled()
     expect(form.$touched.clear).toHaveBeenCalledTimes(1)
-    expect(form.reset).toHaveBeenCalledTimes(1)
+    expect(form.resetValues).toHaveBeenCalledTimes(1)
   })
 
   it('should not clear touched after success submission if successfulSubmission.clearTouched set to false', async () => {
@@ -252,13 +252,13 @@ describe('Form.ts', () => {
       },
     }) as Form & FormData
 
-    form.reset = jest.fn()
+    form.resetValues = jest.fn()
 
     await form.submit(() => Promise.resolve())
 
     expect(form.$errors.clear).toHaveBeenCalledTimes(1)
     expect(form.$touched.clear).not.toHaveBeenCalled()
-    expect(form.reset).toHaveBeenCalledTimes(1)
+    expect(form.resetValues).toHaveBeenCalledTimes(1)
   })
 
   it('should call to validate specific field or all the fields', () => {
@@ -368,7 +368,7 @@ describe('Form.ts', () => {
     Form.defaults.validation.defaultMessage = ({ label, value }) =>
       `${label}: ${value}`
     Form.defaults.successfulSubmission.clearErrors = false
-    Form.defaults.successfulSubmission.resetData = false
+    Form.defaults.successfulSubmission.resetValues = false
 
     let form = new Form(data)
 
@@ -379,7 +379,7 @@ describe('Form.ts', () => {
       )
     ).toEqual('a: b')
     expect(form.$options.successfulSubmission.clearErrors).toBe(false)
-    expect(form.$options.successfulSubmission.resetData).toBe(false)
+    expect(form.$options.successfulSubmission.resetValues).toBe(false)
   })
 
   it('should determine if field is dirty', () => {
@@ -469,7 +469,7 @@ describe('Form.ts', () => {
     expect(form.$touched.push).toHaveBeenCalledWith('first_name')
   })
 
-  it('should reset $onFocus if the field is on focus and validate the field if "validation.onFieldBlurred" is set', () => {
+  it('should resetValues $onFocus if the field is on focus and validate the field if "validation.onFieldBlurred" is set', () => {
     let form = new Form(data, {
       validation: {
         onFieldBlurred: false,
@@ -494,5 +494,17 @@ describe('Form.ts', () => {
     expect(form.$onFocus).toBe('last_name')
     expect(form.validateField).toHaveBeenCalledTimes(1)
     expect(form.validateField).toHaveBeenCalledWith('first_name')
+  })
+
+  it('should reset all the form state', () => {
+    let form = new Form(data)
+
+    form.resetValues = jest.fn()
+
+    form.reset()
+
+    expect(form.resetValues).toHaveBeenCalledTimes(1)
+    expect(form.$errors.clear).toHaveBeenCalledTimes(1)
+    expect(form.$touched.clear).toHaveBeenCalledTimes(1)
   })
 })

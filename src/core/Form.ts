@@ -44,12 +44,12 @@ export class Form {
   public $onFocus: string | null = null
 
   /**
-   * The initiate data that was provide to the form
+   * The initiate values that was provide to the form
    */
-  public $originalData: Object
+  public $initialValues: Object
 
   /**
-   * all the extra data that provide in the construction of this class
+   * all the extra values that provide in the construction of this class
    * will be hold here.
    */
   public $extra: Object
@@ -68,7 +68,7 @@ export class Form {
   constructor(data: Object, options: Options = {}) {
     this.assignOptions(options)
       .init(data)
-      .reset()
+      .resetValues()
   }
 
   /**
@@ -102,12 +102,12 @@ export class Form {
   }
 
   /**
-   * Set all the fields value same as $originalData fields value
+   * Set all the fields value same as $initialValues fields value
    */
-  public reset(): Form {
-    for (let fieldName in this.$originalData) {
-      if (this.$originalData.hasOwnProperty(fieldName)) {
-        this[fieldName] = this.$originalData[fieldName]
+  public resetValues(): Form {
+    for (let fieldName in this.$initialValues) {
+      if (this.$initialValues.hasOwnProperty(fieldName)) {
+        this[fieldName] = this.$initialValues[fieldName]
       }
     }
 
@@ -115,12 +115,23 @@ export class Form {
   }
 
   /**
-   * get all the data of the form
+   * reset the form state (values, errors and touched)
    */
-  public data(): Object {
+  public reset(): Form {
+    this.resetValues()
+    this.$errors.clear()
+    this.$touched.clear()
+
+    return this
+  }
+
+  /**
+   * get all the values of the form
+   */
+  public values(): Object {
     let dataObj = {}
 
-    Object.keys(this.$originalData).forEach(fieldKey => {
+    Object.keys(this.$initialValues).forEach(fieldKey => {
       if (this.hasField(fieldKey)) {
         dataObj[fieldKey] = this[fieldKey]
       }
@@ -130,8 +141,8 @@ export class Form {
   }
 
   /**
-   * fill the Form data with new data.
-   * without remove another fields data.
+   * fill the Form values with new values.
+   * without remove another fields values.
    *
    * @param newData
    */
@@ -139,7 +150,7 @@ export class Form {
     for (let fieldName in newData) {
       if (
         newData.hasOwnProperty(fieldName) &&
-        this.$originalData.hasOwnProperty(fieldName)
+        this.$initialValues.hasOwnProperty(fieldName)
       ) {
         this[fieldName] = newData[fieldName]
       }
@@ -187,7 +198,7 @@ export class Form {
   public validateAll(): boolean {
     let isValid = true
 
-    Object.keys(this.data()).forEach(fieldKey => {
+    Object.keys(this.values()).forEach(fieldKey => {
       if (!this.validateField(fieldKey)) {
         isValid = false
       }
@@ -210,7 +221,7 @@ export class Form {
 
     let dirty = false
 
-    for (let originalFieldKey in this.$originalData) {
+    for (let originalFieldKey in this.$initialValues) {
       if (this.isFieldDirty(originalFieldKey)) {
         dirty = true
         break
@@ -230,7 +241,7 @@ export class Form {
       return false
     }
 
-    return this[fieldKey] !== this.$originalData[fieldKey]
+    return this[fieldKey] !== this.$initialValues[fieldKey]
   }
 
   /**
@@ -323,7 +334,7 @@ export class Form {
 
   /**
    * Init the form
-   * fill all the data that should be filled (Validator, OriginalData etc..(
+   * fill all the values that should be filled (Validator, OriginalData etc..(
    *
    * @param data
    */
@@ -350,7 +361,7 @@ export class Form {
       }
     })
 
-    this.$originalData = originalData
+    this.$initialValues = originalData
     this.$labels = labels
     this.$extra = extra
     this.$validator = new Validator(rules, this.$options.validation)
@@ -383,7 +394,7 @@ export class Form {
 
     this.$options.successfulSubmission.clearErrors && this.$errors.clear()
     this.$options.successfulSubmission.clearTouched && this.$touched.clear()
-    this.$options.successfulSubmission.resetData && this.reset()
+    this.$options.successfulSubmission.resetValues && this.resetValues()
 
     return Form.successfulSubmissionHook(response, this)
   }

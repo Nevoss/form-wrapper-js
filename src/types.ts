@@ -63,9 +63,9 @@ export interface SuccessfulSubmissionOptions {
   clearTouched?: boolean
 
   /**
-   * Set the data to $originalData after successful submission
+   * Set the values to $initialValues after successful submission
    */
-  resetData?: boolean
+  resetValues?: boolean
 }
 
 /**
