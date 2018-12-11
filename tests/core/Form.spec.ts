@@ -1,9 +1,9 @@
 import { Errors } from '../../src/core/Errors'
 import { Validator } from '../../src/core/Validator'
 import { Touched } from '../../src/core/Touched'
-import { Form } from '../../src'
+import { Form } from '../../src/core/Form'
 import generateOptions from '../../src/helpers/generateOptions'
-import defaultOptionsSource from '../../src/defaults'
+import defaultOptionsSource from '../../src/default-options'
 
 jest.mock('../../src/core/Errors')
 jest.mock('../../src/core/Validator')
@@ -364,11 +364,34 @@ describe('Form.ts', () => {
     }
   })
 
-  it('should change the defaults options of the Form', () => {
-    Form.defaults.validation.defaultMessage = ({ label, value }) =>
+  it('should change the defaultOptions options of the Form', () => {
+    Form.defaultOptions.validation.defaultMessage = ({ label, value }) =>
       `${label}: ${value}`
-    Form.defaults.successfulSubmission.clearErrors = false
-    Form.defaults.successfulSubmission.resetValues = false
+    Form.defaultOptions.successfulSubmission.clearErrors = false
+    Form.defaultOptions.successfulSubmission.resetValues = false
+
+    let form = new Form(data)
+
+    expect(
+      form.$options.validation.defaultMessage(
+        { label: 'a', value: 'b', key: 'c' },
+        form
+      )
+    ).toEqual('a: b')
+    expect(form.$options.successfulSubmission.clearErrors).toBe(false)
+    expect(form.$options.successfulSubmission.resetValues).toBe(false)
+  })
+
+  it('should assign defaultOptions to the form', () => {
+    Form.assignDefaultOptions({
+      validation: {
+        defaultMessage: ({ label, value }) => `${label}: ${value}`,
+      },
+      successfulSubmission: {
+        clearErrors: false,
+        resetValues: false,
+      },
+    })
 
     let form = new Form(data)
 

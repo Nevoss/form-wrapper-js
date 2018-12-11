@@ -1,6 +1,6 @@
 import { Form } from '../../src'
 import { Validator } from '../../src/core/Validator'
-import defaultOptions from '../../src/defaults'
+import defaultOptions from '../../src/default-options'
 
 jest.mock('../../src/core/Form')
 
