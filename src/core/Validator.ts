@@ -1,12 +1,11 @@
-import {isObject} from "../utils";
-import {Field, Rule, RulesStack, ValidationOptions} from "../types";
-import {Form} from "./Form";
+import { isObject } from '../utils'
+import { Field, Rule, RulesStack, ValidationOptions } from '../types'
+import { Form } from './Form'
 
 /**
  * Validator Class
  */
 export class Validator {
-
   /**
    * Holds all the rules
    */
@@ -37,7 +36,6 @@ export class Validator {
   private buildRules(rules: Object): Validator {
     Object.keys(rules).forEach(key => {
       this.$rules[key] = rules[key].map(rule => {
-
         let passes = rule
         let message = this.$options.defaultMessage
 
@@ -48,7 +46,7 @@ export class Validator {
 
         return {
           passes,
-          message: typeof message === 'function' ? message : () => message
+          message: typeof message === 'function' ? message : () => message,
         }
       })
     })
@@ -57,7 +55,7 @@ export class Validator {
   }
 
   /**
-   * heck if field has rules
+   * check if field has rules
    *
    * @param fieldKey
    */
@@ -87,7 +85,7 @@ export class Validator {
       return []
     }
 
-    let messages = [];
+    let messages = []
 
     for (let fieldRules of this.get(key)) {
       if (fieldRules.passes(field, form)) {

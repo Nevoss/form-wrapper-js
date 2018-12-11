@@ -1,18 +1,22 @@
 /**
  * Default options that provide to Form instance
  */
-import {Options} from "./types";
+import { Options } from './types'
 
 const defaults: Options = {
   successfulSubmission: {
     clearErrors: true,
-    resetData: true,
+    clearTouched: true,
+    resetValues: true,
   },
   validation: {
-    stopAfterFirstRuleFailed: true,
+    onFieldBlurred: false,
+    onFieldChanged: false,
     onSubmission: true,
-    defaultMessage: ({ label }) => `${label} is invalid.`
-  }
+    unsetFieldErrorsOnFieldChange: false,
+    stopAfterFirstRuleFailed: true,
+    defaultMessage: ({ label }) => `${label} is invalid.`,
+  },
 }
 
 export default defaults

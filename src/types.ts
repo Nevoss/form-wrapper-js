@@ -1,4 +1,4 @@
-import {Form} from "./core/Form";
+import { Form } from './core/Form'
 
 /**
  * Field object that passes the PassesFunction and MessageFunction,
@@ -6,8 +6,8 @@ import {Form} from "./core/Form";
  */
 export interface Field {
   key: string
-  label: string,
-  value: any,
+  label: string
+  value: any
 }
 
 /**
@@ -55,29 +55,48 @@ export interface SuccessfulSubmissionOptions {
   /**
    * Clear errors after successful submission
    */
-  clearErrors?: boolean,
+  clearErrors?: boolean
 
   /**
-   * Set the data to $originalData after successful submission
+   * Clear all the touched array after successful submission
    */
-  resetData?: boolean,
-}
+  clearTouched?: boolean
 
+  /**
+   * Set the values to $initialValues after successful submission
+   */
+  resetValues?: boolean
+}
 
 /**
  * options that related to validation
  */
 export interface ValidationOptions {
   /**
-   * when validation field with a chain of validation rules if this option assigned as true,
-   * for this specific field it is stopping to validate the other rules
+   * validate the field on field changed
    */
-  stopAfterFirstRuleFailed?: boolean
+  onFieldChanged?: boolean
+
+  /**
+   * validate the field on field blurred
+   */
+  onFieldBlurred?: boolean
 
   /**
    * should or not should validate the form on submission
    */
   onSubmission?: boolean
+
+  /**
+   * when calling "fieldChanged" method the errors of the field will be removed
+   */
+  unsetFieldErrorsOnFieldChange?: boolean
+
+  /**
+   * when validation field with a chain of validation rules if this option assigned as true,
+   * for this specific field it is stopping to validate the other rules
+   */
+  stopAfterFirstRuleFailed?: boolean
 
   /***
    * Default message for errors
