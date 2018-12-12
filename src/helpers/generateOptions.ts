@@ -31,7 +31,7 @@ const assignNewOptions = (
 }
 
 /**
- * generate Options base on the defaults Options and new options
+ * generate Options base on the defaultOptions Options and new options
  *
  * @param defaultOptions
  * @param overwriteOptions

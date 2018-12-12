@@ -5,13 +5,13 @@ import { Field, Options, SubmitCallback } from '../types'
 import { isObject } from '../utils'
 import generateDefaultLabel from '../helpers/generateDefaultLabel'
 import generateOptions from '../helpers/generateOptions'
-import defaultsOptions from '../defaults'
+import defaultsOptions from '../default-options'
 
 export class Form {
   /**
    * Defaults options for the Form instance
    */
-  public static defaults: Options = defaultsOptions
+  public static defaultOptions: Options = defaultsOptions
 
   /**
    * determine if the form is on submitting mode
@@ -57,7 +57,7 @@ export class Form {
   /**
    * Options of the Form
    */
-  public $options: Options = Form.defaults
+  public $options: Options = Form.defaultOptions
 
   /**
    * constructor of the class
@@ -69,6 +69,16 @@ export class Form {
     this.assignOptions(options)
       .init(data)
       .resetValues()
+  }
+
+  /**
+   * setting up default options for the Form class in more
+   * convenient way then "Form.defaultOptions.validation.something = something"
+   *
+   * @param options
+   */
+  public static assignDefaultOptions(options: Options = {}): void {
+    Form.defaultOptions = generateOptions(Form.defaultOptions, options)
   }
 
   /**
