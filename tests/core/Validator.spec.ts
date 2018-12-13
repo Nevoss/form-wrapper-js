@@ -1,4 +1,4 @@
-import { Form } from '../../src'
+import { Form } from '../../src/core/Form'
 import { Validator } from '../../src/core/Validator'
 import defaultOptions from '../../src/default-options'
 
