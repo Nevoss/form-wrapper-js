@@ -1,4 +1,5 @@
 import { Form } from './core/Form'
+import { InterceptorManager } from './core/InterceptorManager'
 
 /**
  * Field object that passes the PassesFunction and MessageFunction,
@@ -110,6 +111,23 @@ export interface ValidationOptions {
 export interface Options {
   successfulSubmission?: SuccessfulSubmissionOptions
   validation?: ValidationOptions
+}
+
+/**
+ * an object that hold 2 function one for fulfill and one for reject
+ */
+export interface InterceptorHandler {
+  fulfilled: Function
+  rejected: Function
+}
+
+/**
+ * an object that hold only InterceptorManagers as value
+ */
+export interface InterceptorManagersObject {
+  beforeSubmission: InterceptorManager
+  submissionComplete: InterceptorManager
+  [key: string]: InterceptorManager
 }
 
 /**

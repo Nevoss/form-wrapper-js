@@ -1,13 +1,14 @@
-import { Errors } from '../../src/core/Errors'
-import { Validator } from '../../src/core/Validator'
-import { Touched } from '../../src/core/Touched'
-import { Form } from '../../src/core/Form'
-import generateOptions from '../../src/helpers/generateOptions'
-import defaultOptionsSource from '../../src/default-options'
+import { Errors } from '../../../src/core/Errors'
+import { Validator } from '../../../src/core/Validator'
+import { Touched } from '../../../src/core/Touched'
+import { Form } from '../../../src/core/Form'
+import generateOptions from '../../../src/helpers/generateOptions'
+import defaultOptionsSource from '../../../src/default-options'
+import { InterceptorManager } from '../../../src/core/InterceptorManager'
 
-jest.mock('../../src/core/Errors')
-jest.mock('../../src/core/Validator')
-jest.mock('../../src/core/Touched')
+jest.mock('../../../src/core/Errors')
+jest.mock('../../../src/core/Validator')
+jest.mock('../../../src/core/Touched')
 
 describe('Form.ts', () => {
   interface FormData {
@@ -72,6 +73,12 @@ describe('Form.ts', () => {
     )
     expect(Errors).toHaveBeenCalled()
     expect(Touched).toHaveBeenCalled()
+    expect(form.$interceptors.beforeSubmission).toBeInstanceOf(
+      InterceptorManager
+    )
+    expect(form.$interceptors.submissionComplete).toBeInstanceOf(
+      InterceptorManager
+    )
   })
 
   it('should access the form props', () => {
@@ -139,126 +146,6 @@ describe('Form.ts', () => {
         last_name: 'Golan',
       })
     )
-  })
-
-  it('should successfully submitted if the callback returns Promise.resolve', async () => {
-    let form = new Form(data) as Form & FormData
-
-    let responseParam = {
-      status: 200,
-      data: {},
-    }
-
-    Form.successfulSubmissionHook = jest.fn(() =>
-      Promise.resolve(responseParam)
-    )
-    Form.unSuccessfulSubmissionHook = jest.fn()
-    form.resetValues = jest.fn()
-
-    let mockCallable = jest.fn(() => Promise.resolve(responseParam))
-
-    let response = await form.submit(mockCallable)
-
-    expect(mockCallable.mock.calls.length).toBe(1)
-    expect(form.$errors.clear).toHaveBeenCalledTimes(1)
-    expect(form.$touched.clear).toHaveBeenCalledTimes(1)
-    expect(form.resetValues).toHaveBeenCalledTimes(1)
-    expect(Form.successfulSubmissionHook).toBeCalledWith(responseParam, form)
-    expect(Form.unSuccessfulSubmissionHook).not.toHaveBeenCalledTimes(1)
-    expect(response).toBe(responseParam)
-  })
-
-  it('should send reject promise if the callback was return reject promise', async () => {
-    let form = new Form(data) as Form & FormData
-
-    let responseParam = {
-      status: 404,
-    }
-
-    Form.successfulSubmissionHook = jest.fn()
-    Form.unSuccessfulSubmissionHook = jest.fn(() =>
-      Promise.reject(responseParam)
-    )
-
-    let mockCallable = jest.fn(() => Promise.reject(responseParam))
-
-    expect.assertions(4)
-
-    try {
-      await form.submit(mockCallable)
-    } catch (e) {
-      expect(mockCallable.mock.calls.length).toBe(1)
-      expect(Form.unSuccessfulSubmissionHook).toBeCalledWith(
-        responseParam,
-        form
-      )
-      expect(Form.successfulSubmissionHook).not.toHaveBeenCalled()
-      expect(e).toBe(responseParam)
-    }
-  })
-
-  it('should set $submitting as true if submit method is called and false if validation failed and callback method not called', async () => {
-    let form = new Form(data) as Form & FormData
-
-    let mockCallable = jest.fn(() => Promise.resolve())
-    form.validate = jest.fn(() => false)
-    form.submit(mockCallable).catch(() => false)
-
-    expect(form.$submitting).toBe(false)
-
-    form.validate = jest.fn(() => true)
-    form.submit(mockCallable)
-
-    expect(form.$submitting).toBe(true)
-    expect(mockCallable.mock.calls.length).toBe(1)
-  })
-
-  it('should not resetValues after success submission if resetValues option is false', async () => {
-    let form = new Form(data, {
-      successfulSubmission: {
-        resetValues: false,
-      },
-    }) as Form & FormData
-
-    form.resetValues = jest.fn()
-
-    await form.submit(() => Promise.resolve())
-
-    expect(form.$errors.clear).toHaveBeenCalledTimes(1)
-    expect(form.$touched.clear).toHaveBeenCalledTimes(1)
-    expect(form.resetValues).not.toHaveBeenCalled()
-  })
-
-  it('should not clear errors after success submission if clearErrorsAfterSuccessfulSubmission option is false', async () => {
-    let form = new Form(data, {
-      successfulSubmission: {
-        clearErrors: false,
-      },
-    }) as Form & FormData
-
-    form.resetValues = jest.fn()
-
-    await form.submit(() => Promise.resolve())
-
-    expect(form.$errors.clear).not.toHaveBeenCalled()
-    expect(form.$touched.clear).toHaveBeenCalledTimes(1)
-    expect(form.resetValues).toHaveBeenCalledTimes(1)
-  })
-
-  it('should not clear touched after success submission if successfulSubmission.clearTouched set to false', async () => {
-    let form = new Form(data, {
-      successfulSubmission: {
-        clearTouched: false,
-      },
-    }) as Form & FormData
-
-    form.resetValues = jest.fn()
-
-    await form.submit(() => Promise.resolve())
-
-    expect(form.$errors.clear).toHaveBeenCalledTimes(1)
-    expect(form.$touched.clear).not.toHaveBeenCalled()
-    expect(form.resetValues).toHaveBeenCalledTimes(1)
   })
 
   it('should call to validate specific field or all the fields', () => {
@@ -337,31 +224,6 @@ describe('Form.ts', () => {
       .mockReturnValueOnce(true)
       .mockReturnValueOnce(false)
     expect(form.validateAll()).toBe(false)
-  })
-
-  it('should validate the form on submission if the option is set to validate the form', async () => {
-    let form = new Form(
-      {
-        name: 'Nevo',
-        rules: [() => true],
-      },
-      {
-        validation: {
-          onSubmission: true,
-        },
-      }
-    )
-
-    form.validate = jest.fn(() => false)
-
-    expect.assertions(2)
-
-    try {
-      await form.submit(() => Promise.resolve())
-    } catch (e) {
-      expect(form.validate).toBeCalled()
-      expect(e.hasOwnProperty('message')).toBe(true)
-    }
   })
 
   it('should change the defaultOptions options of the Form', () => {
