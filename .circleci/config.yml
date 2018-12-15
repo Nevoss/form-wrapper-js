@@ -27,6 +27,10 @@ jobs:
                 name: Run tests
                 command: npm test
 
+            - run:
+                name: Uplodad code coverage
+                command: npm run codecov
+
             - persist_to_workspace:
                 root: ~/repo
                 paths: .
