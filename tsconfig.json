@@ -4,7 +4,11 @@
     "module": "es2015",
     "target": "es2015",
     "declaration": true,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "types": [
+      "jest",
+      "jest-extended"
+    ]
   },
   "include": [
     "src/**/*"
