@@ -13,7 +13,10 @@ export class InterceptorManager {
    * @param fulfilled
    * @param rejected
    */
-  public use(fulfilled: Function | null, rejected: Function | null): number {
+  public use(
+    fulfilled: Function | null,
+    rejected: Function | null = null
+  ): number {
     this.$handlers.push({
       fulfilled,
       rejected,

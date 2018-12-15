@@ -22,11 +22,6 @@ export class Form {
   public static defaultOptions: Options = defaultsOptions
 
   /**
-   * Interceptors that will run in every submission
-   */
-  public static defaultInterceptors: InterceptorManagersObject
-
-  /**
    * determine if the form is on submitting mode
    */
   public $submitting: boolean = false
@@ -319,7 +314,10 @@ export class Form {
    * @param callback
    */
   public submit(callback: SubmitCallback): Promise<any> {
-    let chain: any[] = [this.wrapSubmitCallBack(callback), null]
+    let chain: any[] = [
+      this.wrapSubmitCallBack(callback),
+      error => Promise.reject({ error, form: this }),
+    ]
 
     this.$interceptors.beforeSubmission
       .merge(basicInterceptors.beforeSubmission)
