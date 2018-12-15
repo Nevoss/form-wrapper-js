@@ -97,4 +97,35 @@ describe('Form.interceptors.ts', () => {
       expect(rejectedFunc).toHaveBeenCalledTimes(0)
     }
   })
+
+  it('should merge the defaults interceptors into the interceptors array', () => {
+    const beforeSubmissionFulfilledFunc = jest.fn()
+    const beforeSubmissionRejectedFunc = jest.fn()
+    const submissionCompleteFulfilledFunc = jest.fn()
+    const submissionCompleteRejectedFunc = jest.fn()
+
+    Form.defaults.interceptors.beforeSubmission.use(
+      beforeSubmissionFulfilledFunc,
+      beforeSubmissionRejectedFunc
+    )
+    Form.defaults.interceptors.submissionComplete.use(
+      submissionCompleteFulfilledFunc,
+      submissionCompleteRejectedFunc
+    )
+
+    let form = new Form({})
+
+    expect(form.$interceptors.beforeSubmission.$handlers[0].fulfilled).toBe(
+      beforeSubmissionFulfilledFunc
+    )
+    expect(form.$interceptors.beforeSubmission.$handlers[0].rejected).toBe(
+      beforeSubmissionRejectedFunc
+    )
+    expect(form.$interceptors.submissionComplete.$handlers[0].fulfilled).toBe(
+      submissionCompleteFulfilledFunc
+    )
+    expect(form.$interceptors.submissionComplete.$handlers[0].rejected).toBe(
+      submissionCompleteRejectedFunc
+    )
+  })
 })

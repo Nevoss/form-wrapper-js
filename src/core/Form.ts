@@ -382,8 +382,12 @@ export class Form {
     this.$errors = new Errors()
     this.$touched = new Touched()
     this.$interceptors = {
-      beforeSubmission: new InterceptorManager(),
-      submissionComplete: new InterceptorManager(),
+      beforeSubmission: new InterceptorManager(
+        Form.defaults.interceptors.beforeSubmission.all()
+      ),
+      submissionComplete: new InterceptorManager(
+        Form.defaults.interceptors.submissionComplete.all()
+      ),
     }
 
     return this

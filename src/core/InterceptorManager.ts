@@ -7,6 +7,15 @@ export class InterceptorManager {
   $handlers: InterceptorHandler[] = []
 
   /**
+   * constructor
+   *
+   * @param handlers
+   */
+  constructor(handlers: InterceptorHandler[] = []) {
+    this.merge(handlers)
+  }
+
+  /**
    * adding function to the handlers chain
    * and returns the position of the handler in the chain
    *
@@ -46,6 +55,13 @@ export class InterceptorManager {
     this.$handlers = [...interceptors, ...this.$handlers]
 
     return this
+  }
+
+  /**
+   * return all the handlers
+   */
+  public all(): InterceptorHandler[] {
+    return this.$handlers
   }
 
   /**
