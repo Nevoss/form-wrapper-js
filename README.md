@@ -1,18 +1,15 @@
-# Form Wrapper JS
+# :pencil: Form wrapper JS
 [![npm](https://img.shields.io/npm/v/form-wrapper-js.svg?style=shield)](https://www.npmjs.com/package/form-wrapper-js)
+![](https://img.shields.io/github/license/Nevoss/form-wrapper-js.svg)
 [![codecov](https://codecov.io/gh/Nevoss/form-wrapper-js/branch/master/graph/badge.svg)](https://codecov.io/gh/Nevoss/form-wrapper-js)
 [![CircleCI](https://circleci.com/gh/Nevoss/form-wrapper-js.svg?style=shield)](https://circleci.com/gh/Nevoss/form-wrapper-js)
-[![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=shield)](https://github.com/prettier/prettier)
 
+> Light weight library that create forms systems in a convenient and easy way, without dependencies and magic code.
 
-A very light tool to create forms systems in a convenient and easy way, without dependencies and magic code.
+## :art: Playgorund
+- Vue - https://codesandbox.io/s/5x96q83yvp?module=%2Fsrc%2FApp.vue
 
----
-**this library is letting you as a developer, 😎 to create a powerful form systems by choosing how to build it (GUI, validation, submission etc.)**
-
----
-
-## Installation
+## :cd: Installation
 ```
 npm install --save form-wrapper-js
 ```
@@ -21,76 +18,78 @@ npm install --save form-wrapper-js
 yarn add form-wrapper-js
 ```
 
-## Documentation
-coming soon..
+## :rocket: Basic Usage
 
-## Basic Usage
-Basic examples in vue for now (react is coming soon...)
+### Vue
+```vue
+<template>
+  <form>
+    <input type="text" v-model="form.email"/>
+    <input type="text" v-model="form.name"/>
+    <input type="text" v-model="form.password"/>
+  </form>  
+</template>
 
-### VueJS
-you can play around with basic example [Here](https://codesandbox.io/s/5x96q83yvp?module=%2Fsrc%2FApp.vue)
-
-or just take a look at this code:
-```html
-  <template>
-    <form @submit.prevent="submit">
-      <div>
-        <label> {{ form.$labels.first_name }} </label>
-        <input v-model="form.first_name" name="first_name" />
-        <span v-if="form.$errors.has('first_name')" class="text-red"> {{ form.$errors.get('first_name') }} </span>
-      </div>
-      <div>
-        <label> {{ form.$labels.last_name }} </label>
-        <input v-model="form.last_name" name="last_name" />
-        <span v-if="form.$errors.has('last_name')" class="text-red"> {{ form.$errors.get('last_name') }} </span>
-      </div>
-    </form>
-  </template>
-
-  <script>
-    import axios from 'axios'
-    import { Form } from 'from-wrapper-js'
-
-    const required = {
-      passes: ({ value }) => value
-      message: ({ label }) => `${label} is required` 
-    }
-
-    const minChars = (number) => {
+<script>
+  export default {
+    data() {
       return {
-        passes: ({ value }) => value.length > number,
-        message: ({ label }) => `${label} must have more than ${number} characters`
-      }
-    }
-
-    export default {
-      data() {
         form: new Form({
-          first_name: {
-            value: null,
-            label: 'First Name'
-            rules: [ required, minChars(2) ]
-          },
-          last_name: null, // Label will be "Last name" and there is no client side validation rules to check on submit
+          email: null,
+          name: null,
+          password: null
         })
-      },
-      methods: {
-        submit() {
-          this.form.submit(form => axios.post('https://example.com/form'), form.data())
-            .then(() => console.log('success'))
-            .catch(() => console.log('handle some errors from the server (there is hook for more standard way of handling errors from server)'))
-        }
       }
     }
-  </script>
+  }
+</script>
 ```
 
-## Contribute
+**Submmiting the form**
+
+The library wrapping up some form logic in `form.submit()` method, but the method is very flexible by the fact that it letting you choose the way to submit the form.
+
+By default before any submission it validate the form (you will read about it bellow) and sett `form.$submitting` to true.
+after submission complete, it set `form.$submitting` to false, and clear the form values (and more stuff that you will see below).
+
+all the those default behivor can be changed by the `form.$options` object.
+
+```vue
+<template>
+  <form @submit.prevent="handleSubmit">
+    <!-- ... form inputs -->
+    <buttom :disable="form.$submitting">
+  </form>  
+</template>
+
+<script>
+  import axios from 'axios'
+
+  export default {
+    data() {
+      return {
+        form: new Form({
+          // ... form data
+        })
+      }
+    },
+    methods: {
+      handleSubmit() {
+        this.submit((form) => axios.post('https://example.com/form', form.values())) // the callback function must return a promise
+          .then(({reponse, form}) => // do what ever you want)
+          .catch(({error, form}) => // handle errors)
+      }
+    }
+  }
+</script>
+```
+
+## :beers: Contribute
 Evey body is welcome, you can contribute some Code, Docs, bug reports, ideas and even design. 
 
 it is very easy to install the project just take a look at CONTRIBUTING.md and follow the instructions.
 
 **The project is still on develop so ideas for features is more than welcome** ⭐
 
-## License
+## :lock: License
 The MIT License (MIT). Please see License File for more information.
