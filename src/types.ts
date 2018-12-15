@@ -131,6 +131,15 @@ export interface InterceptorManagersObject {
 }
 
 /**
+ * The defaults of the form,
+ * that can be changeable and then will affect on all the new Form instances
+ */
+export interface FormDefaults {
+  options: Options
+  interceptors: InterceptorManagersObject
+}
+
+/**
  * Submit callback interface,
  * the function the should pass to submit method in Form class
  */

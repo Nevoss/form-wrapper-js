@@ -227,10 +227,10 @@ describe('Form.ts', () => {
   })
 
   it('should change the defaultOptions options of the Form', () => {
-    Form.defaultOptions.validation.defaultMessage = ({ label, value }) =>
+    Form.defaults.options.validation.defaultMessage = ({ label, value }) =>
       `${label}: ${value}`
-    Form.defaultOptions.successfulSubmission.clearErrors = false
-    Form.defaultOptions.successfulSubmission.resetValues = false
+    Form.defaults.options.successfulSubmission.clearErrors = false
+    Form.defaults.options.successfulSubmission.resetValues = false
 
     let form = new Form(data)
 

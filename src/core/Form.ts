@@ -5,10 +5,11 @@ import { InterceptorManager } from './InterceptorManager'
 import { isObject } from '../utils'
 import generateDefaultLabel from '../helpers/generateDefaultLabel'
 import generateOptions from '../helpers/generateOptions'
-import defaultsOptions from '../default-options'
+import defaultOptions from '../default-options'
 import basicInterceptors from '../interceptors/index'
 import {
   Field,
+  FormDefaults,
   InterceptorHandler,
   InterceptorManagersObject,
   Options,
@@ -17,10 +18,15 @@ import {
 
 export class Form {
   /**
-   * Defaults options for the Form instance
+   * holds all the defaults for the forms
    */
-  public static defaultOptions: Options = defaultsOptions
-
+  public static defaults: FormDefaults = {
+    options: defaultOptions,
+    interceptors: {
+      beforeSubmission: new InterceptorManager(),
+      submissionComplete: new InterceptorManager(),
+    },
+  }
   /**
    * determine if the form is on submitting mode
    */
@@ -65,7 +71,7 @@ export class Form {
   /**
    * Options of the Form
    */
-  public $options: Options = Form.defaultOptions
+  public $options: Options = Form.defaults.options
 
   /**
    * holds the interceptor managers
@@ -86,12 +92,12 @@ export class Form {
 
   /**
    * setting up default options for the Form class in more
-   * convenient way then "Form.defaultOptions.validation.something = something"
+   * convenient way then "Form.defaults.options.validation.something = something"
    *
    * @param options
    */
   public static assignDefaultOptions(options: Options = {}): void {
-    Form.defaultOptions = generateOptions(Form.defaultOptions, options)
+    Form.defaults.options = generateOptions(Form.defaults.options, options)
   }
 
   /**
