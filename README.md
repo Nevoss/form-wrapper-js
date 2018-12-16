@@ -31,6 +31,8 @@ yarn add form-wrapper-js
 </template>
 
 <script>
+  import {Form} from 'form'
+
   export default {
     data() {
       return {
@@ -47,12 +49,11 @@ yarn add form-wrapper-js
 
 **Submmiting the form**
 
-The library wrapping up some form logic in `form.submit()` method, but the method is very flexible by the fact that it letting you choose the way to submit the form.
+The library wrapping up some form logic in `form.submit()` method, but the method is very flexible. it letting you chose the way you want to submit your form.
 
-By default before any submission it validate the form (you will read about it bellow) and sett `form.$submitting` to true.
-after submission complete, it set `form.$submitting` to false, and clear the form values (and more stuff that you will see below).
+By default before any submission, it validates the form (you will read about it below) and set `form.$submitting` to true. after submission complete, it set `form.$submitting` to false and clear the form values (and more stuff that you will see below).
 
-all the those default behivor can be changed by the `form.$options` object.
+all those default behaviors can be changed by the `form.$options` object.
 
 ```vue
 <template>
@@ -63,6 +64,7 @@ all the those default behivor can be changed by the `form.$options` object.
 </template>
 
 <script>
+  import {Form} from 'form'
   import axios from 'axios'
 
   export default {
