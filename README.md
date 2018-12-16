@@ -74,10 +74,17 @@ all the those default behivor can be changed by the `form.$options` object.
       }
     },
     methods: {
-      handleSubmit() {
-        this.submit((form) => axios.post('https://example.com/form', form.values())) // the callback function must return a promise
-          .then(({reponse, form}) => // do what ever you want)
-          .catch(({error, form}) => // handle errors)
+      async handleSubmit() {
+        try {
+          const {response, form} = await this.submit(
+            (form) => axios.post('https://example.com/form', form.values())
+          ) // the callback function must return a promise
+          
+          // do what ever you want
+          
+        } catch ({ error, form }) {
+          // handel errors
+        }
       }
     }
   }
