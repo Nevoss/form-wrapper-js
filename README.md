@@ -23,7 +23,7 @@ yarn add form-wrapper-js
 
 basic usage is written in the context of Vue.js, this is my framework of choice, I hope to write helpful documentation to other frameworks soon. (will love to get some help with that. :smile:)
 
-###Binding values
+### Binding values
 
 ```vue
 <template>
@@ -51,7 +51,7 @@ basic usage is written in the context of Vue.js, this is my framework of choice,
 </script>
 ```
 
-###Submitting the form
+### Submitting the form
 
 The library wrapping up some form logic in `form.submit()` method, so just pass a callback that returns a `Promise`
 
@@ -97,7 +97,7 @@ all those default behaviors can be changed by the `form.$options` object.
 </script>
 ```
 
-###Validating the form
+### Validating the form
 
 every value can get some validation rules that by default will be validated before submission, of course, you can customize it and validate on input or on blur events (again, more information below).
 
@@ -285,7 +285,8 @@ Form.default.interceptors.submissionComplete.use(null, ({ error, form }) => {
 })
 ```
 
-###Extra
+### Extra
+
 so there are some things that were no covered throw this "basic-usage" guide, soon I will write a good documentation that will cover all features.
 
 here are some basic methods and props that can be useful:
