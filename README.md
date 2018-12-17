@@ -20,9 +20,9 @@ yarn add form-wrapper-js
 
 ## :rocket: Basic Usage
 
-### Vue
+basic usage is written in the context of Vue.js, this is my framework of choice, I hope to write helpful documantation to other frameworks soon, (will love to get some help with that. :smile::)
 
-**Binding the values**
+###Binding the values
 
 ```vue
 <template>
@@ -50,11 +50,11 @@ yarn add form-wrapper-js
 </script>
 ```
 
-**Submitting the form**
+###Submitting the form
 
-The library wrapping up some form logic in `form.submit()` method, but the method is very flexible. it letting you chose the way you want to submit your form.
+The library wrapping up some form logic in `form.submit()` method, so just pass a callback that returns a `Promise`
 
-By default before any submission, it validates the form (you will read about it below) and set `form.$submitting` to true. after submission complete, it set `form.$submitting` to false and clear the form values (and more stuff that you will see below).
+By default before any submission, it validates the form (as describe bellow) and set `form.$submitting` to true. after submission complete, it set `form.$submitting` to false and clear the form values, `$errors` and `$touched` array.
 
 all those default behaviors can be changed by the `form.$options` object.
 
@@ -96,9 +96,9 @@ all those default behaviors can be changed by the `form.$options` object.
 </script>
 ```
 
-**Validating the form**
+###Validating the form
 
-every value can get some validation rules, that by default will validate before submission, of course you can customize it and validate on input or on blur (see the ``form.$options` section).
+every value can get some validation rules that by default will be validate before submission, of course you can customize it and validate on input or on blur (again, more information below).
 ```vue
 <script>
   // ... imports (Form, axios, etc...)
@@ -124,27 +124,30 @@ every value can get some validation rules, that by default will validate before 
   }
 </script>
 ```
-you can also validate the form throw the `form` api `form.validate()` will validate the whole form, and `form.validate('name')` will validate only the `name` field.
+you can also validate the form throw the `Form` api `form.validate()` will validate the whole form, and `form.validate('name')` will validate only the `name` field.
 
 the `rules` file will look like this
 ```js
 import validationLibrary from 'example-validation-library'
 
-// Example for function like validation rule (will take default error message)
+// Example for function validation rule (will take default error message)
+
 export const required = ({ value }) => value !== null || value !== ''
 
-// Example for object like validation rule with message property (can be string or function)
+
+// Example for object validation rule with message property ("message" can be also a string)
+
 export const email = {
-  passes: ({ value }) => validationLibrary.isEmail(value), // use any thing you want to validate or just use regex 
+  passes: ({ value }) => validationLibrary.isEmail(value), // use any library you want to validate, or just use regex 
   message: ({ label, value }) => `${label} must be an email, ${value} is not an email.`,
 }
 ```
 
-this behavior letting you create your validation file (or files) that can be reusable and also very light weight with out a lot of validation that you don't need.
+this behavior letting you create your validation file (or files) that can be reusable and also very light weight with out a lot of validation rules you don't need.
 
-**Handling with errors**
+### Handling with form errors
 
-after you validating the form or validating specific field, and the validate was failed you can use the `form.$errors` api the get all those errors
+after validating form or specific field, there is a case that some fields not passes some rules. you can use `form.$errors` api to fetch out field errors.
 ```vue
 <template>
   <form @submit.prevent="handleSubmit"> 
@@ -157,11 +160,12 @@ after you validating the form or validating specific field, and the validate was
 </template>
 ``` 
 
-`form.$errors.getFirst('fieldName')` will fetch the first error from the error array, but could be more then one error in specific field, `form.$errors.get(fieldName)` will fetch the whole errors array for this specific field.
+`form.$errors.getFirst('fieldName')` will fetch the first error from the errors array, but it possible that there is more then one error in specific field, `form.$errors.get(fieldName)` will fetch the whole errors array for this specific field.
  
- **Options**
- the library try to be as flexible ha it can so every step i guarded with an option, and there is some options that will let you customize the behavior of you forms.
- you can set options in 3 main ways
+ ### Options
+ 
+ the library try to be as flexible has it can, so there is some options that letting you customize the behavior of you forms.
+ you can set those options in 3 main ways
  ```js
 import { Form } from 'form-wrapper-js'
 
@@ -194,62 +198,6 @@ Form.assignDefaultOptions({
 })
 ```
 
-by the way, all those options are totally valid options.
-
-**Complex form handling**
-
-Sometimes you need more from your form.
-you need to know which of you input is on focus, which is dirty, which is touched, you want to handle the labels inside the form and you want to set some extra data to field that can be manageable with the form instance (e.g. select options and more..)
-first to bind the form to the whole those feature
-```vue
-<template>
-  <form @submit.prevent="handleSubmit">
-    <input
-      v-model="form.name"
-      @blur="form.fieldBlurred('name')" // when you need to know if field is touched or you validate on blur
-      @focus="form.fieldFocused('name')" // when you need to know if field is on focus
-      @input="form.fieldChanged('name')" // when you need to validate a field input/change
-      type="text"
-    >
-  </form>
-</template>
-```
-
-I recommending to us all those events hooks to get the whole experience, but you can combine those hooks with Form options and you can create a powerful form system that will behave exactly as you want.
-
-as you build you own form system you can see that some pattern repeat them self, so you can even build a `Field` or a `Form` components that will encapsulate all those form logic (be creative as you want.)
-you can do all those stuff just take a look the Form class API to see how to combine the Form options and Form API with you needs.
-
-**Interceptors**
-
-this concept is taking over from the axios API.
-```js
-import Form from 'form-wrapper-js'
-
-let form = new Form({name: null})
-form.$interceptors.submissionComplete(
-  ({ form, response }) => {}, // this function will run every time submission SUCCESSFULLY completed
-  ({ form, error }) => {} // this function will run every time submission was REJECTED!
-)
-
-form.$interceptors.beforeSubmission((form) => {}) // set some staff before submission
-```
-
-you can even set some default interceptors, that all the new instance of Form can use
-```js
-import Form from 'form-wrapper-js'
-
-Form.default.interceptors.submissionComplete(null, ({ error, form }) => {
-  if (error.response && error.response.status === 422) {
-    // backend endpoint that return errors the form can "record" those error
-    form.$errors.record(error.response.errors)
-  }
-  
-  return Promise.reject({ error, form })
-})
-```
-
-**Options**
 those are the default options 
 ```js 
   {
@@ -269,8 +217,101 @@ those are the default options
   }
 ```
 
+### More complex form handling
+
+Sometimes you need more from your form, which input is on focus, which is dirty, which is touched, you want to handle the labels inside the form and to set some extra data to field that can be manageable with in the form instance (e.g. select options and more..)
+to be able to us those features you need to bind some events to input DOM element.
+```vue
+<template>
+  <form @submit.prevent="handleSubmit">
+    <input
+      v-model="form.name"
+      @blur="form.fieldBlurred('name')"
+      @focus="form.fieldFocused('name')"
+      @input="form.fieldChanged('name')"
+      type="text"
+    >
+  </form>
+</template>
+```
+
+There is no necessary need to bind all those events to the input, try them all out to know which of them you need and which not.
+
+some options will not work if there is no event binding e.g: 
+- `form.$options.validation.onFieldBlurred` - must have `fieldBlurred` event
+- `form.$options.validation.onFieldChange` - must have `fieldChanged` event (on input/change DOM events)
+- `form.$onFocus` - will not work if `fieldFocus` event will not bond to the input DOM element.
+- etc..,
+
+if you are not sure which of them you need just bind all of them, (nothing bad will happened.)
+ 
+as you build you own form system you will see that some pattern repeat them self, be creative as you can and encapsulate those pattern inside components.
+
+### Interceptors
+
+this concept is taking over from the axios API.
+```js
+import Form from 'form-wrapper-js'
+
+let form = new Form({name: null})
+form.$interceptors.submissionComplete.use(
+  ({ form, response }) => {
+    // this function will run every time submission SUCCESSFULLY completed\
+    return { form, response }
+  }, 
+  ({ form, error }) => {
+    // this function will run every time submission was REJECTED!
+    return Promise.reject({ form, error })
+  } 
+)
+
+form.$interceptors.beforeSubmission.use((form) => {
+  // set some staff before submission
+  return form
+}) 
+```
+
+you can even set some default interceptors. 
+all the new instances of Form will automatically use those interceptors
+```js
+import Form from 'form-wrapper-js'
+
+Form.default.interceptors.submissionComplete.use(null, ({ error, form }) => {
+  if (error.response && error.response.status === 422) {
+    // backend endpoint that return errors the form can "record" those error
+    form.$errors.record(error.response.errors)
+  }
+  
+  return Promise.reject({ error, form })
+})
+```
+
+###Extra
+so there is some thinks that was no covered throw this "basic-usage" guide, for know just take a quick looks at the code, but soon I will write a good documentation that will cover all the features.
+
+some basic thing to use:
+```js
+import  { Form } from 'form-wrapper-js'
+
+let form = new Form({name: null})
+
+form.isDirty('name') // returns if field dirty (the value of 'name' different fro the initial value)
+form.isDirty() // if only one of the fields is dirty will return `true`
+
+form.$onFocus // which field is on focus at the current time
+
+form.$touched.has('name') // if field is touched returns true.
+form.$touched.any() // return true if some field is touched.
+
+form.fill({ name: 'some name' }) // will fill the values base on the object that provide
+form.values() // return an object with all the fields values
+
+form.validate('name') // will validate only the name field
+form.validate() // will validate the whole form
+
+```
 ---
-**And please if something is not clear please dig inside the code to understand it better, I was trying to make a very clear code and comments, and if not please let me know**
+**And please if something is not clear enough, dig inside the code to understand it better, I was trying to make a very clear code and comments, and if something not clear enough please let me know**
 
 ---
 
