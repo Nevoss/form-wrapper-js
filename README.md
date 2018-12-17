@@ -239,7 +239,7 @@ There is not necessarily need to bind all those events to the input, try them ou
 some options will not work if there is no event binding e.g.
 - `form.$options.validation.onFieldBlurred` - must have `fieldBlurred` event
 - `form.$options.validation.onFieldChange` - must have `fieldChanged` event (on input/change DOM events)
-- `form.$onFocus` - will not work if `fieldFocus` event will not bond to the input DOM element.
+- `form.$onFocus` - will not work if `fieldFocused` event will not bond to the input DOM element.
 - etc..,
 
 if you are not sure which of them you need, just bind all of them. (nothing bad will happened)
