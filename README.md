@@ -1,10 +1,11 @@
 # :pencil: Form wrapper JS
+> Light weight library that create forms systems in a convenient and easy way, without dependencies and magic code.
+
 [![npm](https://img.shields.io/npm/v/form-wrapper-js.svg?style=shield)](https://www.npmjs.com/package/form-wrapper-js)
-![](https://img.shields.io/github/license/Nevoss/form-wrapper-js.svg)
+![MIT](https://img.shields.io/github/license/Nevoss/form-wrapper-js.svg)
 [![codecov](https://codecov.io/gh/Nevoss/form-wrapper-js/branch/master/graph/badge.svg)](https://codecov.io/gh/Nevoss/form-wrapper-js)
 [![CircleCI](https://circleci.com/gh/Nevoss/form-wrapper-js.svg?style=shield)](https://circleci.com/gh/Nevoss/form-wrapper-js)
 
-> Light weight library that create forms systems in a convenient and easy way, without dependencies and magic code.
 
 ## :art: Playgorund
 - Vue - https://codesandbox.io/s/5x96q83yvp?module=%2Fsrc%2FApp.vue
@@ -20,7 +21,7 @@ yarn add form-wrapper-js
 
 ## :rocket: Basic Usage
 
-basic usage is written in the context of Vue.js, this is my framework of choice, I hope to write helpful documantation to other frameworks soon, (will love to get some help with that. :smile::)
+basic usage is written in the context of Vue.js, this is my framework of choice, I hope to write helpful documentation to other frameworks soon. (will love to get some help with that. :smile:)
 
 ###Binding the values
 
@@ -316,7 +317,7 @@ form.validate() // will validate the whole form
 ---
 
 ## :beers: Contribute
-Evey body is welcome, you can contribute some Code, Docs, bug reports, ideas and even design. 
+Evey body is welcome, you can contribute some Code, Docs, bug reports and even ideas. 
 
 it is very easy to install the project just take a look at CONTRIBUTING.md and follow the instructions.
 
