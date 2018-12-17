@@ -1,5 +1,5 @@
 # :pencil: Form wrapper JS
-> Light weight library that create forms systems in a convenient and easy way, without dependencies and magic code.
+> A lightweight library that creates forms systems in a convenient and easy way, without dependencies and magic code.
 
 [![npm](https://img.shields.io/npm/v/form-wrapper-js.svg?style=shield)](https://www.npmjs.com/package/form-wrapper-js)
 ![MIT](https://img.shields.io/github/license/Nevoss/form-wrapper-js.svg)
@@ -23,7 +23,7 @@ yarn add form-wrapper-js
 
 basic usage is written in the context of Vue.js, this is my framework of choice, I hope to write helpful documentation to other frameworks soon. (will love to get some help with that. :smile:)
 
-###Binding the values
+###Binding values
 
 ```vue
 <template>
@@ -89,7 +89,7 @@ all those default behaviors can be changed by the `form.$options` object.
           // do what ever you want
           
         } catch ({ error, form }) {
-          // handel errors
+          // handle errors
         }
       }
     }
@@ -99,7 +99,8 @@ all those default behaviors can be changed by the `form.$options` object.
 
 ###Validating the form
 
-every value can get some validation rules that by default will be validate before submission, of course you can customize it and validate on input or on blur (again, more information below).
+every value can get some validation rules that by default will be validated before submission, of course, you can customize it and validate on input or on blur events (again, more information below).
+
 ```vue
 <script>
   // ... imports (Form, axios, etc...)
@@ -125,18 +126,16 @@ every value can get some validation rules that by default will be validate befor
   }
 </script>
 ```
-you can also validate the form throw the `Form` api `form.validate()` will validate the whole form, and `form.validate('name')` will validate only the `name` field.
-
 the `rules` file will look like this
 ```js
 import validationLibrary from 'example-validation-library'
 
-// Example for function validation rule (will take default error message)
+// Example for validation rule as a function (will take default error message)
 
 export const required = ({ value }) => value !== null || value !== ''
 
 
-// Example for object validation rule with message property ("message" can be also a string)
+// Example for validation rule as an object, alongside with message property ("message" can be also a string).
 
 export const email = {
   passes: ({ value }) => validationLibrary.isEmail(value), // use any library you want to validate, or just use regex 
@@ -144,11 +143,12 @@ export const email = {
 }
 ```
 
-this behavior letting you create your validation file (or files) that can be reusable and also very light weight with out a lot of validation rules you don't need.
+this behavior letting you create your validation file (or files) that can be reusable and also very lightweight, without a lot of validation rules you don`t need.
 
 ### Handling with form errors
 
-after validating form or specific field, there is a case that some fields not passes some rules. you can use `form.$errors` api to fetch out field errors.
+after validating form or a specific field, there is a case that some fields not pass some rules. you can use `form.$errors` API to retrieve those field errors.
+
 ```vue
 <template>
   <form @submit.prevent="handleSubmit"> 
@@ -160,13 +160,10 @@ after validating form or specific field, there is a case that some fields not pa
   </form>
 </template>
 ``` 
-
-`form.$errors.getFirst('fieldName')` will fetch the first error from the errors array, but it possible that there is more then one error in specific field, `form.$errors.get(fieldName)` will fetch the whole errors array for this specific field.
  
  ### Options
  
- the library try to be as flexible has it can, so there is some options that letting you customize the behavior of you forms.
- you can set those options in 3 main ways
+the library tries to be as flexible has it can, so there are some options that letting you customize the behavior of your forms, you can set those options in 3 main ways
  ```js
 import { Form } from 'form-wrapper-js'
 
@@ -188,7 +185,7 @@ let form = new Form({ name: null }, {
   }
 })
 
-// or setting some defaults that will apply to all the new instance of the form
+// setting defaults that will apply on new Form instances.
 Form.defaults.options.successfulSubmission.clearTouched = false
 // or
 Form.assignDefaultOptions({
@@ -199,29 +196,30 @@ Form.assignDefaultOptions({
 })
 ```
 
-those are the default options 
+Those are the default options 
 ```js 
-  {
-    successfulSubmission: {
-      clearErrors: true, // clear errors after successful submission
-      clearTouched: true, // clear the touched array after successful submission
-      resetValues: true, // set the values as the initial values that was provid at the construction after successful submission
-    },
-    validation: {
-      onFieldBlurred: false, // validate on field bulrred
-      onFieldChanged: false, // validate on field changed/input
-      onSubmission: true, // validate on submission
-      unsetFieldErrorsOnFieldChange: false, // on change/input the errors of the targetd field will removed
-      stopAfterFirstRuleFailed: true, // if the first validation of spesific field will failed it will stop to validate this spesific field
-      defaultMessage: ({ label }) => `${label} is invalid.`, // default meesage if error message not provided
-    },
-  }
+{
+  successfulSubmission: {
+    clearErrors: true, // clear errors after successful submission
+    clearTouched: true, // clear $touched array after successful submission
+    resetValues: true, // after successful submission, it set the values as the initial values that were provided at the construction after successful submission
+  },
+  validation: {
+    onFieldBlurred: false, // validate on field blurred
+    onFieldChanged: false, // validate on change or input event
+    onSubmission: true, // validate on submission
+    unsetFieldErrorsOnFieldChange: false, // on change/input event, the errors of the targeted field will be removed
+    stopAfterFirstRuleFailed: true, // if the first validation of a specific field will fail it will stop to validate this specific field
+    defaultMessage: ({ label }) => `${label} is invalid.`, // default message, if an error message was not provided.
+  },
+}
 ```
 
 ### More complex form handling
 
-Sometimes you need more from your form, which input is on focus, which is dirty, which is touched, you want to handle the labels inside the form and to set some extra data to field that can be manageable with in the form instance (e.g. select options and more..)
-to be able to us those features you need to bind some events to input DOM element.
+Sometimes you need more from your form, which input is on focus? which is dirty? or which is touched? you want to handle the labels inside the form and to set some extra data to a field that can be managed within the form instance. (e.g. select options and more...)
+
+to be able to use those features you need to bind some events to the input DOM element.
 ```vue
 <template>
   <form @submit.prevent="handleSubmit">
@@ -236,17 +234,18 @@ to be able to us those features you need to bind some events to input DOM elemen
 </template>
 ```
 
-There is no necessary need to bind all those events to the input, try them all out to know which of them you need and which not.
+There is not necessarily need to bind all those events to the input, try them out to know which of them you need and which not.
 
-some options will not work if there is no event binding e.g: 
+some options will not work if there is no event binding e.g.
 - `form.$options.validation.onFieldBlurred` - must have `fieldBlurred` event
 - `form.$options.validation.onFieldChange` - must have `fieldChanged` event (on input/change DOM events)
 - `form.$onFocus` - will not work if `fieldFocus` event will not bond to the input DOM element.
 - etc..,
 
-if you are not sure which of them you need just bind all of them, (nothing bad will happened.)
+if you are not sure which of them you need, just bind all of them. (nothing bad will happened)
  
-as you build you own form system you will see that some pattern repeat them self, be creative as you can and encapsulate those pattern inside components.
+as you build your own form system you will see that some pattern repeat them self, be creative as you can and encapsulate those pattern inside components.
+
 
 ### Interceptors
 
@@ -257,23 +256,22 @@ import Form from 'form-wrapper-js'
 let form = new Form({name: null})
 form.$interceptors.submissionComplete.use(
   ({ form, response }) => {
-    // this function will run every time submission SUCCESSFULLY completed\
+    // this function will run every time submission SUCCESSFULLY completed.
     return { form, response }
   }, 
   ({ form, error }) => {
-    // this function will run every time submission was REJECTED!
+    // this function will run every REJECTED submission
     return Promise.reject({ form, error })
   } 
 )
 
 form.$interceptors.beforeSubmission.use((form) => {
-  // set some staff before submission
+  // set some stuff before submission
   return form
 }) 
 ```
 
-you can even set some default interceptors. 
-all the new instances of Form will automatically use those interceptors
+you can even set some default interceptors, that all the new Form instances will automatically use those interceptors
 ```js
 import Form from 'form-wrapper-js'
 
@@ -288,40 +286,46 @@ Form.default.interceptors.submissionComplete.use(null, ({ error, form }) => {
 ```
 
 ###Extra
-so there is some thinks that was no covered throw this "basic-usage" guide, for know just take a quick looks at the code, but soon I will write a good documentation that will cover all the features.
+so there are some things that were no covered throw this "basic-usage" guide, soon I will write a good documentation that will cover all features.
 
-some basic thing to use:
+here are some basic methods and props that can be useful:
 ```js
 import  { Form } from 'form-wrapper-js'
 
 let form = new Form({name: null})
 
-form.isDirty('name') // returns if field dirty (the value of 'name' different fro the initial value)
+form.isDirty('name') // returns if the field is dirty (the value of 'name' different from the initial value)
 form.isDirty() // if only one of the fields is dirty will return `true`
 
 form.$onFocus // which field is on focus at the current time
 
 form.$touched.has('name') // if field is touched returns true.
-form.$touched.any() // return true if some field is touched.
+form.$touched.any() // returns true if some field is touched.
 
-form.fill({ name: 'some name' }) // will fill the values base on the object that provide
-form.values() // return an object with all the fields values
+form.fill({ name: 'some name' }) // will fill the values based on the object that provided
+form.values() // returns an object with all the fields values
 
 form.validate('name') // will validate only the name field
 form.validate() // will validate the whole form
 
+form.$labels.name // will return the label of the field (eg: "Name")
+
+form.$errors.has('name') // checks if `name` field has errors
+form.$errors.get('name') // gets errors array of `name` field
+form.$errors.getFirst('name') // gets the first error from errors array of `name` field
+
 ```
 ---
-**And please if something is not clear enough, dig inside the code to understand it better, I was trying to make a very clear code and comments, and if something not clear enough please let me know**
+**And please if something is not clear enough, try to dig inside the code to understand it better, I was trying to make a very clear code and clear comments, and if something not clear enough please let me know**
 
 ---
 
 ## :beers: Contribute
-Evey body is welcome, you can contribute some Code, Docs, bug reports and even ideas. 
+Everybody is welcome, you can contribute some Code, Docs, bug reports and even ideas. 
 
 it is very easy to install the project just take a look at CONTRIBUTING.md and follow the instructions.
 
-**The project is still on develop so ideas for features is more than welcome** ⭐
+**The project is still on development, so ideas for features are then welcome** ⭐
 
 ## :lock: License
 The MIT License (MIT). Please see License File for more information.
