@@ -29,32 +29,6 @@ export class Validator {
   }
 
   /**
-   * building rules object
-   *
-   * @param rules
-   */
-  private buildRules(rules: Object): Validator {
-    Object.keys(rules).forEach(key => {
-      this.$rules[key] = rules[key].map(rule => {
-        let passes = rule
-        let message = this.$options.defaultMessage
-
-        if (isObject(rule)) {
-          passes = rule.passes
-          message = rule.message
-        }
-
-        return {
-          passes,
-          message: typeof message === 'function' ? message : () => message,
-        }
-      })
-    })
-
-    return this
-  }
-
-  /**
    * check if field has rules
    *
    * @param fieldKey
@@ -100,5 +74,31 @@ export class Validator {
     }
 
     return messages
+  }
+
+  /**
+   * building rules object
+   *
+   * @param rules
+   */
+  private buildRules(rules: Object): Validator {
+    Object.keys(rules).forEach(key => {
+      this.$rules[key] = rules[key].map(rule => {
+        let passes = rule
+        let message = this.$options.defaultMessage
+
+        if (isObject(rule)) {
+          passes = rule.passes
+          message = rule.message
+        }
+
+        return {
+          passes,
+          message: typeof message === 'function' ? message : () => message,
+        }
+      })
+    })
+
+    return this
   }
 }

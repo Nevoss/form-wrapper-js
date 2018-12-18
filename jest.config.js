@@ -3,4 +3,5 @@ module.exports = {
   collectCoverage: true,
   coverageDirectory: './coverage',
   setupTestFrameworkScriptFile: 'jest-extended',
+  setupFiles: ['<rootDir>/tests/jest.setup.ts'],
 }

@@ -60,5 +60,9 @@ describe('Touched.ts', () => {
     touched.unset('a')
 
     expect(touched.all()).toEqual(['b'])
+
+    touched.unset('c')
+
+    expect(touched.all()).toEqual(['b'])
   })
 })
