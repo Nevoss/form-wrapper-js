@@ -16,7 +16,7 @@ export class Touched {
    *
    * @param fieldsKeys
    */
-  public record(fieldsKeys: string[] = []): Touched {
+  public record(fieldsKeys: string[]): Touched {
     this.$touched = [...fieldsKeys]
 
     return this

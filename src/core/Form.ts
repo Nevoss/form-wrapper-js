@@ -2,7 +2,7 @@ import { Errors } from './Errors'
 import { Validator } from './Validator'
 import { Touched } from './Touched'
 import { InterceptorManager } from './InterceptorManager'
-import { isObject } from '../utils'
+import { isObject, warn } from '../utils'
 import generateDefaultLabel from '../helpers/generateDefaultLabel'
 import generateOptions from '../helpers/generateOptions'
 import defaultOptions from '../default-options'
@@ -167,10 +167,7 @@ export class Form {
    */
   public fill(newData: Object): Form {
     for (let fieldName in newData) {
-      if (
-        newData.hasOwnProperty(fieldName) &&
-        this.$initialValues.hasOwnProperty(fieldName)
-      ) {
+      if (newData.hasOwnProperty(fieldName) && this.hasField(fieldName)) {
         this[fieldName] = newData[fieldName]
       }
     }
@@ -194,6 +191,8 @@ export class Form {
    */
   public validateField(fieldKey: string): boolean {
     if (!this.hasField(fieldKey)) {
+      warn(`\`${fieldKey}\` is not a valid field`)
+
       return true
     }
 
@@ -257,6 +256,8 @@ export class Form {
    */
   public isFieldDirty(fieldKey: string): boolean {
     if (!this.hasField(fieldKey)) {
+      warn(`\`${fieldKey}\` is not a valid field`)
+
       return false
     }
 
@@ -270,6 +271,8 @@ export class Form {
    */
   public fieldChanged(fieldKey: string): Form {
     if (!this.hasField(fieldKey)) {
+      warn(`\`${fieldKey}\` is not a valid field`)
+
       return this
     }
 
@@ -287,11 +290,15 @@ export class Form {
    */
   public fieldFocused(fieldKey: string): Form {
     if (!this.hasField(fieldKey)) {
+      warn(`\`${fieldKey}\` is not a valid field`)
+
       return this
     }
 
     this.$touched.push(fieldKey)
     this.$onFocus = fieldKey
+
+    return this
   }
 
   /**
@@ -301,6 +308,8 @@ export class Form {
    */
   public fieldBlurred(fieldKey: string): Form {
     if (!this.hasField(fieldKey)) {
+      warn(`\`${fieldKey}\` is not a valid field`)
+
       return this
     }
 
