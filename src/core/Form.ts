@@ -1,18 +1,32 @@
 import { Errors } from './Errors'
 import { Validator } from './Validator'
 import { Touched } from './Touched'
-import { Field, Options, SubmitCallback } from '../types'
-import { isObject } from '../utils'
+import { InterceptorManager } from './InterceptorManager'
+import { isObject, warn } from '../utils'
 import generateDefaultLabel from '../helpers/generateDefaultLabel'
 import generateOptions from '../helpers/generateOptions'
-import defaultsOptions from '../defaults'
+import defaultOptions from '../default-options'
+import basicInterceptors from '../interceptors/index'
+import {
+  Field,
+  FormDefaults,
+  InterceptorHandler,
+  InterceptorManagersObject,
+  Options,
+  SubmitCallback,
+} from '../types'
 
 export class Form {
   /**
-   * Defaults options for the Form instance
+   * holds all the defaults for the forms
    */
-  public static defaults: Options = defaultsOptions
-
+  public static defaults: FormDefaults = {
+    options: defaultOptions,
+    interceptors: {
+      beforeSubmission: new InterceptorManager(),
+      submissionComplete: new InterceptorManager(),
+    },
+  }
   /**
    * determine if the form is on submitting mode
    */
@@ -57,7 +71,12 @@ export class Form {
   /**
    * Options of the Form
    */
-  public $options: Options = Form.defaults
+  public $options: Options = Form.defaults.options
+
+  /**
+   * holds the interceptor managers
+   */
+  public $interceptors: InterceptorManagersObject
 
   /**
    * constructor of the class
@@ -72,33 +91,33 @@ export class Form {
   }
 
   /**
-   * Hook for successful submission
-   * use Form.successfulSubmissionHook = () => {};
-   * for extending the successful submission handling
+   * setting up default options for the Form class in more
+   * convenient way then "Form.defaults.options.validation.something = something"
    *
-   * @param response
-   * @param form
+   * @param options
    */
-  public static successfulSubmissionHook(
-    response: any,
-    form: Form
-  ): Promise<any> {
-    return Promise.resolve(response)
+  public static assignDefaultOptions(options: Options = {}): void {
+    Form.defaults.options = generateOptions(Form.defaults.options, options)
   }
 
   /**
-   * Hook for un successful submission
-   * use Form.unSuccessfulSubmissionHook = () => {};
-   * for extending the un successful submission handling
+   * assign options to Options object
    *
-   * @param error
-   * @param form
+   * @param options
    */
-  public static unSuccessfulSubmissionHook(
-    error: any,
-    form: Form
-  ): Promise<any> {
-    return Promise.reject(error)
+  public assignOptions(options: Options) {
+    this.$options = generateOptions(this.$options, options)
+
+    return this
+  }
+
+  /**
+   * checks if field exits or not in the form class
+   *
+   * @param fieldKey
+   */
+  public hasField(fieldKey: string): boolean {
+    return this.hasOwnProperty(fieldKey)
   }
 
   /**
@@ -148,10 +167,7 @@ export class Form {
    */
   public fill(newData: Object): Form {
     for (let fieldName in newData) {
-      if (
-        newData.hasOwnProperty(fieldName) &&
-        this.$initialValues.hasOwnProperty(fieldName)
-      ) {
+      if (newData.hasOwnProperty(fieldName) && this.hasField(fieldName)) {
         this[fieldName] = newData[fieldName]
       }
     }
@@ -175,6 +191,8 @@ export class Form {
    */
   public validateField(fieldKey: string): boolean {
     if (!this.hasField(fieldKey)) {
+      warn(`\`${fieldKey}\` is not a valid field`)
+
       return true
     }
 
@@ -238,48 +256,12 @@ export class Form {
    */
   public isFieldDirty(fieldKey: string): boolean {
     if (!this.hasField(fieldKey)) {
+      warn(`\`${fieldKey}\` is not a valid field`)
+
       return false
     }
 
     return this[fieldKey] !== this.$initialValues[fieldKey]
-  }
-
-  /**
-   * assign options to Options object
-   *
-   * @param options
-   */
-  public assignOptions(options: Options) {
-    this.$options = generateOptions(this.$options, options)
-
-    return this
-  }
-
-  /**
-   * submit the form, this method received a callback that
-   * will submit the form and must return a Promise.
-   *
-   * @param callback
-   */
-  public submit(callback: SubmitCallback): Promise<any> {
-    if (this.$options.validation.onSubmission && !this.validate()) {
-      return Promise.reject({ message: 'Form is not valid' })
-    }
-
-    this.$submitting = true
-
-    return callback(this)
-      .then(this.successfulSubmission.bind(this))
-      .catch(this.unSuccessfulSubmission.bind(this))
-  }
-
-  /**
-   * checks if field exits or not in the form class
-   *
-   * @param fieldKey
-   */
-  public hasField(fieldKey: string): boolean {
-    return this.hasOwnProperty(fieldKey)
   }
 
   /**
@@ -289,6 +271,8 @@ export class Form {
    */
   public fieldChanged(fieldKey: string): Form {
     if (!this.hasField(fieldKey)) {
+      warn(`\`${fieldKey}\` is not a valid field`)
+
       return this
     }
 
@@ -306,11 +290,15 @@ export class Form {
    */
   public fieldFocused(fieldKey: string): Form {
     if (!this.hasField(fieldKey)) {
+      warn(`\`${fieldKey}\` is not a valid field`)
+
       return this
     }
 
     this.$touched.push(fieldKey)
     this.$onFocus = fieldKey
+
+    return this
   }
 
   /**
@@ -320,6 +308,8 @@ export class Form {
    */
   public fieldBlurred(fieldKey: string): Form {
     if (!this.hasField(fieldKey)) {
+      warn(`\`${fieldKey}\` is not a valid field`)
+
       return this
     }
 
@@ -330,6 +320,39 @@ export class Form {
     this.$options.validation.onFieldBlurred && this.validateField(fieldKey)
 
     return this
+  }
+
+  /**
+   * submit the form, this method received a callback that
+   * will submit the form and must return a Promise.
+   *
+   * @param callback
+   */
+  public submit(callback: SubmitCallback): Promise<any> {
+    let chain: any[] = [
+      this.wrapSubmitCallBack(callback),
+      error => Promise.reject({ error, form: this }),
+    ]
+
+    this.$interceptors.beforeSubmission
+      .merge(basicInterceptors.beforeSubmission)
+      .forEach((handler: InterceptorHandler) =>
+        chain.unshift(handler.fulfilled, handler.rejected)
+      )
+
+    this.$interceptors.submissionComplete
+      .merge(basicInterceptors.submissionComplete)
+      .forEach((handler: InterceptorHandler) =>
+        chain.push(handler.fulfilled, handler.rejected)
+      )
+
+    let promise: Promise<any> = Promise.resolve(this)
+
+    while (chain.length) {
+      promise = promise.then(chain.shift(), chain.shift())
+    }
+
+    return promise
   }
 
   /**
@@ -367,6 +390,14 @@ export class Form {
     this.$validator = new Validator(rules, this.$options.validation)
     this.$errors = new Errors()
     this.$touched = new Touched()
+    this.$interceptors = {
+      beforeSubmission: new InterceptorManager(
+        Form.defaults.interceptors.beforeSubmission.all()
+      ),
+      submissionComplete: new InterceptorManager(
+        Form.defaults.interceptors.submissionComplete.all()
+      ),
+    }
 
     return this
   }
@@ -385,28 +416,16 @@ export class Form {
   }
 
   /**
-   * Successful submission method
+   * wrap the submit callback function
+   * to normalize the promise resolve or reject parameter
    *
-   * @param response
+   * @param callback
    */
-  private successfulSubmission(response: any): Promise<any> {
-    this.$submitting = false
-
-    this.$options.successfulSubmission.clearErrors && this.$errors.clear()
-    this.$options.successfulSubmission.clearTouched && this.$touched.clear()
-    this.$options.successfulSubmission.resetValues && this.resetValues()
-
-    return Form.successfulSubmissionHook(response, this)
-  }
-
-  /**
-   * UnSuccessful submission method
-   *
-   * @param error
-   */
-  private unSuccessfulSubmission(error: any): Promise<any> {
-    this.$submitting = false
-
-    return Form.unSuccessfulSubmissionHook(error, this)
+  private wrapSubmitCallBack(callback: SubmitCallback): Function {
+    return () =>
+      callback(this).then(
+        response => Promise.resolve({ response, form: this }),
+        error => Promise.reject({ error, form: this })
+      )
   }
 }

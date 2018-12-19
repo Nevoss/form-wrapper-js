@@ -1,5 +1,5 @@
 import generateOptions from '../../src/helpers/generateOptions'
-import defaultOptions from '../../src/defaults'
+import defaultOptions from '../../src/default-options'
 
 describe('generateOptions.ts', () => {
   it('should generate new options object from default options and new options Object', () => {

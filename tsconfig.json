@@ -3,7 +3,12 @@
     "outDir": "./lib/",
     "module": "es2015",
     "target": "es2015",
-    "declaration": true
+    "declaration": true,
+    "esModuleInterop": true,
+    "types": [
+      "jest",
+      "jest-extended"
+    ]
   },
   "include": [
     "src/**/*"

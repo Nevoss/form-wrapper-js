@@ -1,6 +1,6 @@
-import { Form } from '../../src'
+import { Form } from '../../src/core/Form'
 import { Validator } from '../../src/core/Validator'
-import defaultOptions from '../../src/defaults'
+import defaultOptions from '../../src/default-options'
 
 jest.mock('../../src/core/Form')
 
@@ -84,7 +84,7 @@ describe('Validator.js', () => {
     ).toEqual('Developer is invalid. the true is incorrect')
   })
 
-  it('should deterime if has rule', () => {
+  it('should determine if has rule', () => {
     let validator = new Validator(rules, defaultOptions.validation)
 
     expect(validator.has('first_name')).toBe(true)
@@ -130,6 +130,15 @@ describe('Validator.js', () => {
     )
     expect(errors).toHaveLength(1)
     expect(errors[0]).toBe('Is Developer is invalid. the false is incorrect')
+  })
+
+  it('should return empty errors array if field is not exists', () => {
+    let validator = new Validator(rules, defaultOptions.validation)
+
+    let mockFormField = { key: 'some_other_field_1', value: null, label: 'A' }
+    let mockForm = new Form({})
+
+    expect(validator.validateField(mockFormField, mockForm)).toHaveLength(0)
   })
 
   it('should call passes and message callback functions with the right params when validate', () => {

@@ -1,9 +1,9 @@
+import { Options } from './types'
+
 /**
  * Default options that provide to Form instance
  */
-import { Options } from './types'
-
-const defaults: Options = {
+const defaultOptions: Options = {
   successfulSubmission: {
     clearErrors: true,
     clearTouched: true,
@@ -19,4 +19,4 @@ const defaults: Options = {
   },
 }
 
-export default defaults
+export default defaultOptions
