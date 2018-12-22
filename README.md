@@ -21,7 +21,7 @@ yarn add form-wrapper-js
 
 ## :rocket: Basic Usage
 
-basic usage is written in the context of Vue.js, this is my framework of choice, I hope to write helpful documentation to other frameworks soon. (will love to get some help with that. :smile:)
+All the examples bellow are written in Vue.js context, hoping to write examples for other frameworks soon. (any help will be appreciated. :smile:)
 
 ### Binding values
 
@@ -53,11 +53,11 @@ basic usage is written in the context of Vue.js, this is my framework of choice,
 
 ### Submitting the form
 
-The library wrapping up some form logic in `form.submit()` method, so just pass a callback that returns a `Promise`
+The library is wrapping up some form logic in `form.submit()` method, so just pass a callback that returns a `Promise`
 
-By default before any submission, it validates the form (as describe bellow) and set `form.$submitting` to true. after submission complete, it set `form.$submitting` to false and clear the form values, `$errors` and `$touched` array.
+By default before any submission, it will validate the form (as described below) and then set `form.$submitting` to true. after submission completed, it will set `form.$submitting` to false and clear will the form values, `$errors` and `$touched` array.
 
-all those default behaviors can be changed by the `form.$options` object.
+All those default behaviors can be changed by the `form.$options` object.
 
 ```vue
 <template>
@@ -99,7 +99,7 @@ all those default behaviors can be changed by the `form.$options` object.
 
 ### Validating the form
 
-every value can get some validation rules that by default will be validated before submission, of course, you can customize it and validate on input or on blur events (again, more information below).
+Every value can get some validation rules that by default will be validated before submission, of course, you can customize it and validate it "on input" or "on blur" events (more information below).
 
 ```vue
 <script>
@@ -126,7 +126,7 @@ every value can get some validation rules that by default will be validated befo
   }
 </script>
 ```
-the `rules` file will look like this
+The `rules` file will look like this:
 ```js
 import validationLibrary from 'example-validation-library'
 
@@ -143,11 +143,11 @@ export const email = {
 }
 ```
 
-this behavior letting you create your validation file (or files) that can be reusable and also very lightweight, without a lot of validation rules you don`t need.
+This behavior will let you create your validation file (or files) that can be reusable and also very lightweight, without a lot of validation rules you don\`t need.
 
 ### Handling with form errors
 
-after validating form or a specific field, there is a case that some fields not pass some rules. you can use `form.$errors` API to retrieve those field errors.
+After validating the form or a specific field, it may occur that some fields will not pass some of the validation rules. you can use `form.$errors` API to retrieve those fields\` errors.
 
 ```vue
 <template>
@@ -163,7 +163,7 @@ after validating form or a specific field, there is a case that some fields not 
  
  ### Options
  
-the library tries to be as flexible has it can, so there are some options that letting you customize the behavior of your forms, you can set those options in 3 main ways
+The library tries to be as flexible as possible. therefore, there are some options that lets you customize the behavior of your forms, and you can set those options in 3 main ways:
  ```js
 import { Form } from 'form-wrapper-js'
 
@@ -215,11 +215,12 @@ Those are the default options
 }
 ```
 
-### More complex form handling
+### Complex form handling
 
-Sometimes you need more from your form, which input is on focus? which is dirty? or which is touched? you want to handle the labels inside the form and to set some extra data to a field that can be managed within the form instance. (e.g. select options and more...)
+Sometimes you need more from your forms. in order to so you need to know which input is on focus, which ones are dirty, or touched,
+besides, you want to handle the labels inside your forms and to set some extra data to a field that can be managed within the form instance. (e.g. select options and more...)
 
-to be able to use those features you need to bind some events to the input DOM element.
+To be able to use those features you need to bind some events to the input DOM element.
 ```vue
 <template>
   <form @submit.prevent="handleSubmit">
@@ -234,22 +235,22 @@ to be able to use those features you need to bind some events to the input DOM e
 </template>
 ```
 
-There is not necessarily need to bind all those events to the input, try them out to know which of them you need and which not.
+It isn\`t necessary to bind all those events to an input. try them out in order to know which ones of them you need and which ones you`re not.
 
-some options will not work if there is no event binding e.g.
+Some options will not work if there will be no event binding e.g.
 - `form.$options.validation.onFieldBlurred` - must have `fieldBlurred` event
 - `form.$options.validation.onFieldChange` - must have `fieldChanged` event (on input/change DOM events)
 - `form.$onFocus` - will not work if `fieldFocused` event will not bond to the input DOM element.
 - etc..,
 
-if you are not sure which of them you need, just bind all of them. (nothing bad will happened)
+If you are not sure which one of them you need, just bind all of them. (nothing bad will happened :smile:)
  
-as you build your own form system you will see that some pattern repeat them self, be creative as you can and encapsulate those pattern inside components.
+As you build your own form system you will see that some patterns repeat themselves. be as creative as you can, and encapsulate those patterns inside a components.
 
 
 ### Interceptors
 
-this concept is taking over from the axios API.
+this concept was taken from the axios API.
 ```js
 import Form from 'form-wrapper-js'
 
@@ -271,7 +272,7 @@ form.$interceptors.beforeSubmission.use((form) => {
 }) 
 ```
 
-you can even set some default interceptors, that all the new Form instances will automatically use those interceptors
+You can even set some default interceptors, that all the new Form instances will automatically use those interceptors
 ```js
 import Form from 'form-wrapper-js'
 
@@ -287,9 +288,7 @@ Form.default.interceptors.submissionComplete.use(null, ({ error, form }) => {
 
 ### Extra
 
-so there are some things that were no covered throw this "basic-usage" guide, soon I will write a good documentation that will cover all features.
-
-here are some basic methods and props that can be useful:
+Some basic methods and props that can be useful:
 ```js
 import  { Form } from 'form-wrapper-js'
 
@@ -316,17 +315,17 @@ form.$errors.get('name') // gets errors array of `name` field
 form.$errors.getFirst('name') // gets the first error from errors array of `name` field
 
 ```
+
 ---
-**And please if something is not clear enough, try to dig inside the code to understand it better, I was trying to make a very clear code and clear comments, and if something not clear enough please let me know**
+**There are some things that hasn\`t been covered through this "basic-usage" guide. more updates will be coming soon :wink:**
 
 ---
 
 ## :beers: Contribute
-Everybody is welcome, you can contribute some Code, Docs, bug reports and even ideas. 
 
-it is very easy to install the project just take a look at CONTRIBUTING.md and follow the instructions.
+**Code, Docs, Bug reports, Ideas - are more the welcome.** ⭐
 
-**The project is still on development, so ideas for features are then welcome** ⭐
+the installation is very easy, take a look at CONTRIBUTING.md file and follow the instructions.
 
 ## :lock: License
 The MIT License (MIT). Please see License File for more information.
