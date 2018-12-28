@@ -7,14 +7,14 @@ import generateDefaultLabel from '../helpers/generateDefaultLabel'
 import generateOptions from '../helpers/generateOptions'
 import defaultOptions from '../default-options'
 import basicInterceptors from '../interceptors/index'
+import { Field } from '../types/Field'
+import { FormDefaults } from '../types/Form'
+import { Options } from '../types/Options'
+import { SubmitCallback } from '../types/Form'
 import {
-  Field,
-  FormDefaults,
   InterceptorHandler,
   InterceptorManagersObject,
-  Options,
-  SubmitCallback,
-} from '../types'
+} from '../types/Interceptors'
 
 export class Form {
   /**

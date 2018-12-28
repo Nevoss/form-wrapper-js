@@ -1,5 +1,5 @@
 import { Form } from '../core/Form'
-import { InterceptorHandler } from '../types'
+import { InterceptorHandler } from '../types/Interceptors'
 
 /**
  * validate the form before submission

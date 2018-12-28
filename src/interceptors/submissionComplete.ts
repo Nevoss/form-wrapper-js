@@ -1,23 +1,8 @@
-import { Form } from '../core/Form'
-import { InterceptorHandler } from '../types'
-
-/**
- * The interface of an object with successful response from the
- * SubmitCallback function
- */
-interface successfulResponse {
-  form: Form
-  response: any
-}
-
-/**
- * The interface of an object with unsuccessful response from the
- * SubmitCallback function
- */
-interface InvalidResponse {
-  form: Form
-  error: any
-}
+import {
+  InterceptorHandler,
+  InvalidResponse,
+  successfulResponse,
+} from '../types/Interceptors'
 
 /**
  * set the $submitting property as false event if the submission
