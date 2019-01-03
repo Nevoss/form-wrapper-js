@@ -1,4 +1,4 @@
-import { InterceptorHandler } from '../types'
+import { InterceptorHandler } from '../types/Interceptors'
 
 export class InterceptorManager {
   /**

@@ -1,4 +1,4 @@
-import { Options } from '../types'
+import { Options } from '../types/Options'
 import { isObject } from '../utils'
 
 /**

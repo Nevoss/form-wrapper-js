@@ -1,6 +1,8 @@
-import { isObject } from '../utils'
-import { Field, Rule, RulesStack, ValidationOptions } from '../types'
 import { Form } from './Form'
+import { isObject } from '../utils'
+import { Field } from '../types/Field'
+import { Rule, RulesStack } from '../types/Validator'
+import { ValidationOptions } from '../types/Options'
 
 /**
  * Validator Class
