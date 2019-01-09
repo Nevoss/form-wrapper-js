@@ -7,7 +7,7 @@
 [![CircleCI](https://circleci.com/gh/Nevoss/form-wrapper-js.svg?style=shield)](https://circleci.com/gh/Nevoss/form-wrapper-js)
 
 
-## :art: Playgorund
+## :art: Playground
 - Vue - https://codesandbox.io/s/5x96q83yvp?module=%2Fsrc%2FApp.vue
 
 ## :cd: Installation
