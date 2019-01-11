@@ -16,7 +16,7 @@ describe('generateDebouncedValidateField.ts', () => {
     Function.prototype.bind = jest.fn(function() {
       return this
     })
-    form.$options.validation.debounceTimeOnFieldChanged = 500
+    form.$options.validation.debouncedValidateFieldTime = 500
 
     let result = generateDebouncedValidateField(form)
 
