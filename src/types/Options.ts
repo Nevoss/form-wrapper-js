@@ -30,6 +30,12 @@ export interface ValidationOptions {
   onFieldChanged?: boolean
 
   /**
+   * the debounce time (on milliseconds) for `onFieldChanged` event
+   * (only for the validation part)
+   */
+  debounceTimeOnFieldChanged?: number
+
+  /**
    * validate the field on field blurred
    */
   onFieldBlurred?: boolean

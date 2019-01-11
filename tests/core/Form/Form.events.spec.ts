@@ -19,12 +19,12 @@ describe('Form.events.ts', () => {
       },
     })
 
-    form.validateField = jest.fn()
+    form.debouncedValidateField = jest.fn()
 
     form.fieldChanged('first_name')
 
-    expect(form.validateField).toHaveBeenCalledTimes(1)
-    expect(form.validateField).toHaveBeenCalledWith('first_name')
+    expect(form.debouncedValidateField).toHaveBeenCalledTimes(1)
+    expect(form.debouncedValidateField).toHaveBeenCalledWith('first_name')
 
     form.assignOptions({
       validation: {
@@ -32,9 +32,11 @@ describe('Form.events.ts', () => {
       },
     })
 
+    form.debouncedValidateField = jest.fn()
+
     form.fieldChanged('first_name')
 
-    expect(form.validateField).toHaveBeenCalledTimes(1)
+    expect(form.debouncedValidateField).toHaveBeenCalledTimes(0)
   })
 
   it('should clear field errors after field changed', () => {

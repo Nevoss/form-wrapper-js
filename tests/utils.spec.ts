@@ -1,4 +1,4 @@
-import { isObject, warn } from '../src/utils'
+import { isObject, warn, debounce } from '../src/utils'
 
 describe('utils.js', () => {
   it('should determine if value is object', () => {
@@ -16,5 +16,21 @@ describe('utils.js', () => {
     expect(console.error).toHaveBeenCalledWith(
       '[Form-wrapper-js warn]: random error message'
     )
+  })
+
+  it('should debounce the method', () => {
+    jest.useFakeTimers()
+
+    let callback = jest.fn()
+
+    let debouncedCallback = debounce(callback, 2000)
+    debouncedCallback('argument1', 2)
+
+    expect(callback).toHaveBeenCalledTimes(0)
+
+    jest.runAllTimers()
+
+    expect(callback).toHaveBeenCalledTimes(1)
+    expect(callback).toHaveBeenCalledWith('argument1', 2)
   })
 })

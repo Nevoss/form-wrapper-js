@@ -12,6 +12,7 @@ const defaultOptions: Options = {
   validation: {
     onFieldBlurred: false,
     onFieldChanged: false,
+    debounceTimeOnFieldChanged: 0,
     onSubmission: true,
     unsetFieldErrorsOnFieldChange: false,
     stopAfterFirstRuleFailed: true,
