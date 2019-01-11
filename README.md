@@ -207,6 +207,7 @@ Those are the default options
   validation: {
     onFieldBlurred: false, // validate on field blurred
     onFieldChanged: false, // validate on change or input event
+    debouncedValidateFieldTime: 0, //the debounce time for `debouncedValidateField` method, the method is running inside fieldChanged method
     onSubmission: true, // validate on submission
     unsetFieldErrorsOnFieldChange: false, // on change/input event, the errors of the targeted field will be removed
     stopAfterFirstRuleFailed: true, // if the first validation of a specific field will fail it will stop to validate this specific field
