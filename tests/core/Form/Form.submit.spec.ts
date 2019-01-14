@@ -1,8 +1,9 @@
 import { Form } from '../../../src/core/Form'
+import { FieldValidationError } from '../../../src/errors/FieldValidationError'
 
 jest.mock('../../../src/core/Errors')
 jest.mock('../../../src/core/Validator')
-jest.mock('../../../src/core/Touched')
+jest.mock('../../../src/core/FieldKeysCollection')
 
 describe('Form.submit.ts', () => {
   it('should successfully submitted if the callback returns Promise.resolve', async () => {
@@ -51,11 +52,10 @@ describe('Form.submit.ts', () => {
     }
   })
 
-  it('should validate the form on submission if the option is set to validate the form', async () => {
+  it('should validate the form on submission if the option is set to true', async () => {
     let form = new Form(
       {
         name: 'Nevo',
-        rules: [() => true],
       },
       {
         validation: {
@@ -64,25 +64,48 @@ describe('Form.submit.ts', () => {
       }
     )
 
-    // mock the validate method to return FALSE
-    form.validate = jest.fn(() => false)
+    form.$validator.validateField = jest.fn(() =>
+      Promise.reject(new FieldValidationError(['error']))
+    )
+    form.$errors.any = jest.fn(() => true)
+
+    const validateSpy = jest.spyOn(form, 'validate')
 
     expect.assertions(4)
 
     try {
       await form.submit(() => Promise.resolve())
     } catch (e) {
-      expect(form.validate).toBeCalled()
+      expect(validateSpy).toBeCalledTimes(1)
       expect(e.hasOwnProperty('error')).toBe(true)
       expect(e.error.hasOwnProperty('message')).toBe(true)
       expect(e.form).toBe(form)
     }
   })
 
+  it('should not validate the form before submission if the option set to false', async () => {
+    let form = new Form(
+      {
+        name: 'Nevo',
+      },
+      {
+        validation: {
+          onSubmission: false,
+        },
+      }
+    )
+
+    const validateSpy = jest.spyOn(form, 'validate')
+
+    await form.submit(() => Promise.resolve())
+
+    expect(validateSpy).toBeCalledTimes(0)
+  })
+
   it('should set $submitting as true if submit method is called', () => {
     let form = new Form({}) as Form
 
-    form.validate = jest.fn(() => true)
+    form.validate = jest.fn(() => Promise.resolve())
 
     expect.assertions(2)
 
@@ -101,7 +124,8 @@ describe('Form.submit.ts', () => {
     let form = new Form({}) as Form
 
     let mockCallable = jest.fn(() => Promise.resolve())
-    form.validate = jest.fn(() => false)
+    form.$errors.any = jest.fn(() => false)
+
     form.submit(mockCallable).catch(() => false)
 
     expect(form.$submitting).toBe(false)

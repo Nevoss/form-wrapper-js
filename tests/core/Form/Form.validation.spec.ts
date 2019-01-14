@@ -1,12 +1,14 @@
 import { Form } from '../../../src/core/Form'
+import { FieldValidationError } from '../../../src/errors/FieldValidationError'
 import * as utils from '../../../src/utils'
+import { mocked } from 'ts-jest/utils'
 
 jest.mock('../../../src/core/Errors')
 jest.mock('../../../src/core/Validator')
-jest.mock('../../../src/core/Touched')
+jest.mock('../../../src/core/FieldKeysCollection')
 
 describe('Form.validation.ts', () => {
-  it('should validate specific field', () => {
+  it('should validate specific field', async () => {
     let form = new Form({
       name: {
         value: 'a',
@@ -15,11 +17,12 @@ describe('Form.validation.ts', () => {
       },
     })
 
-    form.$validator.validateField = jest.fn(() => ['error'])
+    form.$validator.validateField = jest.fn(() =>
+      Promise.reject(new FieldValidationError(['error']))
+    )
 
-    let isValid = form.validateField('name')
+    await form.validateField('name')
 
-    expect(isValid).toBe(false)
     expect(form.$errors.unset).toHaveBeenCalledTimes(1)
     expect(form.$errors.unset).toBeCalledWith('name')
     expect(form.$errors.push).toHaveBeenCalledTimes(1)
@@ -31,25 +34,28 @@ describe('Form.validation.ts', () => {
       form
     )
 
-    form.$validator.validateField = jest.fn(() => [])
+    mocked(form.$errors.push).mockClear()
+    mocked(form.$errors.unset).mockClear()
 
-    isValid = form.validateField('name')
-    expect(isValid).toBe(true)
-    expect(form.$errors.push).toHaveBeenCalledTimes(1)
-    expect(form.$errors.unset).toHaveBeenCalledTimes(2)
+    form.$validator.validateField = jest.fn(() => Promise.resolve())
+
+    await form.validateField('name')
+    expect(form.$errors.push).toHaveBeenCalledTimes(0)
+    expect(form.$errors.unset).toHaveBeenCalledTimes(1)
+    expect(form.$errors.unset).toBeCalledWith('name')
   })
 
-  it('should warn if trying to validate field and the field is not exists', () => {
+  it('should warn if trying to validate field and the field is not exists', async () => {
     let warnMock = jest.spyOn(utils, 'warn')
 
     let form = new Form({ name: null })
 
-    form.validateField('first_name')
+    await form.validateField('first_name')
 
     expect(warnMock).toHaveBeenCalledTimes(1)
   })
 
-  it('should validate all the fields of the form', () => {
+  it('should validate all the fields of the form', async () => {
     let form = new Form({
       name: {
         value: null,
@@ -63,34 +69,49 @@ describe('Form.validation.ts', () => {
 
     form.validateField = jest
       .fn()
-      .mockReturnValueOnce(true)
-      .mockReturnValueOnce(true)
+      .mockReturnValueOnce(Promise.resolve())
+      .mockReturnValueOnce(Promise.resolve())
 
-    expect(form.validateAll()).toBe(true)
+    await form.validateAll()
+
     expect(form.validateField).toHaveBeenNthCalledWith(1, 'name')
     expect(form.validateField).toHaveBeenNthCalledWith(2, 'last_name')
-
-    form.validateField = jest
-      .fn()
-      .mockReturnValueOnce(true)
-      .mockReturnValueOnce(false)
-    expect(form.validateAll()).toBe(false)
   })
 
-  it('should call to validate specific field or all the fields', () => {
+  it('should call to validate specific field or all the fields', async () => {
     let form = new Form({ first_name: null })
 
     form.validateAll = jest.fn()
     form.validateField = jest.fn()
 
-    form.validate()
+    await form.validate()
 
     expect(form.validateAll).toHaveBeenCalledTimes(1)
-    expect(form.validateField).not.toHaveBeenCalled()
+    expect(form.validateField).toHaveBeenCalledTimes(0)
 
-    form.validate('first_name')
+    mocked(form.validateAll).mockClear()
+    mocked(form.validateField).mockClear()
 
-    expect(form.validateAll).toHaveBeenCalledTimes(1)
+    await form.validate('first_name')
+
+    expect(form.validateAll).toHaveBeenCalledTimes(0)
     expect(form.validateField).toHaveBeenCalledTimes(1)
+  })
+
+  it('should bubble up errors that are not FieldValidationError on validateField method', async () => {
+    let form = new Form({ name: null })
+
+    form.$validator.validateField = jest.fn(() => {
+      throw new Error('error')
+    })
+
+    expect.assertions(2)
+
+    try {
+      await form.validateField('name')
+    } catch (e) {
+      expect(e).toBeInstanceOf(Error)
+      expect(e.message).toBe('error')
+    }
   })
 })

@@ -1,6 +1,6 @@
 import { Errors } from '../../../src/core/Errors'
 import { Validator } from '../../../src/core/Validator'
-import { Touched } from '../../../src/core/Touched'
+import { FieldKeysCollection } from '../../../src/core/FieldKeysCollection'
 import { Form } from '../../../src/core/Form'
 import generateOptions from '../../../src/helpers/generateOptions'
 import defaultOptionsSource from '../../../src/default-options'
@@ -10,6 +10,7 @@ import generateDebouncedValidateField from '../../../src/helpers/generateDebounc
 
 jest.mock('../../../src/core/Errors')
 jest.mock('../../../src/core/Validator')
+jest.mock('../../../src/core/FieldKeysCollection')
 jest.mock('../../../src/core/Touched')
 jest.mock('../../../src/helpers/generateDebouncedValidateField', () => {
   return {
@@ -82,7 +83,7 @@ describe('Form.ts', () => {
       defaultOptions.validation
     )
     expect(Errors).toHaveBeenCalled()
-    expect(Touched).toHaveBeenCalled()
+    expect(FieldKeysCollection).toHaveBeenCalled()
     expect(form.$interceptors.beforeSubmission).toBeInstanceOf(
       InterceptorManager
     )
@@ -173,6 +174,7 @@ describe('Form.ts', () => {
     let form = new Form(data)
 
     expect(
+      // @ts-ignore
       form.$options.validation.defaultMessage(
         { label: 'a', value: 'b', key: 'c' },
         form
@@ -196,6 +198,7 @@ describe('Form.ts', () => {
     let form = new Form(data)
 
     expect(
+      // @ts-ignore
       form.$options.validation.defaultMessage(
         { label: 'a', value: 'b', key: 'c' },
         form

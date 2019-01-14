@@ -1,3 +1,5 @@
+import { RawRule } from './types/Validator'
+
 /**
  * check if value is an object and only object
  *
@@ -5,6 +7,15 @@
  */
 export const isObject = (value: any): boolean => {
   return value !== null && typeof value === 'object' && !Array.isArray(value)
+}
+
+/**
+ * checks if value is implements RawRule interface
+ *
+ * @param value
+ */
+export const isRawRule = (value: any): value is RawRule => {
+  return isObject(value) && value.passes
 }
 
 /**

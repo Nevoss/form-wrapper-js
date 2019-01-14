@@ -1,12 +1,13 @@
 import { MessageFunction, PassesFunction } from './Errors'
+import { Rule } from '../core/Rule'
 
 /**
- * The Rule interface in responsible to check value of field is valid,
- * and send error message if not.
+ * Raw Rule is an object that can be transfer eventually to a normal Rule Object
  */
-export interface Rule {
-  passes: PassesFunction
-  message: MessageFunction
+export interface RawRule {
+  passes: PassesFunction | Function
+  message?: MessageFunction | string
+  returnsPromise?: boolean
 }
 
 /**

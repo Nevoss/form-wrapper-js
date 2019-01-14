@@ -60,7 +60,7 @@ export interface ValidationOptions {
   /***
    * Default message for errors
    */
-  defaultMessage?: MessageFunction
+  defaultMessage?: MessageFunction | string
 }
 
 /**

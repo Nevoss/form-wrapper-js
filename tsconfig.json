@@ -1,19 +1,20 @@
 {
   "compilerOptions": {
-    "outDir": "./lib/",
+    "outDir": "./dist/",
     "module": "es2015",
     "target": "es2015",
     "declaration": true,
     "esModuleInterop": true,
+    "moduleResolution": "node",
     "types": [
       "jest",
       "jest-extended"
     ]
   },
   "include": [
-    "src/**/*"
+    "./src/**/*", "./tests/**/*"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules", "./tests/**/*"
   ]
 }
