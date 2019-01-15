@@ -71,7 +71,7 @@ export class Validator {
     while (fieldRulesChain.length) {
       let fieldRule = fieldRulesChain.shift()
       try {
-        await fieldRule.passes(field, form)
+        await fieldRule.validate(field, form)
       } catch (error) {
         if (!(error instanceof RuleValidationError)) {
           return Promise.reject(error)

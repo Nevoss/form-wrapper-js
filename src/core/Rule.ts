@@ -1,8 +1,10 @@
 import { RawRule } from '../types/Validator'
 import { MessageFunction, PassesFunction } from '../types/Errors'
 import generateMessageFunction from '../helpers/generateMessageFunction'
-import generatePassesFunction from '../helpers/generatePassesFunction'
-import { isRawRule } from '../utils'
+import { isBoolean, isPromise, isRawRule } from '../utils'
+import { Field } from '../types/Field'
+import { Form } from './Form'
+import { RuleValidationError } from '../errors/RuleValidationError'
 
 export class Rule {
   /**
@@ -38,30 +40,49 @@ export class Rule {
   }
 
   /**
+   * validate field with passes function
+   *
+   * @param field
+   * @param form
+   */
+  public validate(field: Field, form: Form): Promise<any> {
+    const passesResponse = this.passes(field, form)
+
+    if (isBoolean(passesResponse)) {
+      return passesResponse
+        ? Promise.resolve()
+        : Promise.reject(new RuleValidationError())
+    }
+
+    if (isPromise(passesResponse)) {
+      return passesResponse
+    }
+
+    return passesResponse
+      ? Promise.resolve()
+      : Promise.reject(new RuleValidationError())
+  }
+
+  /**
    * building a Rule class from a raw value (RawRule interface of regular function)
    *
    * @param rawValue
    * @param defaultMessage
    */
   public static buildFromRawValue(
-    rawValue: RawRule | Function,
+    rawValue: RawRule | PassesFunction,
     defaultMessage: MessageFunction
   ): Rule {
-    // By purpose there is no type for this variable because there is a problem with the implementation later .
-    // TypeScript cannot trust that if the "user" set `returnsPromise` = true the `passes` property actually return Promise,
-    // But I must trust the user :) so...
-    let passes
+    let passes: PassesFunction
     let message: MessageFunction
 
     if (isRawRule(rawValue)) {
-      passes = rawValue.returnsPromise
-        ? rawValue.passes
-        : generatePassesFunction(rawValue.passes)
+      passes = rawValue.passes
       message = rawValue.message
         ? generateMessageFunction(rawValue.message)
         : defaultMessage
     } else {
-      passes = generatePassesFunction(rawValue)
+      passes = rawValue
       message = defaultMessage
     }
 

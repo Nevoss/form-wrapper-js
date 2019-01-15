@@ -1,14 +1,10 @@
 import { mocked } from 'ts-jest/utils'
 import { Rule } from '../../src/core/Rule'
 import { MessageFunction, PassesFunction } from '../../src/types/Errors'
-import generatePassesFunction from '../../src/helpers/generatePassesFunction'
 import { RawRule } from '../../src/types/Validator'
 import generateMessageFunction from '../../src/helpers/generateMessageFunction'
-
-jest.mock('../../src/helpers/generatePassesFunction', () => ({
-  __esModule: true,
-  default: jest.fn(() => 'generatePassesFunction fake value'),
-}))
+import { Field } from '../../src/types/Field'
+import { Form, RuleValidationError } from '../../src'
 
 jest.mock('../../src/helpers/generateMessageFunction', () => ({
   __esModule: true,
@@ -17,10 +13,11 @@ jest.mock('../../src/helpers/generateMessageFunction', () => ({
 
 describe('Rule.ts', () => {
   let fakeDefaultMessage: MessageFunction = () => 'example'
+  let fakeForm: Form = new Form({})
+  let fakeField: Field = { key: 'a', label: 'a', value: 'a' }
 
   beforeEach(() => {
-    mocked(generatePassesFunction).mockClear()
-    mocked(generatePassesFunction).mockClear()
+    mocked(generateMessageFunction).mockClear()
   })
 
   it('should construct correctly', () => {
@@ -36,23 +33,20 @@ describe('Rule.ts', () => {
   })
 
   it('should build Rule class with basic function', () => {
-    const rawValue = () => false
+    const rawValue = jest.fn(() => false)
 
     const rule = Rule.buildFromRawValue(rawValue, fakeDefaultMessage)
 
     expect(generateMessageFunction).toHaveBeenCalledTimes(0)
 
-    expect(generatePassesFunction).toHaveBeenCalledTimes(1)
-    expect(generatePassesFunction).toHaveBeenLastCalledWith(rawValue)
-    expect(rule.passes).toBe('generatePassesFunction fake value')
-
+    expect(rule.passes).toBe(rawValue)
     expect(rule.message).toBe(fakeDefaultMessage)
 
     expect(rule.$rawValue).toBe(rawValue)
   })
 
   it('should build Rule class with RawRule object that passes prop NOT returns promise', () => {
-    const passes = () => true
+    const passes = jest.fn(() => true)
     const rawValue: RawRule = {
       passes,
     }
@@ -61,29 +55,7 @@ describe('Rule.ts', () => {
 
     expect(generateMessageFunction).toHaveBeenCalledTimes(0)
 
-    expect(generatePassesFunction).toHaveBeenCalledTimes(1)
-    expect(generatePassesFunction).toHaveBeenLastCalledWith(passes)
-    expect(rule.passes).toBe('generatePassesFunction fake value')
-
-    expect(rule.message).toBe(fakeDefaultMessage)
-
-    expect(rule.$rawValue).toBe(rawValue)
-  })
-
-  it('should build Rule class with RawRule object that passes prop IS returning promise', () => {
-    const passes = () => new Promise(resolve => resolve())
-    const rawValue: RawRule = {
-      passes,
-      returnsPromise: true,
-    }
-
-    const rule = Rule.buildFromRawValue(rawValue, fakeDefaultMessage)
-
-    expect(generateMessageFunction).toHaveBeenCalledTimes(0)
-
-    expect(generatePassesFunction).toHaveBeenCalledTimes(0)
     expect(rule.passes).toBe(passes)
-
     expect(rule.message).toBe(fakeDefaultMessage)
 
     expect(rule.$rawValue).toBe(rawValue)
@@ -102,8 +74,75 @@ describe('Rule.ts', () => {
     expect(generateMessageFunction).toBeCalledWith(message)
     expect(rule.message).toBe('generateMessageFunction fake value')
 
-    expect(generatePassesFunction).toHaveBeenCalledTimes(1)
-
     expect(rule.$rawValue).toBe(rawValue)
+  })
+
+  it('should validate with the passes function that`s returns true', async () => {
+    const passes = jest.fn(() => true)
+
+    const rawValue: RawRule = {
+      passes,
+    }
+
+    const rule = Rule.buildFromRawValue(rawValue, fakeDefaultMessage)
+
+    await expect(rule.validate(fakeField, fakeForm)).resolves
+
+    expect(passes).toHaveBeenCalledTimes(1)
+    expect(passes).toHaveBeenCalledWith(fakeField, fakeForm)
+  })
+
+  it('should validate with the passes function that`s returns false', async () => {
+    const passes = jest.fn(() => false)
+
+    const rawValue: RawRule = {
+      passes,
+    }
+
+    const rule = Rule.buildFromRawValue(rawValue, fakeDefaultMessage)
+
+    expect.assertions(3)
+
+    try {
+      await rule.validate(fakeField, fakeForm)
+    } catch (e) {
+      expect(e).toBeInstanceOf(RuleValidationError)
+    }
+
+    expect(passes).toHaveBeenCalledTimes(1)
+    expect(passes).toHaveBeenCalledWith(fakeField, fakeForm)
+  })
+
+  it('should validate with passes function that returns Promise', async () => {
+    const promise = Promise.resolve()
+    const passes = jest.fn(() => promise)
+
+    const rawValue: RawRule = {
+      passes,
+    }
+
+    const rule = Rule.buildFromRawValue(rawValue, fakeDefaultMessage)
+
+    await expect(rule.validate(fakeField, fakeForm)).toBe(promise)
+
+    expect(passes).toHaveBeenCalledTimes(1)
+    expect(passes).toHaveBeenCalledWith(fakeField, fakeForm)
+  })
+
+  it('should validate even if the returns value of passes is not boolean or promise', async () => {
+    const passes = jest.fn(() => '')
+
+    const rule = Rule.buildFromRawValue(passes, fakeDefaultMessage)
+
+    expect.assertions(3)
+
+    try {
+      await rule.validate(fakeField, fakeForm)
+    } catch (e) {
+      expect(e).toBeInstanceOf(RuleValidationError)
+    }
+
+    expect(passes).toHaveBeenCalledTimes(1)
+    expect(passes).toHaveBeenCalledWith(fakeField, fakeForm)
   })
 })

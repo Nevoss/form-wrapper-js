@@ -5,9 +5,8 @@ import { Rule } from '../core/Rule'
  * Raw Rule is an object that can be transfer eventually to a normal Rule Object
  */
 export interface RawRule {
-  passes: PassesFunction | Function
+  passes: PassesFunction
   message?: MessageFunction | string
-  returnsPromise?: boolean
 }
 
 /**

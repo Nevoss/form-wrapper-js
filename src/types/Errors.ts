@@ -5,7 +5,7 @@ import { Form } from '../core/Form'
  * Passes function is a prop in Rule Object
  */
 export interface PassesFunction {
-  (field?: Field, form?: Form): Promise<any>
+  (field?: Field, form?: Form): Promise<any> | boolean
 }
 
 /**
