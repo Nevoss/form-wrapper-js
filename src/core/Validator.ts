@@ -1,5 +1,6 @@
 import { Form } from './Form'
 import { Rule } from './Rule'
+import { FieldKeysCollection } from './FieldKeysCollection'
 import { RuleValidationError } from '../errors/RuleValidationError'
 import { FieldValidationError } from '../errors/FieldValidationError'
 import generateMessageFunction from '../helpers/generateMessageFunction'
@@ -18,6 +19,11 @@ export class Validator {
   public $rules: RulesStack = {}
 
   /**
+   * Holds the current field that the validator is validating
+   */
+  public $validating: FieldKeysCollection
+
+  /**
    * Validations options
    */
   public $options: ValidationOptions
@@ -30,6 +36,7 @@ export class Validator {
    */
   constructor(rules: Object, options: ValidationOptions) {
     this.$options = { ...options }
+    this.$validating = new FieldKeysCollection()
 
     this._buildRules(rules)
   }
@@ -68,12 +75,16 @@ export class Validator {
     const messages: string[] = []
     let fieldRulesChain: Rule[] = Array.from(this.get(key))
 
+    this.$validating.push(key)
+
     while (fieldRulesChain.length) {
       let fieldRule = fieldRulesChain.shift()
       try {
         await fieldRule.validate(field, form)
       } catch (error) {
         if (!(error instanceof RuleValidationError)) {
+          this.$validating.unset(key)
+
           return Promise.reject(error)
         }
 
@@ -84,6 +95,8 @@ export class Validator {
         }
       }
     }
+
+    this.$validating.unset(key)
 
     return messages.length
       ? Promise.reject(new FieldValidationError(messages))

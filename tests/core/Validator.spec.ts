@@ -6,6 +6,7 @@ import { Field } from '../../src/types/Field'
 import { FieldValidationError } from '../../src/errors/FieldValidationError'
 import { ValidationOptions } from '../../src/types/Options'
 import { RuleValidationError } from '../../src'
+import { FieldKeysCollection } from '../../src/core/FieldKeysCollection'
 
 jest.mock('../../src/core/Form')
 
@@ -55,6 +56,7 @@ describe('Validator.js', () => {
       'is_developer',
     ])
 
+    expect(validator.$validating).toBeInstanceOf(FieldKeysCollection)
     expect(validator.$rules.first_name).toHaveLength(1)
     expect(validator.$rules.last_name).toHaveLength(2)
     expect(validator.$rules.is_developer).toHaveLength(3)
@@ -92,7 +94,7 @@ describe('Validator.js', () => {
     expect(validator.get('other')).toBe(undefined)
   })
 
-  it('should return a resolved promise if fieldkey is not exists', () => {
+  it('should return a resolved promise if fieldKey is not exists', () => {
     const validator = new Validator(
       { name: [() => true] },
       defaultValidationOptions
@@ -129,6 +131,7 @@ describe('Validator.js', () => {
     expect(passesMock1).toHaveBeenCalledWith(field, fakeForm)
     expect(passesMock2).toHaveBeenCalledWith(field, fakeForm)
     expect(passesMock3).toHaveBeenCalledWith(field, fakeForm)
+    expect(validator.$validating.has('name')).toBe(false)
   })
 
   it('should returns rejected promise if one of the validation message failed', async () => {
@@ -149,7 +152,7 @@ describe('Validator.js', () => {
       defaultValidationOptions
     )
 
-    expect.assertions(5)
+    expect.assertions(6)
 
     const field: Field = { key: 'name', value: 'a', label: 'a' }
     try {
@@ -162,6 +165,7 @@ describe('Validator.js', () => {
     expect(passesMock1).toHaveBeenCalledWith(field, fakeForm)
     expect(passesMock2).toHaveBeenCalledWith(field, fakeForm)
     expect(passesMock3).toHaveBeenCalledWith(field, fakeForm)
+    expect(validator.$validating.has('name')).toBe(false)
   })
 
   it('should stop validating the other `passes` functions if the first function failed and the options are set to do so', async () => {
@@ -192,7 +196,7 @@ describe('Validator.js', () => {
 
     const field: Field = { key: 'name', value: 'a', label: 'a' }
 
-    expect.assertions(4)
+    expect.assertions(5)
 
     try {
       await validator.validateField(field, fakeForm)
@@ -203,6 +207,7 @@ describe('Validator.js', () => {
 
     expect(passesMock1).toHaveBeenCalledWith(field, fakeForm)
     expect(passesMock2).toHaveBeenCalledTimes(0)
+    expect(validator.$validating.has('name')).toBe(false)
   })
 
   it('should bubble up the error if the error is not RuleValidationError', async () => {
@@ -231,5 +236,21 @@ describe('Validator.js', () => {
 
     expect(passesMock1).toHaveBeenCalledWith(field, fakeForm)
     expect(passesMock2).toHaveBeenCalledTimes(0)
+    expect(validator.$validating.has('name')).toBe(false)
+  })
+
+  it('should add the fieldKey to $validation collection if the field is on validation ', () => {
+    const validator = new Validator(
+      { name: [() => true] },
+      defaultValidationOptions
+    )
+
+    const field: Field = { key: 'name', value: 'a', label: 'a' }
+
+    expect(validator.$validating.has('name')).toBe(false)
+
+    validator.validateField(field, fakeForm)
+
+    expect(validator.$validating.has('name')).toBe(true)
   })
 })
