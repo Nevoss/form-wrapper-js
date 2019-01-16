@@ -337,7 +337,9 @@ export class Form {
    */
   public submit(callback: SubmitCallback): Promise<any> {
     let chain: any[] = [
-      this._wrapSubmitCallBack(callback),
+      () => callback(this),
+      null,
+      response => Promise.resolve({ response, form: this }),
       error => Promise.reject({ error, form: this }),
     ]
 
@@ -422,20 +424,5 @@ export class Form {
       value: this[fieldKey],
       label: this.$labels[fieldKey],
     }
-  }
-
-  /**
-   * wrap the submit callback function
-   * to normalize the promise resolve or reject parameter
-   *
-   * @param callback
-   * @private
-   */
-  private _wrapSubmitCallBack(callback: SubmitCallback): Function {
-    return () =>
-      callback(this).then(
-        response => Promise.resolve({ response, form: this }),
-        error => Promise.reject({ error, form: this })
-      )
   }
 }
