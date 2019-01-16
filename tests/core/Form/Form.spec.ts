@@ -6,10 +6,17 @@ import generateOptions from '../../../src/helpers/generateOptions'
 import defaultOptionsSource from '../../../src/default-options'
 import { InterceptorManager } from '../../../src/core/InterceptorManager'
 import * as utils from '../../../src/utils'
+import generateDebouncedValidateField from '../../../src/helpers/generateDebouncedValidateField'
 
 jest.mock('../../../src/core/Errors')
 jest.mock('../../../src/core/Validator')
 jest.mock('../../../src/core/Touched')
+jest.mock('../../../src/helpers/generateDebouncedValidateField', () => {
+  return {
+    __esModule: true,
+    default: jest.fn(() => 'fakeResponse'),
+  }
+})
 
 describe('Form.ts', () => {
   interface FormData {
@@ -33,6 +40,8 @@ describe('Form.ts', () => {
   it('should init correctly', () => {
     const rulesArray = [() => true]
     const isDeveloperRulesArray = [() => false]
+
+    const assignOptionsSpy = jest.spyOn(Form.prototype, 'assignOptions')
 
     let form = new Form({
       first_name: {
@@ -80,6 +89,7 @@ describe('Form.ts', () => {
     expect(form.$interceptors.submissionComplete).toBeInstanceOf(
       InterceptorManager
     )
+    expect(assignOptionsSpy).toHaveBeenCalled()
   })
 
   it('should access the form props', () => {
@@ -98,10 +108,15 @@ describe('Form.ts', () => {
     expect(form.$options).toEqual(defaultOptions)
     expect(form.$options.successfulSubmission.clearErrors).toBe(true)
 
-    const newOptions = { successfulSubmission: { clearErrors: false } }
+    const newOptions = {
+      successfulSubmission: { clearErrors: false },
+    }
 
     form.assignOptions(newOptions)
+
     expect(form.$options).toEqual(generateOptions(defaultOptions, newOptions))
+    expect(generateDebouncedValidateField).toHaveBeenLastCalledWith(form)
+    expect(form.debouncedValidateField).toBe('fakeResponse')
   })
 
   it('should returns the values on call', function() {
