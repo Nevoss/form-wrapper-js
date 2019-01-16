@@ -15,3 +15,22 @@ export const isObject = (value: any): boolean => {
 export const warn = (message): void => {
   console.error(`[Form-wrapper-js warn]: ${message}`)
 }
+
+/**
+ * debounce function
+ *
+ * @param callback
+ * @param time
+ */
+export const debounce = (callback: Function, time: number): Function => {
+  let interval
+
+  return (...args) => {
+    clearTimeout(interval)
+    interval = setTimeout(() => {
+      interval = null
+
+      callback(...args)
+    }, time)
+  }
+}

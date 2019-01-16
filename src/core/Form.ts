@@ -3,6 +3,7 @@ import { Validator } from './Validator'
 import { Touched } from './Touched'
 import { InterceptorManager } from './InterceptorManager'
 import { isObject, warn } from '../utils'
+import generateDebouncedValidateField from '../helpers/generateDebouncedValidateField'
 import generateDefaultLabel from '../helpers/generateDefaultLabel'
 import generateOptions from '../helpers/generateOptions'
 import defaultOptions from '../default-options'
@@ -79,6 +80,12 @@ export class Form {
   public $interceptors: InterceptorManagersObject
 
   /**
+   * holds the debounced version of `validateField` method the debounce time is
+   * pre defined in the `$options` prop
+   */
+  public debouncedValidateField: Function
+
+  /**
    * constructor of the class
    *
    * @param data
@@ -86,7 +93,7 @@ export class Form {
    */
   constructor(data: Object, options: Options = {}) {
     this.assignOptions(options)
-      .init(data)
+      ._init(data)
       .resetValues()
   }
 
@@ -107,6 +114,7 @@ export class Form {
    */
   public assignOptions(options: Options) {
     this.$options = generateOptions(this.$options, options)
+    this.debouncedValidateField = generateDebouncedValidateField(this)
 
     return this
   }
@@ -199,7 +207,7 @@ export class Form {
     this.$errors.unset(fieldKey)
 
     const errors = this.$validator.validateField(
-      this.buildFieldObject(fieldKey),
+      this._buildFieldObject(fieldKey),
       this
     )
 
@@ -278,7 +286,8 @@ export class Form {
 
     this.$options.validation.unsetFieldErrorsOnFieldChange &&
       this.$errors.unset(fieldKey)
-    this.$options.validation.onFieldChanged && this.validateField(fieldKey)
+    this.$options.validation.onFieldChanged &&
+      this.debouncedValidateField(fieldKey)
 
     return this
   }
@@ -330,7 +339,7 @@ export class Form {
    */
   public submit(callback: SubmitCallback): Promise<any> {
     let chain: any[] = [
-      this.wrapSubmitCallBack(callback),
+      this._wrapSubmitCallBack(callback),
       error => Promise.reject({ error, form: this }),
     ]
 
@@ -357,11 +366,12 @@ export class Form {
 
   /**
    * Init the form
-   * fill all the values that should be filled (Validator, OriginalData etc..(
+   * fill all the values that should be filled (Validator, OriginalData etc..)
    *
    * @param data
+   * @private
    */
-  private init(data: Object): Form {
+  private _init(data: Object): Form {
     let rules = {}
     let originalData = {}
     let labels = {}
@@ -406,8 +416,9 @@ export class Form {
    * build Field object
    *
    * @param fieldKey
+   * @private
    */
-  private buildFieldObject(fieldKey: string): Field {
+  private _buildFieldObject(fieldKey: string): Field {
     return {
       key: fieldKey,
       value: this[fieldKey],
@@ -420,8 +431,9 @@ export class Form {
    * to normalize the promise resolve or reject parameter
    *
    * @param callback
+   * @private
    */
-  private wrapSubmitCallBack(callback: SubmitCallback): Function {
+  private _wrapSubmitCallBack(callback: SubmitCallback): Function {
     return () =>
       callback(this).then(
         response => Promise.resolve({ response, form: this }),
