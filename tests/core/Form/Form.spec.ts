@@ -11,7 +11,6 @@ import generateDebouncedValidateField from '../../../src/helpers/generateDebounc
 jest.mock('../../../src/core/Errors')
 jest.mock('../../../src/core/Validator')
 jest.mock('../../../src/core/FieldKeysCollection')
-jest.mock('../../../src/core/Touched')
 jest.mock('../../../src/helpers/generateDebouncedValidateField', () => {
   return {
     __esModule: true,
