@@ -70,16 +70,18 @@ describe('Form.submit.ts', () => {
     form.$errors.any = jest.fn(() => true)
 
     const validateSpy = jest.spyOn(form, 'validate')
+    const callback = jest.fn(() => Promise.resolve())
 
-    expect.assertions(4)
+    expect.assertions(5)
 
     try {
-      await form.submit(() => Promise.resolve())
+      await form.submit(callback)
     } catch (e) {
       expect(validateSpy).toBeCalledTimes(1)
       expect(e.hasOwnProperty('error')).toBe(true)
       expect(e.error.hasOwnProperty('message')).toBe(true)
       expect(e.form).toBe(form)
+      expect(callback).toHaveBeenCalledTimes(0)
     }
   })
 
@@ -124,7 +126,7 @@ describe('Form.submit.ts', () => {
     let form = new Form({}) as Form
 
     let mockCallable = jest.fn(() => Promise.resolve())
-    form.$errors.any = jest.fn(() => false)
+    form.$errors.any = jest.fn(() => true)
 
     form.submit(mockCallable).catch(() => false)
 

@@ -208,7 +208,10 @@ export class Form {
     this.$errors.unset(fieldKey)
 
     try {
-      await this.$validator.validateField(this._buildFieldObject(fieldKey), this)
+      await this.$validator.validateField(
+        this._buildFieldObject(fieldKey),
+        this
+      )
     } catch (error) {
       if (!(error instanceof FieldValidationError)) {
         return Promise.reject(error)
@@ -229,6 +232,21 @@ export class Form {
     })
 
     return Promise.all(promises)
+  }
+
+  /**
+   * returns if validator is validating the field or the whole form
+   *
+   * @param fieldKey
+   */
+  public isValidating(fieldKey: string | null = null) {
+    if (fieldKey && !this.hasField(fieldKey)) {
+      warn(`\`${fieldKey}\` is not a valid field`)
+    }
+
+    return fieldKey
+      ? this.$validator.$validating.has(fieldKey)
+      : this.$validator.$validating.any()
   }
 
   /**

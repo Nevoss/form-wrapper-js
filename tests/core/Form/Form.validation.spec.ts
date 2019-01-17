@@ -4,7 +4,6 @@ import * as utils from '../../../src/utils'
 import { mocked } from 'ts-jest/utils'
 
 jest.mock('../../../src/core/Errors')
-jest.mock('../../../src/core/Validator')
 jest.mock('../../../src/core/FieldKeysCollection')
 
 describe('Form.validation.ts', () => {
@@ -46,13 +45,14 @@ describe('Form.validation.ts', () => {
   })
 
   it('should warn if trying to validate field and the field is not exists', async () => {
-    let warnMock = jest.spyOn(utils, 'warn')
+    const warnSpy = jest.spyOn(utils, 'warn')
 
     let form = new Form({ name: null })
 
     await form.validateField('first_name')
 
-    expect(warnMock).toHaveBeenCalledTimes(1)
+    expect(warnSpy).toHaveBeenCalledTimes(1)
+    warnSpy.mockClear()
   })
 
   it('should validate all the fields of the form', async () => {
@@ -113,5 +113,44 @@ describe('Form.validation.ts', () => {
       expect(e).toBeInstanceOf(Error)
       expect(e.message).toBe('error')
     }
+  })
+
+  it('should checks if validating the field', () => {
+    let form = new Form({ name: null })
+
+    form.$validator.$validating.has = jest.fn(() => true)
+
+    expect(form.isValidating('name')).toBe(true)
+    expect(form.$validator.$validating.has).toHaveBeenCalledWith('name')
+
+    form.$validator.$validating.has = jest.fn(() => false)
+
+    expect(form.isValidating('name')).toBe(false)
+    expect(form.$validator.$validating.has).toHaveBeenCalledWith('name')
+  })
+
+  it('should check if the whole form is on validation mode', () => {
+    let form = new Form({ name: null })
+
+    form.$validator.$validating.any = jest.fn(() => true)
+
+    expect(form.isValidating()).toBe(true)
+    expect(form.$validator.$validating.any).toHaveBeenCalledTimes(1)
+
+    form.$validator.$validating.any = jest.fn(() => false)
+
+    expect(form.isValidating()).toBe(false)
+    expect(form.$validator.$validating.any).toHaveBeenCalledTimes(1)
+  })
+
+  it('should warn if the field is not exists in the initial fields', () => {
+    let warnSpy = jest.spyOn(utils, 'warn')
+
+    let form = new Form({ name: null })
+
+    form.isValidating('loYodea')
+
+    expect(warnSpy).toHaveBeenCalledTimes(1)
+    warnSpy.mockClear()
   })
 })
