@@ -2,7 +2,7 @@ import { Form } from '../../../src/core/Form'
 
 jest.mock('../../../src/core/Errors')
 jest.mock('../../../src/core/Validator')
-jest.mock('../../../src/core/Touched')
+jest.mock('../../../src/core/FieldKeysCollection')
 
 describe('Form.interceptors.ts', () => {
   it('should add new interceptor to the end of the chain when using submissionComplete interceptorManager', async () => {

@@ -3,7 +3,7 @@ import * as utils from '../../../src/utils'
 
 jest.mock('../../../src/core/Errors')
 jest.mock('../../../src/core/Validator')
-jest.mock('../../../src/core/Touched')
+jest.mock('../../../src/core/FieldKeysCollection')
 
 describe('Form.events.ts', () => {
   let data = {

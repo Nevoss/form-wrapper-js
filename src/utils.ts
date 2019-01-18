@@ -1,3 +1,14 @@
+import { RawRule } from './types/Validator'
+
+/**
+ * determine if value is a boolean
+ *
+ * @param value
+ */
+export const isBoolean = (value: any): value is boolean => {
+  return typeof value === 'boolean'
+}
+
 /**
  * check if value is an object and only object
  *
@@ -5,6 +16,24 @@
  */
 export const isObject = (value: any): boolean => {
   return value !== null && typeof value === 'object' && !Array.isArray(value)
+}
+
+/**
+ * determine if value is a Promise
+ *
+ * @param value
+ */
+export const isPromise = (value: any): value is Promise<any> => {
+  return !!value && isObject(value) && typeof value.then === 'function'
+}
+
+/**
+ * checks if value is implements RawRule interface
+ *
+ * @param value
+ */
+export const isRawRule = (value: any): value is RawRule => {
+  return isObject(value) && value.passes
 }
 
 /**

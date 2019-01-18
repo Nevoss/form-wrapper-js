@@ -5,14 +5,14 @@ import { Form } from '../core/Form'
  * Passes function is a prop in Rule Object
  */
 export interface PassesFunction {
-  (field: Field, form: Form): boolean
+  (field?: Field, form?: Form): Promise<any> | boolean
 }
 
 /**
  * Message function is a prop in the Rule Object
  */
 export interface MessageFunction {
-  (field: Field, form: Form): string
+  (field?: Field, form?: Form): string
 }
 
 /**

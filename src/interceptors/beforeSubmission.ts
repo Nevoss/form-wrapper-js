@@ -7,8 +7,14 @@ import { InterceptorHandler } from '../types/Interceptors'
  */
 export const validateForm: InterceptorHandler = {
   fulfilled: (form: Form): Promise<any> => {
-    if (form.$options.validation.onSubmission && !form.validate()) {
-      return Promise.reject({ message: 'Form is invalid.' })
+    if (form.$options.validation.onSubmission) {
+      return form.validate().then(() => {
+        if (form.$errors.any()) {
+          return Promise.reject({ message: 'Form is invalid.' })
+        }
+
+        return Promise.resolve(form)
+      })
     }
 
     return Promise.resolve(form)
