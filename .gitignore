@@ -5,3 +5,4 @@ dist
 coverage
 .rpt2_cache
 examples
+docs/.vuepress/dist
