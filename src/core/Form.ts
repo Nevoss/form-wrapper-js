@@ -1,8 +1,9 @@
 import { Errors } from './Errors'
 import { Validator } from './Validator'
-import { Touched } from './Touched'
+import { FieldKeysCollection } from './FieldKeysCollection'
 import { InterceptorManager } from './InterceptorManager'
 import { isObject, warn } from '../utils'
+import generateDebouncedValidateField from '../helpers/generateDebouncedValidateField'
 import generateDefaultLabel from '../helpers/generateDefaultLabel'
 import generateOptions from '../helpers/generateOptions'
 import defaultOptions from '../default-options'
@@ -15,6 +16,7 @@ import {
   InterceptorHandler,
   InterceptorManagersObject,
 } from '../types/Interceptors'
+import { FieldValidationError } from '../errors/FieldValidationError'
 
 export class Form {
   /**
@@ -43,9 +45,9 @@ export class Form {
   public $validator: Validator
 
   /**
-   * Touched class - holds all the fields that was touched
+   * Touched - holds all the fields that was touched
    */
-  public $touched: Touched
+  public $touched: FieldKeysCollection
 
   /**
    * Holds all the labels of the fields
@@ -79,6 +81,12 @@ export class Form {
   public $interceptors: InterceptorManagersObject
 
   /**
+   * holds the debounced version of `validateField` method the debounce time is
+   * pre defined in the `$options` prop
+   */
+  public debouncedValidateField: Function
+
+  /**
    * constructor of the class
    *
    * @param data
@@ -86,7 +94,7 @@ export class Form {
    */
   constructor(data: Object, options: Options = {}) {
     this.assignOptions(options)
-      .init(data)
+      ._init(data)
       .resetValues()
   }
 
@@ -107,6 +115,7 @@ export class Form {
    */
   public assignOptions(options: Options) {
     this.$options = generateOptions(this.$options, options)
+    this.debouncedValidateField = generateDebouncedValidateField(this)
 
     return this
   }
@@ -180,7 +189,7 @@ export class Form {
    *
    * @param fieldKey
    */
-  public validate(fieldKey: string | null = null): boolean {
+  public validate(fieldKey: string | null = null): Promise<any> {
     return fieldKey ? this.validateField(fieldKey) : this.validateAll()
   }
 
@@ -189,40 +198,55 @@ export class Form {
    *
    * @param fieldKey
    */
-  public validateField(fieldKey: string): boolean {
+  public async validateField(fieldKey: string): Promise<any> {
     if (!this.hasField(fieldKey)) {
       warn(`\`${fieldKey}\` is not a valid field`)
 
-      return true
+      return Promise.resolve()
     }
 
     this.$errors.unset(fieldKey)
 
-    const errors = this.$validator.validateField(
-      this.buildFieldObject(fieldKey),
-      this
-    )
+    try {
+      await this.$validator.validateField(
+        this._buildFieldObject(fieldKey),
+        this
+      )
+    } catch (error) {
+      if (!(error instanceof FieldValidationError)) {
+        return Promise.reject(error)
+      }
 
-    if (errors.length > 0) {
-      this.$errors.push({ [fieldKey]: errors })
+      this.$errors.push({ [fieldKey]: error.messages })
     }
 
-    return errors.length === 0
+    return Promise.resolve()
   }
 
   /**
    * validate all the fields of the form
    */
-  public validateAll(): boolean {
-    let isValid = true
-
-    Object.keys(this.values()).forEach(fieldKey => {
-      if (!this.validateField(fieldKey)) {
-        isValid = false
-      }
+  public validateAll(): Promise<any> {
+    const promises = Object.keys(this.$initialValues).map(fieldKey => {
+      return this.validateField(fieldKey)
     })
 
-    return isValid
+    return Promise.all(promises)
+  }
+
+  /**
+   * returns if validator is validating the field or the whole form
+   *
+   * @param fieldKey
+   */
+  public isValidating(fieldKey: string | null = null) {
+    if (fieldKey && !this.hasField(fieldKey)) {
+      warn(`\`${fieldKey}\` is not a valid field`)
+    }
+
+    return fieldKey
+      ? this.$validator.$validating.has(fieldKey)
+      : this.$validator.$validating.any()
   }
 
   /**
@@ -278,7 +302,8 @@ export class Form {
 
     this.$options.validation.unsetFieldErrorsOnFieldChange &&
       this.$errors.unset(fieldKey)
-    this.$options.validation.onFieldChanged && this.validateField(fieldKey)
+    this.$options.validation.onFieldChanged &&
+      this.debouncedValidateField(fieldKey)
 
     return this
   }
@@ -330,7 +355,9 @@ export class Form {
    */
   public submit(callback: SubmitCallback): Promise<any> {
     let chain: any[] = [
-      this.wrapSubmitCallBack(callback),
+      () => callback(this),
+      null,
+      response => Promise.resolve({ response, form: this }),
       error => Promise.reject({ error, form: this }),
     ]
 
@@ -357,11 +384,12 @@ export class Form {
 
   /**
    * Init the form
-   * fill all the values that should be filled (Validator, OriginalData etc..(
+   * fill all the values that should be filled (Validator, OriginalData etc..)
    *
    * @param data
+   * @private
    */
-  private init(data: Object): Form {
+  private _init(data: Object): Form {
     let rules = {}
     let originalData = {}
     let labels = {}
@@ -389,7 +417,7 @@ export class Form {
     this.$extra = extra
     this.$validator = new Validator(rules, this.$options.validation)
     this.$errors = new Errors()
-    this.$touched = new Touched()
+    this.$touched = new FieldKeysCollection()
     this.$interceptors = {
       beforeSubmission: new InterceptorManager(
         Form.defaults.interceptors.beforeSubmission.all()
@@ -406,26 +434,13 @@ export class Form {
    * build Field object
    *
    * @param fieldKey
+   * @private
    */
-  private buildFieldObject(fieldKey: string): Field {
+  private _buildFieldObject(fieldKey: string): Field {
     return {
       key: fieldKey,
       value: this[fieldKey],
       label: this.$labels[fieldKey],
     }
-  }
-
-  /**
-   * wrap the submit callback function
-   * to normalize the promise resolve or reject parameter
-   *
-   * @param callback
-   */
-  private wrapSubmitCallBack(callback: SubmitCallback): Function {
-    return () =>
-      callback(this).then(
-        response => Promise.resolve({ response, form: this }),
-        error => Promise.reject({ error, form: this })
-      )
   }
 }
