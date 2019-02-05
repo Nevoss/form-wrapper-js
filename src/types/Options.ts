@@ -30,9 +30,9 @@ export interface ValidationOptions {
   onFieldChanged?: boolean
 
   /**
-   * the debounce time (on milliseconds) for `debounceValidateField` method
-   * this method will be called in `fieldChanged` method if `onFieldChanged`
-   * equals to true
+   * the debounce time (on milliseconds) for `debounceValidateField` method.
+   * `debounceValidateField` method will be called on `fieldChanged` method.
+   * if `validation.onFieldChanged` option equals to true
    */
   debouncedValidateFieldTime?: number
 
@@ -47,17 +47,17 @@ export interface ValidationOptions {
   onSubmission?: boolean
 
   /**
-   * when calling "fieldChanged" method the errors of the field will be removed
+   * on "fieldChanged" call, the errors of the field will be removed
    */
   unsetFieldErrorsOnFieldChange?: boolean
 
   /**
-   * when validation field with a chain of validation rules if this option assigned as true,
-   * for this specific field it is stopping to validate the other rules
+   * It will stop the chain of a field validation when one rule of the
+   * validation chain will failed.
    */
   stopAfterFirstRuleFailed?: boolean
 
-  /***
+  /**
    * Default message for errors
    */
   defaultMessage?: MessageFunction | string
