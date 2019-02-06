@@ -1,7 +1,7 @@
 # Getting Started
 
-Before we getting started it's impotent to know that the guide is written in the context of [VueJS](https://vuejs.org/),
-just because all this library written in the same context.
+Before we getting started it's necessary to understand that this guide is written in the context of [VueJS](https://vuejs.org/),
+just because the library was written in the same context.
 **BUT** you can use it in any any context you likes, even in vanilla JS.
 
 ## Installation
@@ -58,10 +58,8 @@ export default {
 </script>
 ```
 
-This is the most basic usage you will need from a form.
-
-First we import the `Form` class from the library then we created a form property in Vue data property. `name` and `last_name`
-are our form\`s inputs, we initiate there values with `null` for each of them.
+First we have been import the `Form` class from the library, then created a form property inside Vue data property. `name` and `last_name`
+are our form fields, that was initiated with `null` value.
 
 ```js
 import { Form } from 'form-wrapper-js'
@@ -79,7 +77,7 @@ export default {
 ```
 
 ::: tip
-We can initiate the form fields with any value we like, e.g:
+You can initiate the form fields with any value you likes, e.g:
 
 ```js
 return {
@@ -90,8 +88,8 @@ return {
 
 :::
 
-Then we bind the inputs properties to their inputs. the library sets the inputs properties as a first citizen property of the
-form so you can just get and set any input property like: `form.name` and `form.last_name`
+Then we have bound the field properties to their inputs. the library sets the field property as a first citizen property of the
+`Form` object, so you can just `get` and `set` field value like that: `form.name` and `form.last_name`
 
 ```html
 <!-- init the form -->
