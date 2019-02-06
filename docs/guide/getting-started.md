@@ -59,7 +59,7 @@ export default {
 ```
 
 First we have been import the `Form` class from the library, then created a form property inside Vue data property. `name` and `last_name`
-are our form fields, that was initiated with `null` value.
+are our form fields that was initiated with `null` value.
 
 ```js
 import { Form } from 'form-wrapper-js'
@@ -98,11 +98,13 @@ Then we have bound the field properties to their inputs. the library sets the fi
 <!-- -->
 ```
 
-we use `v-model` like we used to use before there is no magic here.
+we use `v-model` like a normal vue reactive property, there is no magic here.
 
-And in the end we set up the submit method
+At the end we created the `submit` method, to send out the form fields values
 
 ```js
+import axios from 'axios'
+
 export default {
   // Vue stuff....
   methods: {
@@ -117,10 +119,10 @@ export default {
 }
 ```
 
-the Form `submit` method accept a function as it first arguments the function must returns a promise, more information
-how you can use the submit method is in the section: [Form submission](/guide/form-submission.md)
+The Form `submit` method accept a function as it first arguments, the function must return a promise. to explore about more information of
+how you can use the `submit` method take a look at [Form submission](/guide/form-submission.md) section.
 
-last thing we do is to bind the `submit` method that we created to the form itself
+Last thing to do is to bind the `submit` method that we created to the form itself
 
 ```html
 <form @submit.prevent="submit"><!-- form inputs and button --></form>
@@ -130,7 +132,8 @@ last thing we do is to bind the `submit` method that we created to the form itse
 Don't forget to prevent the default behavior of the form by setting `prevent` modifier
 :::
 
-## Why do I need this?
+## Why do I need it?
 
-So maybe the "Getting started" use case is too simple, you don\`t need a whole library just for this simple case. **but** as you go on with this
-guide you will see more solutions that can solve simple and complex problems that will pop up almost every time you code a form, the idea of the library is to make the development of the form more easy and fun. :smile:
+So maybe the "Getting started" use case is too simple, you don't need a whole library just for the above simple case. **but** as you go on with this
+guide you will explore solutions that can solves simple and complex problems that will pop up almost every time you will code a form. 
+the idea of the library is to make the forms development more easy and fun. :smile:

@@ -1,6 +1,7 @@
 # Field Property
 
-Until now we see a basic usage of the Form class:
+The basic usage of the `Form` object as explained on [Getting started](/guide/getting-started) section
+is very good for simple cases.
 
 ```js
 import { Form } from 'form-wrapper-js'
@@ -16,8 +17,8 @@ export default {
 }
 ```
 
-but what if we need to setting up more configuration to the field itself like: `label`, `rules` (validation rules) and `extras`.
-you can declare a form field also like that:
+But there is cases that you will want to set up some configuration to the field, like: `label`, `rules` (validation rules) and `extras`.
+for this purpose there is another way you can declare a form field.
 
 ```js
 import { Form } from 'form-wrapper-js'
@@ -42,20 +43,21 @@ export default {
 }
 ```
 
-`rules` are cover in ower [validation](/guide/validation.md) section. but in this section we will dig in to undrstand all the other
-properties of the field.
+`rules` has covered in another section: [validation](/guide/validation.md). in this section we will dig into the other
+field properties.
 
 ## Value property
 
 ::: warning
-`value` is the only field that **required** when declare your field as an object.
+`value` is the only field that is **require** when you declare a field as an object.
 :::
-The value propery will hold the initial value of the field:
+
+The value property will hold the initial value of the field:
 
 ```js
 new Form({
   name: {
-    value: null, // null is the initial propery of `name`
+    value: null, // null is the initial property of `name`
   },
 })
 
@@ -66,9 +68,9 @@ new Form({
 })
 ```
 
-## Label propery
+## Label property
 
-The label propery is the display name of you field, the label will be used in validation error messages, also you can use it yourself:
+The label property is the display name of you field. the label will be used in validation error messages. you can also use it in your code:
 
 ```js
 const form = new Form({
@@ -83,30 +85,50 @@ form.$labels.name // -> 'Your name'
 form.$labels.last_name // -> 'Last name'
 ```
 
-As you can see if you don`t specify a lable the library will generate a default one, it will uppercase the first word and every underscore
-will become a space.
+As you can see if label is not exists in the field, the library will generate a default one (uppercase the first word and every underscore
+will become a space)
 
-## Extras propery
+## Extras Property
 
-"extras" propery will be used to any thing that related to the field that you will need to use later, maybe in validation or maybe event in your
-Vue template, one good example for that is `options`, you can speciify a field options that can be used in the template.
+"extras" property will be used to anything that related to the field, and can be useful later in the code, 
+One good example for that is an `options` property. field `options` can be declared and used later in the template.
 
-```js
-const form = new Form({
-  job_title: {
-    value: null,
-    extras: {
-      options: [
-        { value: 1, label: 'Developer' },
-        { value: 2, label: 'Manager' },
-      ],
-    },
-  },
-})
+```vue
+<template>
+<form>
+  <select v-model="form.job_title">
+    <option 
+      v-for="option in form.$extras.job_title.options" 
+      :key="option.value"
+      :value="option.value"
+    > {{ options.label }} </option>
+  </select>
+</form>
+</template>
 
-form.$extras.job_title.options // -> (The option array from before)
+<script >
+export default {
+  data() {
+    return {
+      form: new Form({
+        job_title: {
+          value: null,
+          extras: {
+            options: [
+              { value: 1, label: 'Developer' },
+              { value: 2, label: 'Manager' },
+            ],
+          },
+        },
+      })     
+    }
+  }
+}
+</script>
 ```
+
+It is important to understand that you can set any property you like in `extras`.
 
 ---
 
-**As we say before `rules` property will be cover later in this guide on [validation](/guide/validation.md) section.**
+**As we say before `rules` property will be cover later on [validation](/guide/validation.md) section.**
