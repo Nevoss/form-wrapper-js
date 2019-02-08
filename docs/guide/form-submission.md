@@ -2,7 +2,7 @@
 
 ## Usage
 
-There is couple of things that hapends when your are submitting your form, but first let see a basic submission
+There are couple of things that can happen when submitting a form, but first, let see a basic submission implementation.
 
 ```vue
 <template>
@@ -27,24 +27,27 @@ export default {
   methods: {
     async submit() {
       try {
-        const response = await this.form.submit(form =>
+        const { response, form } = await this.form.submit(form =>
           axios.post('https://example.com/form', form.values())
         )
-      } catch (e) {}
+      } catch ({ error, form }) {}
     },
   },
 }
 </script>
 ```
 
-In this section we are using axios but this is important to know that `submit` method accept any thing
-that returns `Promise`, that is the one rule to know about submission.
+In this code snippet we are using 'axios' but `submit` method accept any method that returns a `Promise`.
 
-`submit` method resolves an object if the submission was successful, one property is the `Form` itself with the key of `form`
-the other property is `response` that holds the response from your callback.
+On successful submission the `submit` method resolves an object with 2 properties.
 
-If the submission is failed the `submit` method throw an exception with an object thats holds 2 parameters. the first again is the `form`
-and the secoend one is `error` that holds the error that returns from your callback.
+- `response` - holds the resolved data from your `submit` method.
+- `form` - holds the whole form object 
+
+On failure the `submit` method throws an exception with 2 properties object.
+
+- `error` - holds the exception that was throw (or rejected) from the `submit` method promise.
+- `form` - holds the whole form object.
 
 ## Why do I need `submit`?
 
@@ -52,7 +55,7 @@ It seems like `submit` method just uses the callback you provide and nothing mor
 
 - `$submitting` property become `true` when the user is sending the `Form` and turn to `false` when the submission is finished.
 - By default the form is validating itself before any submission and do not send the request if the validation failed. (can be changed via [options](/guide/options)).
-- By default the form clear the `errors`, the field `values` and the `touched` array after submission (can be changed via [options](/guide/options)).
+- By default the form clears the `errors`, the field `values` and the `touched` array after submission. (can be changed via [options](/guide/options)).
 
-Those three behiviors are methods that we called [interceptors](/guide/interceptors). you can create your own custom [interceptors](/guide/interceptors)
-to make your development more easy and clean up your code little bit.
+ In the next section there is an explanation about [interceptors](/guide/interceptors), this is another reason you should 
+ use the `submit` method.

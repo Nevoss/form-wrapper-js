@@ -1,23 +1,26 @@
 # Interceptors
 
-Before we started, this module inspired by [axios](https://github.com/axios), so big thanks to.
+Before we started, this module inspired by [axios](https://github.com/axios), so big thanks to [axios](https://github.com/axios) contributors.
 
 ## What `interceptors` are?
 
-`interceptors` are basicly methods that are injected into the submission, some of them comes before the submission and some of them comes after.
-the library letting creates your custom `interceptors`, here is some basic example.
+`interceptors` are basically methods that are injected into the submission process, some of them comes before the submission and some of them comes after.
+the library letting creates your custom `interceptors`. here are some basic examples.
 
-Let say your server side endpoint returns an errors on submission and you want to `fill` the `$error` property with those errors,
-the simple solution is doing something like that:
+Let say your server side endpoint returns an errors on submission and you wants to `fill` the `$error` property with those errors,
+the simple solution is to doing something like that:
 
 ```js
+import axios from 'axios' 
+
 export default {
   methods: {
     async submit() {
       try {
         await this.form.submit(
-          () => axios()
-          // ...
+          () => axios(
+            // ...
+          )
         )
       } catch ({ error: { response } }) {
         if (response && response.status && response.status === 422) {
@@ -29,10 +32,10 @@ export default {
 }
 ```
 
-after you creates more form you realize that you duplicate this behivor from form to form, that is why you should use interceptors.
+This behavior can be repeat from form to form, to prevent this duplication we can use `interceptors`.
 
 ```js
-// /src/form/Form.js
+// /form/Form.js
 import { Form } from 'form-wrapper-js'
 
 Form.defaults.interceptors.submissionComplete.use(
@@ -44,7 +47,7 @@ Form.defaults.interceptors.submissionComplete.use(
   }
 )
 
-// In you component
+// In a Vue component
 export default {
   methods: {
     async submit() {
@@ -53,11 +56,10 @@ export default {
           // ...
         )
       )
+    },
   },
 }
 ```
-
-now you components are much cleaner.
 
 ## How to use it?
 
@@ -66,10 +68,10 @@ For now there are 2 types of interceptors: `beforeSubmission` and `submissionCom
 - `beforeSubmission` runs before the form submission like `validation` (default interceptor).
 - `submissionComplete` runs after the submission is complete like the above example (server side errors)
 
-To use interceptors you just call the `use` method, the first argument invokes if the everything goes OK e.g: the submission passes.
-the secoend parameter invokes of something failed on the way e.g: submission failed.
+To use interceptors you will need to call the `use` method, the first function argument will be called if the everything goes OK e.g: the submission passes.
+the second one will be called if something went wrong e.g: the submission fail.
 
-Default interceptors will affect on every new instance
+You can set default interceptors that will affect on every new instance of `Form`.
 
 ```js
 import { Form } from 'form-wrapper-js'
@@ -85,7 +87,7 @@ Form.defaults.interceptors.beforeSubmission.use(form => {
 })
 ```
 
-You can also use interceptors after the `Form` instaciation.
+You can also use interceptors after the `Form` instantiated.
 
 ```js
 const form = new Form({

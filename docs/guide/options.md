@@ -1,13 +1,13 @@
 # Options
 
-In some cases you can customize the behivor of the form. in this section we will cover the default options and
-how you can changed them
+Options are great way o customize the behavior of your forms. in this section we will cover the default options and
+how you can changed them.
 
 ## Setting options
 
-There is Three main way to change the options
+There is Three main way to change the default options.
 
-- Secoend parameter of the form
+- As a second parameter of the `Form` constructor.
 
 ```js
 const form = new Form(
@@ -31,27 +31,29 @@ form.assignOptions({
 
 // OR
 
-form.$options.validation.onFieldBlurred = true // change spesific option
+form.$options.validation.onFieldBlurred = true // change specific option
 ```
 
-- change to all new instances that will come later:
+- Change the defaults will affect the new instance that will create from the `Form` class:
 
 ```js
 import { Form } from 'form-wrapper-js'
 
 Form.assignDefaultOptions({
-  // override options object
+  // override default options object
 })
 
-Form.defaults.options.validation.onFieldChanged = true // change spesific option
+Form.defaults.options.validation.onFieldChanged = true // change specific default option
 ```
 
 ## Default options
 
-This decleration snippet was taken from the code itself.
+This deceleration snippet was taken from the code itself. you can overview the whole 
+`options` object and the default values of it.
 
 ```js
-{
+export default {
+  
   successfulSubmission: {
     /**
      * Clear errors after successful submission
@@ -68,6 +70,7 @@ This decleration snippet was taken from the code itself.
      */
     resetValues: true,
   },
+  
   validation: {
     /**
      * validate the field on field changed
@@ -112,6 +115,6 @@ This decleration snippet was taken from the code itself.
 
 ::: warning
 
-- `validation.onFieldChange` - will work only if the [field event `fieldChange`](/guide/field-events.md) was bounded to the field
-- `validation.onFieldBlurred` - will work only if the [field event `fieldBlurred`](/guide/field-events.md) was bounded to the field
+- `validation.onFieldChange` - will work only if the [field event `fieldChange`](/guide/field-events.md) was bounded to the field element.
+- `validation.onFieldBlurred` - will work only if the [field event `fieldBlurred`](/guide/field-events.md) was bounded to the field element.
   :::
