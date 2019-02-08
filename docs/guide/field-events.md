@@ -1,15 +1,15 @@
 # Field events
 
-To get the full power of the library you will need to bind 3 events to your fields
-`fieldChange`, `fieldBlurred` and `fieldFocused`, **BUT** in most cases you will not need all of them.
-in this section we will cover why do you need those method.
+To get the full power of the library it is recommended to bind 3 event methods to your fields:
+`fieldChanged`, `fieldBlurred` and `fieldFocused`.
+in this section we will cover why do you need those method and how to use them.
 
 ## Field Focused
 
-`fieldFocused` method is usefull for 2 things:
+`fieldFocused` method is useful for 2 things:
 
-- you can track which field is on focus
-- you can track whice field is touched
+- To track which field is on focus
+- To track which field is touched
 
 ```vue
 <template>
@@ -21,19 +21,19 @@ in this section we will cover why do you need those method.
 </template>
 ```
 
-As you can see every time we foucs on the field we call `fieldFocused` with argument `name` (the field name), Now we can use it on the template or in our script,
-and we see as well the usage.
+As you can see every time `@focus` event is triggered on `name` field, `fieldFocused` method will be invoked with `name` as its' argument.
+then the of `$onFocus` will become `name` and the field also will be marked as `touched`.
 
 ::: warning
-Make sure to read `fieldBlurred` method explanation if you are using `fieldFocused` to track `$onFocus` property
+Make sure to read `fieldBlurred` method explanation when you are using `fieldFocused` method to track `$onFocus` property.
 :::
 
 ## Field Blurred
 
-`fieldBlurred` method is usefull for 2 things:
+`fieldBlurred` method is useful for 2 things:
 
-- It will release `$onFocus` - that's mean that if you set `fieldFocused` event without setting `fieldBlurred` event,
-  the field will remain `$onFocus` until you will call `fieldFocused` agian
+- It will release `$onFocus` -  if you will bind `fieldFocused` event without bind `fieldBlurred` event,
+  the field will remain `$onFocus` until you will call `fieldFocused` again.
 - It will validate the field if declared in the [options](/guide/options)
 
 ```vue
@@ -46,9 +46,10 @@ Make sure to read `fieldBlurred` method explanation if you are using `fieldFocus
 
 ## Field Changed
 
-`fieldChange` is a general name for 2 events that this method can be bind to, `change` event and `input` event.
+`fieldChange` is a general method for 2 possible events, 
+for some elements `onChange` event will be suitable and for another `onInput`.
 
-The method is usefull for 2 things:
+The method is useful for 2 things:
 
 - It will unset error if declared in the [options](/guide/optios)
 - It will validate the field if declared in the [options](/guide/options)
@@ -66,9 +67,9 @@ The method is usefull for 2 things:
 
 ## Dirty fields
 
-One thing that is not acually event but related to field events is `dirty` fields.
+One thing that is not actually event method but related to field event methods, is `dirty` fields.
 
-`dirty` field is just way to explain fields that has a different value from their initiated value.
+`dirty` field is represent a field that has a different value from it initiated value.
 
 ```js
 const form = new Form({
@@ -85,17 +86,15 @@ form.isDirty() // returns true
 ```
 
 when you passes an argument to the `isDirty` method it checks the field key that you passed to it, but if you call the 
-method without arguments it will check the whole form, and then if only one field id `dirty` it will return `true`.
+method without arguments it will check the whole form, and then if only one field is `dirty` it will returns `true`.
 
 
 
-## Sum
+## Summery
 
-The main idea of those methods is to make it easy to track some meta data of the form. which is on focus? which is touchd? and to validate
+The main idea of those methods is to make it easy to track some meta data of the form. which field is on focus? which is touched? and to validate
 the field in some situations.
 
-As you can see alot of this section related to the [options](/guide/options) section, it will let you configure the basic behivihor you
-wants from your forms, and will clear out you components.
-
-One more thing to notice somtimes can be very easy to take alot of those methods and bind them togther in a components, try to be creative
-to create your own forms components systems.
+As you can see a lot of this section is related to the [options](/guide/options) section, 
+it will let you configure the basic behavior of the form, and will clear out your components. be creative has you can
+and group up the repeated stuff to create a reusable components.

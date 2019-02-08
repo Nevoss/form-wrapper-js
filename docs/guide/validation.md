@@ -1,15 +1,15 @@
 # Validation
 
-In some cases you will need to set up client side validation and handling an error messages. The library will
-try to make those issues easy to handle.
+There is some cases you will want to add client side validation and showing error messages. The library will
+trying to make those issues easy to handle.
 
 ## Basic validation
 
-Each field can have some `rules`, a rule is a function or an object that describe which cases the input value is valid and which cases it is not.
+Each field can have some `rules`, a rule is a function or an object that describe which cases the field value is valid and which cases it is not.
 
 ```js
 import { Form } from 'form-wrapper-js'
-import { required, email } from '@/helpers/validation.js'
+import { required, email } from '@/form/validation.js'
 
 export default {
   form: new Form({
@@ -21,10 +21,10 @@ export default {
 }
 ```
 
-The field property `email` has 2 rules bind to it, those 2 rules are declared in another file called `validation.js`.
+The field `email` has 2 rules, those 2 rules are declared in another file called `validation.js`.
 
 ```js
-// helpers/validation.js
+// form/validation.js
 
 import { isEmail } from 'some-example-library'
 
@@ -36,41 +36,43 @@ export const email = {
 }
 ```
 
-there are the 2 option you can use declare a validation rule:
+there are the 2 "shapes" of validation rule:
 
-- the first is just a function that returns `true` or `false`
-  the error message that will be collected by the [Errors collector](/guide/validation#errors) is the default error as declare in
-  the [options](/guide/options)
-- the second is an object that must at least have a `passes` property, that act's just like a function rule type. the second property is `message` (that can be also simple `string`) that returns an error message that will collect by the [Errors collector](/guide/validation#Errors) if `passes` function will return `false`.
+- The first is just a function that returns a `boolean`.
+  the error message that will be collect by the [Errors collector](#errors) is the default error message that has been declared in
+  the [form options](/guide/options)
+- The second is an object. the object must at least have a `passes` property 
+  that should be just like a function rule. the second property is `message` (that can be also a simple `string`), 
+  it should return an error message that will collect by the [Errors collector](/guide/validation#Errors) in case the field is not valid.
 
 ::: tip
-By default the validation runs on submission. you can tweak out the [options](/guide/options) call validation on field input or on field blurred, and also
-you can call the validation manually:
+By default the validation runs on submission. you can tweak out the [options](/guide/options) and make your validation runs on field input event or on field blurred event 
+and also you can call the validation manually:
 
-- `form.validate()` - will run validation to the whole form
+- `form.validate()` - will validate the whole form
 - `form.validate('name')` - will validate only `name` field
 
-check out the [options](/guide/options) before you uses those methods.
+check out the [options](/guide/options) before starting to use those methods.
 :::
 
 ## Validation`s functions
 
-`passes` and `message` function can be very flexible in fact you can create a very powerful validation file or files.
-their are both invoke with the same arguments:
+`passes` and `message` functions can be very flexible in fact you can create a very powerful validation file or files.
+they are both invokes with the same arguments:
 
-- first argument is field, which holds:
+- first argument is field, which contains:
 
 ```js
 const field = {
-  key: 'email', // the field key
-  label: 'Email', // the label of the field
-  value: 'somthing@example.com', // the current value of the field
+  key: 'email', // field key
+  label: 'Email', // label of the field
+  value: 'somthing@example.com', // current value of the field
 }
 ```
 
-- seconed argument is the whole form object
+- second argument is the whole form object
 
-Here is an example for complex validation rule:
+Here is a quick example for a complex validation rule:
 
 ```js
 export const sameAs = sameAsField => {
@@ -82,7 +84,7 @@ export const sameAs = sameAsField => {
 }
 ```
 
-And the vue part
+And here is how you can use it in a Vue component.
 
 ```js
 import { Form } from 'form-wrapper-js'
@@ -109,11 +111,11 @@ As you can see validation rules can be very powerful and you can customize it as
 
 ## Promise base validation
 
-Somtimes you use a validation library or a http service that's returning a `Promise` and not a `boolean`
+Sometimes you will use a validation library or an http service that's returning a `Promise` and not a `boolean`
 you can use it as well by returning the `Promise` in the validation function
 
 ```js
-// helpers/validation.js
+// form/validation.js
 import { RuleValidationError } from 'form-wrapper-js'
 import axios from 'axios'
 
@@ -130,18 +132,21 @@ export const isValidEmail = {
 }
 ```
 
-As you can see `passes` function will return an `Promise` that was return by the axios library, if this promise resolved
-the input will be valid, if the promise rejected we catch it and check if the status is `422` (you can do any thing you want) and then
-we return a rejected promise with `RuleValidationError`
+As you can see `passes` function will return an `Promise` from the `axios` library, if the promise will resolved
+the field will be marked as valid, if the promise will rejected and the response status will be `422` (you can do any thing you want), the function will 
+return a rejected promise with `RuleValidationError`
 
 ::: danger
 One thing to understand, you must reject with **`RuleValidationError`**! otherwise the error will bubble up.
 :::
 
+You can use `form.isValidating('email')` In case that your `Promise` base validating take some time, the function will
+return `true` if the `Promise` base validation is still running and `false` if not.
+
 ## Errors
 
-The errors collector will collect errors each time you validate a specific field or the whole form,
-you can display them out with a use of the `$errors` property.
+The errors collector will collect errors each time validating a specific field or the whole form,
+you can display those errors out with the use of `$errors` property.
 
 ```vue
 <template>
@@ -156,24 +161,25 @@ you can display them out with a use of the `$errors` property.
 </template>
 ```
 
-each field can have multiple errors so thats why `form.$errors.get('email')` will return an array of errors (if there is only one it will be array of one error :smile:),
-that's why we use `form.$errors.getFirst('email')` to get the first error from the array.
+Each field have an array of errors, `form.$errors.get('email')` will return the whole array, 
+`form.$errors.getFirst('email')` will return the first error from that array.
 
-there is more helpers that you should use
+Here is a quick snippet of some methods from the `$errors` property you could and should use
+from time to time.
 
 ```js
-form.$errors.any() // retruns if there is any error in the form
+form.$errors.any() // checks if there is any error in the form
 
-form.$errors.has('name') // returns if there is errors in `name` field
+form.$errors.has('name') // check if there is errors in the `name` field
 
 form.$errors.clear() // will clear all the errors
 
 form.$errors.unset('name') // will clear only `name` field errors
 
-form.$errors.all() // will returns all the fields and on each field has an array of errors
+form.$errors.all() // will return all the fields with an array of errors for each of them.
 
 form.$errors.record({
   name: ['some errors', 'another one'],
   last_name: ['and another one again'],
-}) // will fill errors with the object given
+}) // will fill fields errors
 ```
