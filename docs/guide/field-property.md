@@ -1,6 +1,6 @@
 # Field Property
 
-The basic usage of the `Form` object as explained on [Getting started](/guide/getting-started) section
+The basic usage of the `Form` object as explained on [Getting started](/guide) section
 is very good for simple cases.
 
 ```js

@@ -16,7 +16,7 @@
     "prepublishOnly": "npm run build",
     "docs:dev": "vuepress dev docs",
     "docs:build": "vuepress build docs",
-    "docs:deploy": "npm run docs:build && gh-pages -d docs/.vuepress/dist"
+    "docs:deploy": "npm run docs:build && gh-pages -m 'Auto deploy [ci skip]' -d docs/.vuepress/dist"
   },
   "repository": {
     "type": "git",
