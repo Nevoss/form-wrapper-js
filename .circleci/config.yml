@@ -49,6 +49,33 @@ jobs:
                 name: Publish package
                 command: npm publish
 
+    docs-build-deploy:
+        <<: *defaults
+        steps:
+            - checkout
+
+            - restore_cache:
+                keys:
+                    - v1-dependencies-{{ checksum "package.json" }}
+                    - v1-dependencies-
+
+            - run: npm install
+
+            - save_cache:
+                paths:
+                    - node_modules
+                key: v1-dependencies-{{ checksum "package.json" }}
+
+            - run:
+                name: Configure dependencies
+                command: |
+                    git config --global user.email $GH_EMAIL
+                    git config --global user.name $GH_NAME
+
+            - run:
+                name: Deploy docs to gh-pages branch
+                command: npm run docs:deploy
+
 workflows:
     version: 2
     test-deploy:
@@ -65,3 +92,10 @@ workflows:
                         only: /^v.*/
                     branches:
                         ignore: /.*/
+
+    docs:
+        jobs:
+            - docs-build-deploy:
+                filters:
+                    branches:
+                        only: master
