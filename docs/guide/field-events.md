@@ -67,9 +67,9 @@ The method is useful for 2 things:
 
 ## Dirty fields
 
-One thing that is not actually event method but related to field event methods, is `dirty` fields.
+One thing that is not actually event method but related to field event methods, are `dirty` fields.
 
-`dirty` field is represent a field that has a different value from it initiated value.
+A field is `dirty` if it has a different value from the initialized value.
 
 ```js
 const form = new Form({
@@ -85,16 +85,16 @@ form.isDirty('last_name') // returns false
 form.isDirty() // returns true
 ```
 
-when you passes an argument to the `isDirty` method it checks the field key that you passed to it, but if you call the 
-method without arguments it will check the whole form, and then if only one field is `dirty` it will returns `true`.
+When you pass an argument to the `isDirty` method it checks the field key that you passed to it, but if you call the 
+method without arguments it will check the whole form and then return `true` if at least one field is `dirty`.
 
 
 
-## Summery
+## Summary
 
-The main idea of those methods is to make it easy to track some meta data of the form. which field is on focus? which is touched? and to validate
+The main idea of these methods is to make it easy to track some meta data of the form. Which field is on focus? Which is touched? And to validate
 the field in some situations.
 
-As you can see a lot of this section is related to the [options](/guide/options) section, 
-it will let you configure the basic behavior of the form, and will clear out your components. be creative has you can
-and group up the repeated stuff to create a reusable components.
+As you can see, a lot of this section is related to the [options](/guide/options) section. 
+It will let you configure the basic behavior of the form, and will clear out your components. Be as creative as you can
+and group up the repeated code to create reusable components.
