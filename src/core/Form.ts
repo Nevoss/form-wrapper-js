@@ -169,6 +169,34 @@ export class Form {
   }
 
   /**
+   * Returns FormData object with the form values,
+   * this one is for the use of file upload and other.
+   */
+  public valuesAsFormData(): FormData {
+    const values = this.values()
+    const formData = new FormData()
+
+    for (let key in values) {
+      let value = values[key]
+
+      if ([undefined, false, null].indexOf(value) > -1) {
+        continue
+      }
+
+      formData.append(key, value)
+    }
+
+    return formData
+  }
+
+  /**
+   * returns the form values as a json string.
+   */
+  public valuesAsJson(): string {
+    return JSON.stringify(this.values())
+  }
+
+  /**
    * fill the Form values with new values.
    * without remove another fields values.
    *

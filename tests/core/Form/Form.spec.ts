@@ -134,6 +134,38 @@ describe('Form.ts', () => {
     })
   })
 
+  it('should return form values as FormData object', () => {
+    const form = new Form(data) as Form & { [key: string]: any }
+
+    form.first_name = 'Nevo'
+    form.last_name = null
+    form.is_developer = false
+
+    form.not_real_prop = 'Somthing'
+
+    const formData = form.valuesAsFormData()
+
+    expect(formData).toBeInstanceOf(FormData)
+    expect(formData.get('first_name')).toBe('Nevo')
+    expect(formData.has('last_name')).toBe(false)
+    expect(formData.has('is_developer')).toBe(false)
+    expect(formData.has('not_real_prop')).toBe(false)
+  })
+
+  it('should return form values as JSON', () => {
+    const form = new Form(data) as Form & { [key: string]: any }
+
+    form.first_name = 'Nevo'
+    form.last_name = null
+    form.is_developer = false
+
+    form.not_real_prop = 'Somthing'
+
+    const valueAsJson = form.valuesAsJson()
+
+    expect(valueAsJson).toBe(JSON.stringify(form.values()))
+  })
+
   it('should resetValues the values of the form', () => {
     let form = new Form(data) as Form & FormData
 
