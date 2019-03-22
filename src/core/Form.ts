@@ -84,7 +84,7 @@ export class Form {
    * holds the debounced version of `validateField` method the debounce time is
    * pre defined in the `$options` prop
    */
-  public debouncedValidateField: Function
+  public $debouncedValidateField: Function
 
   /**
    * constructor of the class
@@ -115,7 +115,7 @@ export class Form {
    */
   public $assignOptions(options: Options) {
     this.$options = generateOptions(this.$options, options)
-    this.debouncedValidateField = generateDebouncedValidateField(this)
+    this.$debouncedValidateField = generateDebouncedValidateField(this)
 
     return this
   }
@@ -331,7 +331,7 @@ export class Form {
     this.$options.validation.unsetFieldErrorsOnFieldChange &&
       this.$errors.unset(fieldKey)
     this.$options.validation.onFieldChanged &&
-      this.debouncedValidateField(fieldKey)
+      this.$debouncedValidateField(fieldKey)
 
     return this
   }

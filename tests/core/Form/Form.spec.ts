@@ -116,7 +116,7 @@ describe('Form.ts', () => {
 
     expect(form.$options).toEqual(generateOptions(defaultOptions, newOptions))
     expect(generateDebouncedValidateField).toHaveBeenLastCalledWith(form)
-    expect(form.debouncedValidateField).toBe('fakeResponse')
+    expect(form.$debouncedValidateField).toBe('fakeResponse')
   })
 
   it('should returns the values on call', function() {
