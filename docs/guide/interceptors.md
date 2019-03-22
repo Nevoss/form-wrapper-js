@@ -4,10 +4,10 @@ Before we started, this module inspired by [axios](https://github.com/axios), so
 
 ## What `interceptors` are?
 
-`interceptors` are basically methods that are injected into the submission process, some of them comes before the submission and some of them comes after.
-the library letting creates your custom `interceptors`. here are some basic examples.
+`$interceptors` are basically methods that are injected into the submission process, some of them comes before the submission and some of them comes after.
+the library letting creates your custom `$interceptors`. here are some basic examples.
 
-Let say your server side endpoint returns an errors on submission and you wants to `fill` the `$error` property with those errors,
+Let say your server side endpoint returns an errors on submission and you wants to `fill` the `$errors` property with those errors,
 the simple solution is to doing something like that:
 
 ```js
@@ -17,7 +17,7 @@ export default {
   methods: {
     async submit() {
       try {
-        await this.form.submit(
+        await this.form.$submit(
           () => axios(
             // ...
           )
@@ -32,7 +32,7 @@ export default {
 }
 ```
 
-This behavior can be repeat from form to form, to prevent this duplication we can use `interceptors`.
+This behavior can be repeat from form to form, to prevent this duplication we can use `$interceptors`.
 
 ```js
 // /form/Form.js
@@ -51,7 +51,7 @@ Form.defaults.interceptors.submissionComplete.use(
 export default {
   methods: {
     async submit() {
-      await this.form.submit(
+      await this.form.$submit(
         () => axios(
           // ...
         )
