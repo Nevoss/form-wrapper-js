@@ -172,8 +172,8 @@ export class Form {
    * Returns FormData object with the form values,
    * this one is for the use of file upload and other.
    */
-  public valuesAsFormData(): FormData {
-    const values = this.values()
+  public $valuesAsFormData(): FormData {
+    const values = this.$values()
     const formData = new FormData()
 
     for (let key in values) {
@@ -192,8 +192,8 @@ export class Form {
   /**
    * returns the form values as a json string.
    */
-  public valuesAsJson(): string {
-    return JSON.stringify(this.values())
+  public $valuesAsJson(): string {
+    return JSON.stringify(this.$values())
   }
 
   /**

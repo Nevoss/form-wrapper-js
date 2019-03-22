@@ -53,17 +53,17 @@ On failure the `$submit` method throws an exception with 2 properties object.
 
 There are 2 methods that can help you format your fields values:
 
-- The first method, `valuesAsFormData` is useful in cases when you need to submit a form with a file in it, the common way to do so is to send the form with a `Content-Type` header: `multipart/form-data`,
+- The first method, `$valuesAsFormData` is useful in cases when you need to submit a form with a file in it, the common way to do so is to send the form with a `Content-Type` header: `multipart/form-data`,
 and sending the form values as `FormData` object. this is where the method comes into action:
 
 ```js
-form.submit(() => axios.post('https://example.com/form', form.valuesAsFormData(), {
+form.$submit(() => axios.post('https://example.com/form', form.$valuesAsFormData(), {
   headers: { 'Content-Type': 'multipart/form-data' }
 }))
 ```
 
-- The second one,`valuesAsJson` is useful for some HTTP clients that require a raw JSON as a request body. 
-the method is just a shortcut for `JSON.stringify(form.values())`
+- The second one,`$valuesAsJson` is useful for some HTTP clients that require a raw JSON as a request body. 
+the method is just a shortcut for `JSON.stringify(form.$values())`
 
 
 ## Why do I need `$submit`?

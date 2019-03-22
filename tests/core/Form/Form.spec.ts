@@ -143,7 +143,7 @@ describe('Form.ts', () => {
 
     form.not_real_prop = 'Somthing'
 
-    const formData = form.valuesAsFormData()
+    const formData = form.$valuesAsFormData()
 
     expect(formData).toBeInstanceOf(FormData)
     expect(formData.get('first_name')).toBe('Nevo')
@@ -161,9 +161,9 @@ describe('Form.ts', () => {
 
     form.not_real_prop = 'Somthing'
 
-    const valueAsJson = form.valuesAsJson()
+    const valueAsJson = form.$valuesAsJson()
 
-    expect(valueAsJson).toBe(JSON.stringify(form.values()))
+    expect(valueAsJson).toBe(JSON.stringify(form.$values()))
   })
 
   it('should resetValues the values of the form', () => {
