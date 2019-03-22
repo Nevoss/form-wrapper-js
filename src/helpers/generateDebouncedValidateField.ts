@@ -9,7 +9,7 @@ import { Form } from '../core/Form'
  */
 export default (form: Form): Function => {
   return debounce(
-    form.validateField.bind(form),
+    form.$validateField.bind(form),
     form.$options.validation.debouncedValidateFieldTime
   )
 }

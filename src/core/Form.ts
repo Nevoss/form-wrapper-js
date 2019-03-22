@@ -93,9 +93,9 @@ export class Form {
    * @param options
    */
   constructor(data: Object, options: Options = {}) {
-    this.assignOptions(options)
+    this.$assignOptions(options)
       ._init(data)
-      .resetValues()
+      .$resetValues()
   }
 
   /**
@@ -113,7 +113,7 @@ export class Form {
    *
    * @param options
    */
-  public assignOptions(options: Options) {
+  public $assignOptions(options: Options) {
     this.$options = generateOptions(this.$options, options)
     this.debouncedValidateField = generateDebouncedValidateField(this)
 
@@ -125,14 +125,14 @@ export class Form {
    *
    * @param fieldKey
    */
-  public hasField(fieldKey: string): boolean {
+  public $hasField(fieldKey: string): boolean {
     return this.hasOwnProperty(fieldKey)
   }
 
   /**
    * Set all the fields value same as $initialValues fields value
    */
-  public resetValues(): Form {
+  public $resetValues(): Form {
     for (let fieldName in this.$initialValues) {
       if (this.$initialValues.hasOwnProperty(fieldName)) {
         this[fieldName] = this.$initialValues[fieldName]
@@ -145,8 +145,8 @@ export class Form {
   /**
    * reset the form state (values, errors and touched)
    */
-  public reset(): Form {
-    this.resetValues()
+  public $reset(): Form {
+    this.$resetValues()
     this.$errors.clear()
     this.$touched.clear()
 
@@ -156,11 +156,11 @@ export class Form {
   /**
    * get all the values of the form
    */
-  public values(): Object {
+  public $values(): Object {
     let dataObj = {}
 
     Object.keys(this.$initialValues).forEach(fieldKey => {
-      if (this.hasField(fieldKey)) {
+      if (this.$hasField(fieldKey)) {
         dataObj[fieldKey] = this[fieldKey]
       }
     })
@@ -202,9 +202,9 @@ export class Form {
    *
    * @param newData
    */
-  public fill(newData: Object): Form {
+  public $fill(newData: Object): Form {
     for (let fieldName in newData) {
-      if (newData.hasOwnProperty(fieldName) && this.hasField(fieldName)) {
+      if (newData.hasOwnProperty(fieldName) && this.$hasField(fieldName)) {
         this[fieldName] = newData[fieldName]
       }
     }
@@ -217,8 +217,8 @@ export class Form {
    *
    * @param fieldKey
    */
-  public validate(fieldKey: string | null = null): Promise<any> {
-    return fieldKey ? this.validateField(fieldKey) : this.validateAll()
+  public $validate(fieldKey: string | null = null): Promise<any> {
+    return fieldKey ? this.$validateField(fieldKey) : this.$validateAll()
   }
 
   /**
@@ -226,8 +226,8 @@ export class Form {
    *
    * @param fieldKey
    */
-  public async validateField(fieldKey: string): Promise<any> {
-    if (!this.hasField(fieldKey)) {
+  public async $validateField(fieldKey: string): Promise<any> {
+    if (!this.$hasField(fieldKey)) {
       warn(`\`${fieldKey}\` is not a valid field`)
 
       return Promise.resolve()
@@ -254,9 +254,9 @@ export class Form {
   /**
    * validate all the fields of the form
    */
-  public validateAll(): Promise<any> {
+  public $validateAll(): Promise<any> {
     const promises = Object.keys(this.$initialValues).map(fieldKey => {
-      return this.validateField(fieldKey)
+      return this.$validateField(fieldKey)
     })
 
     return Promise.all(promises)
@@ -267,8 +267,8 @@ export class Form {
    *
    * @param fieldKey
    */
-  public isValidating(fieldKey: string | null = null) {
-    if (fieldKey && !this.hasField(fieldKey)) {
+  public $isValidating(fieldKey: string | null = null) {
+    if (fieldKey && !this.$hasField(fieldKey)) {
       warn(`\`${fieldKey}\` is not a valid field`)
     }
 
@@ -284,15 +284,15 @@ export class Form {
    *
    * @param fieldKey
    */
-  public isDirty(fieldKey: string | null = null): boolean {
+  public $isDirty(fieldKey: string | null = null): boolean {
     if (fieldKey) {
-      return this.isFieldDirty(fieldKey)
+      return this.$isFieldDirty(fieldKey)
     }
 
     let dirty = false
 
     for (let originalFieldKey in this.$initialValues) {
-      if (this.isFieldDirty(originalFieldKey)) {
+      if (this.$isFieldDirty(originalFieldKey)) {
         dirty = true
         break
       }
@@ -306,8 +306,8 @@ export class Form {
    *
    * @param fieldKey
    */
-  public isFieldDirty(fieldKey: string): boolean {
-    if (!this.hasField(fieldKey)) {
+  public $isFieldDirty(fieldKey: string): boolean {
+    if (!this.$hasField(fieldKey)) {
       warn(`\`${fieldKey}\` is not a valid field`)
 
       return false
@@ -321,8 +321,8 @@ export class Form {
    *
    * @param fieldKey
    */
-  public fieldChanged(fieldKey: string): Form {
-    if (!this.hasField(fieldKey)) {
+  public $fieldChanged(fieldKey: string): Form {
+    if (!this.$hasField(fieldKey)) {
       warn(`\`${fieldKey}\` is not a valid field`)
 
       return this
@@ -341,8 +341,8 @@ export class Form {
    *
    * @param fieldKey
    */
-  public fieldFocused(fieldKey: string): Form {
-    if (!this.hasField(fieldKey)) {
+  public $fieldFocused(fieldKey: string): Form {
+    if (!this.$hasField(fieldKey)) {
       warn(`\`${fieldKey}\` is not a valid field`)
 
       return this
@@ -359,8 +359,8 @@ export class Form {
    *
    * @param fieldKey
    */
-  public fieldBlurred(fieldKey: string): Form {
-    if (!this.hasField(fieldKey)) {
+  public $fieldBlurred(fieldKey: string): Form {
+    if (!this.$hasField(fieldKey)) {
       warn(`\`${fieldKey}\` is not a valid field`)
 
       return this
@@ -370,7 +370,7 @@ export class Form {
       this.$onFocus = null
     }
 
-    this.$options.validation.onFieldBlurred && this.validateField(fieldKey)
+    this.$options.validation.onFieldBlurred && this.$validateField(fieldKey)
 
     return this
   }
@@ -381,7 +381,7 @@ export class Form {
    *
    * @param callback
    */
-  public submit(callback: SubmitCallback): Promise<any> {
+  public $submit(callback: SubmitCallback): Promise<any> {
     let chain: any[] = [
       () => callback(this),
       null,

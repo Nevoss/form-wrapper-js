@@ -21,6 +21,6 @@ describe('generateDebouncedValidateField.ts', () => {
     let result = generateDebouncedValidateField(form)
 
     expect(result).toBe('example')
-    expect(utils.debounce).toHaveBeenLastCalledWith(form.validateField, 500)
+    expect(utils.debounce).toHaveBeenLastCalledWith(form.$validateField, 500)
   })
 })
