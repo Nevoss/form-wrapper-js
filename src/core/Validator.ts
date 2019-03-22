@@ -8,16 +8,12 @@ import { Field } from '../types/Field'
 import { RulesStack } from '../types/Validator'
 import { ValidationOptions } from '../types/Options'
 import { MessageFunction } from '../types/Errors'
+import { RulesManager } from './RulesManager'
 
 /**
  * Validator Class
  */
 export class Validator {
-  /**
-   * Holds all the rules
-   */
-  public $rules: RulesStack = {}
-
   /**
    * Holds the current field that the validator is validating
    */
@@ -26,37 +22,23 @@ export class Validator {
   /**
    * Validations options
    */
-  public $options: ValidationOptions
+  private _options: ValidationOptions
 
   /**
-   * constructor
+   * Rules managers - hold all the fields rules.
+   */
+  private _rules: RulesManager
+
+  /**
+   * Validator constructor.
    *
    * @param rules
    * @param options
    */
-  constructor(rules: Object, options: ValidationOptions) {
-    this.$options = { ...options }
+  constructor(rules: RulesManager, options: ValidationOptions) {
+    this._rules = rules
+    this._options = { ...options }
     this.$validating = new FieldKeysCollection()
-
-    this._buildRules(rules)
-  }
-
-  /**
-   * check if field has rules
-   *
-   * @param fieldKey
-   */
-  public has(fieldKey: string): boolean {
-    return this.$rules.hasOwnProperty(fieldKey)
-  }
-
-  /**
-   * get the rules of specific filedKey
-   *
-   * @param fieldKey
-   */
-  public get(fieldKey: string): Rule[] {
-    return this.$rules[fieldKey]
   }
 
   /**
@@ -68,12 +50,12 @@ export class Validator {
   public async validateField(field: Field, form: Form): Promise<any> {
     const { key } = field
 
-    if (!this.has(key)) {
+    if (!this._rules.has(key)) {
       return Promise.resolve()
     }
 
     const messages: string[] = []
-    let fieldRulesChain: Rule[] = Array.from(this.get(key))
+    let fieldRulesChain: Rule[] = Array.from(this._rules.get(key))
 
     this.$validating.push(key)
 
@@ -90,7 +72,7 @@ export class Validator {
 
         messages.push(fieldRule.message(field, form))
 
-        if (this.$options.stopAfterFirstRuleFailed) {
+        if (this._options.stopAfterFirstRuleFailed) {
           fieldRulesChain = []
         }
       }
@@ -101,25 +83,5 @@ export class Validator {
     return messages.length
       ? Promise.reject(new FieldValidationError(messages))
       : Promise.resolve(field)
-  }
-
-  /**
-   * building rules object
-   *
-   * @param rules
-   * @private
-   */
-  private _buildRules(rules: Object): Validator {
-    let defaultMessage: MessageFunction = generateMessageFunction(
-      this.$options.defaultMessage
-    )
-
-    Object.keys(rules).forEach(key => {
-      this.$rules[key] = rules[key].map(rawValue =>
-        Rule.buildFromRawValue(rawValue, defaultMessage)
-      )
-    })
-
-    return this
   }
 }

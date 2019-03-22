@@ -1,7 +1,7 @@
 import { Form } from '../../src/core/Form'
+import { RulesManager } from '../../src/core/RulesManager'
 import { Validator } from '../../src/core/Validator'
 import defaultOptions from '../../src/default-options'
-import { Rule } from '../../src/core/Rule'
 import { Field } from '../../src/types/Field'
 import { FieldValidationError } from '../../src/errors/FieldValidationError'
 import { ValidationOptions } from '../../src/types/Options'
@@ -10,93 +10,31 @@ import { FieldKeysCollection } from '../../src/core/FieldKeysCollection'
 
 jest.mock('../../src/core/Form')
 
-describe('Validator.js', () => {
+describe('Validator.ts', () => {
   let fakeForm: Form = new Form({})
   let defaultValidationOptions: ValidationOptions
-  let rules = {
-    first_name: [() => true],
-    last_name: [
-      {
-        passes: () => false,
-        message: 'Invalid',
-      },
-      () => true,
-    ],
-    is_developer: [
-      {
-        passes: ({ value }) => value,
-        message: ({ label, value }) =>
-          `${label} is invalid. the ${value} is incorrect`,
-      },
-      {
-        passes: () => Promise.resolve(),
-        returnsPromise: true,
-      },
-      {
-        passes: () => Promise.reject(),
-        returnsPromise: true,
-      },
-    ],
-  }
 
   beforeEach(() => {
     defaultValidationOptions = { ...defaultOptions.validation }
   })
 
   it('should construct correctly', () => {
-    let buildFromRawValueSpy = jest.spyOn(Rule, 'buildFromRawValue')
-
     defaultValidationOptions.defaultMessage = 'This is try'
 
-    let validator = new Validator(rules, defaultValidationOptions)
-
-    expect(Object.keys(validator.$rules)).toEqual([
-      'first_name',
-      'last_name',
-      'is_developer',
-    ])
+    let validator = new Validator(
+      new RulesManager({}, defaultValidationOptions.defaultMessage),
+      defaultValidationOptions
+    )
 
     expect(validator.$validating).toBeInstanceOf(FieldKeysCollection)
-    expect(validator.$rules.first_name).toHaveLength(1)
-    expect(validator.$rules.last_name).toHaveLength(2)
-    expect(validator.$rules.is_developer).toHaveLength(3)
-
-    expect(buildFromRawValueSpy).toHaveBeenCalledTimes(6)
-
-    let callNumber: number = 1
-    Object.keys(validator.$rules).forEach(fieldKey => {
-      validator.$rules[fieldKey].forEach((rule, index) => {
-        expect(rule).toBeInstanceOf(Rule)
-        expect(buildFromRawValueSpy).toHaveBeenNthCalledWith(
-          callNumber,
-          rules[fieldKey][index],
-          expect.toBeFunction()
-        )
-        callNumber++
-      })
-    })
-  })
-
-  it('should determine if has rule', () => {
-    let validator = new Validator(rules, defaultOptions.validation)
-
-    expect(validator.has('first_name')).toBe(true)
-    expect(validator.has('last_name')).toBe(true)
-    expect(validator.has('is_developer')).toBe(true)
-    expect(validator.has('other')).toBe(false)
-  })
-
-  it('should get the rules of the field key that requested', () => {
-    let validator = new Validator(rules, defaultOptions.validation)
-
-    expect(validator.get('first_name')).toBeInstanceOf(Array)
-    expect(validator.get('last_name')).toBeInstanceOf(Array)
-    expect(validator.get('other')).toBe(undefined)
   })
 
   it('should return a resolved promise if fieldKey is not exists', () => {
     const validator = new Validator(
-      { name: [() => true] },
+      new RulesManager(
+        { name: [() => true] },
+        defaultValidationOptions.defaultMessage
+      ),
       defaultValidationOptions
     )
 
@@ -112,13 +50,16 @@ describe('Validator.js', () => {
     const passesMock3 = jest.fn(() => Promise.resolve())
 
     const validator = new Validator(
-      {
-        name: [
-          passesMock1,
-          passesMock2,
-          { passes: passesMock3, returnsPromise: true },
-        ],
-      },
+      new RulesManager(
+        {
+          name: [
+            passesMock1,
+            passesMock2,
+            { passes: passesMock3, returnsPromise: true },
+          ],
+        },
+        defaultValidationOptions.defaultMessage
+      ),
       defaultValidationOptions
     )
 
@@ -142,13 +83,16 @@ describe('Validator.js', () => {
     defaultValidationOptions.stopAfterFirstRuleFailed = false
 
     const validator = new Validator(
-      {
-        name: [
-          passesMock1,
-          { passes: passesMock2, message: 'aaa' },
-          { passes: passesMock3, message: 'bbb' },
-        ],
-      },
+      new RulesManager(
+        {
+          name: [
+            passesMock1,
+            { passes: passesMock2, message: 'aaa' },
+            { passes: passesMock3, message: 'bbb' },
+          ],
+        },
+        defaultValidationOptions.defaultMessage
+      ),
       defaultValidationOptions
     )
 
@@ -181,16 +125,19 @@ describe('Validator.js', () => {
     defaultValidationOptions.stopAfterFirstRuleFailed = true
 
     const validator = new Validator(
-      {
-        name: [
-          {
-            passes: passesMock1,
-            message: ({ label }) => `${label} invalid`,
-            returnsPromise: true,
-          },
-          passesMock2,
-        ],
-      },
+      new RulesManager(
+        {
+          name: [
+            {
+              passes: passesMock1,
+              message: ({ label }) => `${label} invalid`,
+              returnsPromise: true,
+            },
+            passesMock2,
+          ],
+        },
+        defaultValidationOptions.defaultMessage
+      ),
       defaultValidationOptions
     )
 
@@ -219,9 +166,12 @@ describe('Validator.js', () => {
     defaultValidationOptions.stopAfterFirstRuleFailed = false
 
     const validator = new Validator(
-      {
-        name: [passesMock1, passesMock2],
-      },
+      new RulesManager(
+        {
+          name: [passesMock1, passesMock2],
+        },
+        defaultValidationOptions.defaultMessage
+      ),
       defaultValidationOptions
     )
 
@@ -241,7 +191,10 @@ describe('Validator.js', () => {
 
   it('should add the fieldKey to $validation collection if the field is on validation ', () => {
     const validator = new Validator(
-      { name: [() => true] },
+      new RulesManager(
+        { name: [() => true] },
+        defaultValidationOptions.defaultMessage
+      ),
       defaultValidationOptions
     )
 
