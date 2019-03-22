@@ -449,7 +449,10 @@ export class Form {
     this.$initialValues = originalData
     this.$labels = labels
     this.$extra = extra
-    this.$rules = new RulesManager(rules, this.$options.validation.defaultMessage)
+    this.$rules = new RulesManager(
+      rules,
+      this.$options.validation.defaultMessage
+    )
     this.$validator = new Validator(this.$rules, this.$options.validation)
     this.$errors = new Errors()
     this.$touched = new FieldKeysCollection()
