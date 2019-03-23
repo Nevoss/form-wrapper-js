@@ -85,10 +85,7 @@ describe('Form.ts', () => {
       defaultOptions.validation.defaultMessage
     )
 
-    expect(Validator).toHaveBeenCalledWith(
-      form.$rules,
-      defaultOptions.validation
-    )
+    expect(Validator).toHaveBeenCalledWith(defaultOptions.validation)
     expect(Errors).toHaveBeenCalled()
     expect(FieldKeysCollection).toHaveBeenCalled()
     expect(form.$interceptors.beforeSubmission).toBeInstanceOf(

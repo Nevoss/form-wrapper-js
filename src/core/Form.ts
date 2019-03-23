@@ -243,6 +243,7 @@ export class Form {
 
     try {
       await this.$validator.validateField(
+        this.$rules.get(fieldKey),
         this._buildFieldObject(fieldKey),
         this
       )
@@ -453,7 +454,7 @@ export class Form {
       rules,
       this.$options.validation.defaultMessage
     )
-    this.$validator = new Validator(this.$rules, this.$options.validation)
+    this.$validator = new Validator(this.$options.validation)
     this.$errors = new Errors()
     this.$touched = new FieldKeysCollection()
     this.$interceptors = {

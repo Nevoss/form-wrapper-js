@@ -25,18 +25,11 @@ export class Validator {
   private _options: ValidationOptions
 
   /**
-   * Rules managers - hold all the fields rules.
-   */
-  private _rules: RulesManager
-
-  /**
    * Validator constructor.
    *
-   * @param rules
    * @param options
    */
-  constructor(rules: RulesManager, options: ValidationOptions) {
-    this._rules = rules
+  constructor(options: ValidationOptions) {
     this._options = { ...options }
     this.$validating = new FieldKeysCollection()
   }
@@ -44,23 +37,25 @@ export class Validator {
   /**
    * validate specific field.
    *
+   * @param rules
    * @param field
    * @param form
    */
-  public async validateField(field: Field, form: Form): Promise<any> {
+  public async validateField(
+    rules: Rule[],
+    field: Field,
+    form: Form
+  ): Promise<any> {
     const { key } = field
 
-    if (!this._rules.has(key)) {
-      return Promise.resolve()
-    }
-
     const messages: string[] = []
-    let fieldRulesChain: Rule[] = Array.from(this._rules.get(key))
+    let fieldRulesChain: Rule[] = Array.from(rules)
 
     this.$validating.push(key)
 
     while (fieldRulesChain.length) {
       let fieldRule = fieldRulesChain.shift()
+
       try {
         await fieldRule.validate(field, form)
       } catch (error) {

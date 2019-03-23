@@ -92,8 +92,11 @@ describe('RulesManager.ts', () => {
     )
 
     expect(rulesManager.get('first_name')).toBeInstanceOf(Array)
+    expect(rulesManager.get('first_name')).toHaveLength(1)
     expect(rulesManager.get('last_name')).toBeInstanceOf(Array)
-    expect(rulesManager.get('other')).toBe(undefined)
+    expect(rulesManager.get('last_name')).toHaveLength(2)
+    expect(rulesManager.get('other')).toBeInstanceOf(Array)
+    expect(rulesManager.get('other')).toHaveLength(0)
   })
 
   it('should returns all the fields rules', () => {

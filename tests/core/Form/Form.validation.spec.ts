@@ -29,6 +29,7 @@ describe('Form.validation.ts', () => {
       name: ['error'],
     })
     expect(form.$validator.validateField).toBeCalledWith(
+      form.$rules.get('name'),
       { label: 'The Name', value: 'a', key: 'name' },
       form
     )

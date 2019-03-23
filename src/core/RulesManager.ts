@@ -41,6 +41,10 @@ export class RulesManager {
    * @param fieldKey
    */
   public get(fieldKey: string): Rule[] {
+    if (!this.has(fieldKey)) {
+      return []
+    }
+
     return this._rules[fieldKey]
   }
 
