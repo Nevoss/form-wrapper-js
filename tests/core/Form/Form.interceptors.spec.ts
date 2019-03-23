@@ -15,7 +15,7 @@ describe('Form.interceptors.ts', () => {
 
     let callback = jest.fn(() => Promise.resolve('yay!'))
 
-    await form.submit(callback)
+    await form.$submit(callback)
 
     expect(fulfilledFunc).toHaveBeenCalledTimes(1)
     expect(fulfilledFunc).toHaveBeenLastCalledWith({ response: 'yay!', form })
@@ -28,7 +28,7 @@ describe('Form.interceptors.ts', () => {
 
     callback = jest.fn(() => Promise.reject('Oh...'))
 
-    await form.submit(callback)
+    await form.$submit(callback)
 
     expect(rejectedFunc).toHaveBeenCalledTimes(1)
     expect(rejectedFunc).toHaveBeenLastCalledWith({ error: 'Oh...', form })
@@ -48,7 +48,7 @@ describe('Form.interceptors.ts', () => {
 
     let callback = jest.fn(() => Promise.resolve('yay!'))
 
-    await form.submit(callback)
+    await form.$submit(callback)
 
     expect(fulfilledFunc).toHaveBeenCalledTimes(1)
     expect(fulfilledFunc).toHaveBeenLastCalledWith(form)
@@ -62,7 +62,7 @@ describe('Form.interceptors.ts', () => {
     form.$interceptors.beforeSubmission.use(() => Promise.reject('Error!'))
 
     try {
-      await form.submit(callback)
+      await form.$submit(callback)
     } catch (e) {
       expect(rejectedFunc).toHaveBeenCalledTimes(1)
       expect(rejectedFunc).toHaveBeenLastCalledWith('Error!')
@@ -85,13 +85,13 @@ describe('Form.interceptors.ts', () => {
     )
     form.$interceptors.submissionComplete.eject(interceptorIndex)
 
-    await form.submit(() => Promise.resolve())
+    await form.$submit(() => Promise.resolve())
 
     expect(fulfilledFunc).toHaveBeenCalledTimes(0)
     expect(rejectedFunc).toHaveBeenCalledTimes(0)
 
     try {
-      await form.submit(() => Promise.reject())
+      await form.$submit(() => Promise.reject())
     } catch (e) {
       expect(fulfilledFunc).toHaveBeenCalledTimes(0)
       expect(rejectedFunc).toHaveBeenCalledTimes(0)

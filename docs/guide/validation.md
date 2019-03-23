@@ -49,8 +49,8 @@ there are the 2 "shapes" of validation rule:
 By default the validation runs on submission. you can tweak out the [options](/guide/options) and make your validation runs on field input event or on field blurred event 
 and also you can call the validation manually:
 
-- `form.validate()` - will validate the whole form
-- `form.validate('name')` - will validate only `name` field
+- `form.$validate()` - will validate the whole form
+- `form.$validate('name')` - will validate only `name` field
 
 check out the [options](/guide/options) before starting to use those methods.
 :::
@@ -140,7 +140,7 @@ return a rejected promise with `RuleValidationError`
 One thing to understand, you must reject with **`RuleValidationError`**! otherwise the error will bubble up.
 :::
 
-You can use `form.isValidating('email')` In case that your `Promise` base validating take some time, the function will
+You can use `form.$isValidating('email')` In case that your `Promise` base validating take some time, the function will
 return `true` if the `Promise` base validation is still running and `false` if not.
 
 ## Errors

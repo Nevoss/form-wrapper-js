@@ -48,8 +48,8 @@ export default {
   methods: {
     async submit() {
       try {
-        const {response} = await this.form.submit(form =>
-          axios.post('https://example.com/form', form.values())
+        const {response} = await this.form.$submit(form =>
+          axios.post('https://example.com/form', form.$values())
         )
       } catch (e) {}
     },
@@ -110,8 +110,8 @@ export default {
   methods: {
     async submit() {
       try {
-        const response = await this.form.submit(form =>
-          axios.post('https://example.com/form', form.values())
+        const response = await this.form.$submit(form =>
+          axios.post('https://example.com/form', form.$values())
         )
       } catch (e) {}
     },
@@ -119,8 +119,8 @@ export default {
 }
 ```
 
-The Form `submit` method accept a function as it first arguments, the function must return a promise. to explore about more information of
-how you can use the `submit` method take a look at [Form submission](/guide/form-submission.md) section.
+The Form `$submit` method accept a function as it first arguments, the function must return a promise. to explore about more information of
+how you can use the `$submit` method take a look at [Form submission](/guide/form-submission.md) section.
 
 Last thing to do is to bind the `submit` method that we created to the form itself
 

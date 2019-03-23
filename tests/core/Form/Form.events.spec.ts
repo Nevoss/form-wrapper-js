@@ -19,24 +19,24 @@ describe('Form.events.ts', () => {
       },
     })
 
-    form.debouncedValidateField = jest.fn()
+    form.$debouncedValidateField = jest.fn()
 
-    form.fieldChanged('first_name')
+    form.$fieldChanged('first_name')
 
-    expect(form.debouncedValidateField).toHaveBeenCalledTimes(1)
-    expect(form.debouncedValidateField).toHaveBeenCalledWith('first_name')
+    expect(form.$debouncedValidateField).toHaveBeenCalledTimes(1)
+    expect(form.$debouncedValidateField).toHaveBeenCalledWith('first_name')
 
-    form.assignOptions({
+    form.$assignOptions({
       validation: {
         onFieldChanged: false,
       },
     })
 
-    form.debouncedValidateField = jest.fn()
+    form.$debouncedValidateField = jest.fn()
 
-    form.fieldChanged('first_name')
+    form.$fieldChanged('first_name')
 
-    expect(form.debouncedValidateField).toHaveBeenCalledTimes(0)
+    expect(form.$debouncedValidateField).toHaveBeenCalledTimes(0)
   })
 
   it('should clear field errors after field changed', () => {
@@ -46,17 +46,17 @@ describe('Form.events.ts', () => {
       },
     })
 
-    form.fieldChanged('first_name')
+    form.$fieldChanged('first_name')
 
     expect(form.$errors.unset).toHaveBeenCalledTimes(0)
 
-    form.assignOptions({
+    form.$assignOptions({
       validation: {
         unsetFieldErrorsOnFieldChange: true,
       },
     })
 
-    form.fieldChanged('first_name')
+    form.$fieldChanged('first_name')
 
     expect(form.$errors.unset).toHaveBeenCalledTimes(1)
     expect(form.$errors.unset).toHaveBeenCalledWith('first_name')
@@ -65,7 +65,7 @@ describe('Form.events.ts', () => {
   it('should push to touched and set $onFocus when field is on focus', () => {
     let form = new Form(data)
 
-    form.fieldFocused('first_name')
+    form.$fieldFocused('first_name')
 
     expect(form.$onFocus).toBe('first_name')
     expect(form.$touched.push).toHaveBeenCalledTimes(1)
@@ -79,25 +79,25 @@ describe('Form.events.ts', () => {
       },
     })
 
-    form.validateField = jest.fn()
+    form.$validateField = jest.fn()
     form.$onFocus = 'first_name'
 
-    form.fieldBlurred('first_name')
+    form.$fieldBlurred('first_name')
 
     expect(form.$onFocus).toBe(null)
-    expect(form.validateField).toHaveBeenCalledTimes(0)
+    expect(form.$validateField).toHaveBeenCalledTimes(0)
 
-    form.assignOptions({
+    form.$assignOptions({
       validation: {
         onFieldBlurred: true,
       },
     })
     form.$onFocus = 'last_name'
-    form.fieldBlurred('first_name')
+    form.$fieldBlurred('first_name')
 
     expect(form.$onFocus).toBe('last_name')
-    expect(form.validateField).toHaveBeenCalledTimes(1)
-    expect(form.validateField).toHaveBeenCalledWith('first_name')
+    expect(form.$validateField).toHaveBeenCalledTimes(1)
+    expect(form.$validateField).toHaveBeenCalledWith('first_name')
   })
 
   it('should warn if field not exists in fieldBlurred, fieldChanged and fieldFocused methods', () => {
@@ -105,17 +105,17 @@ describe('Form.events.ts', () => {
 
     let form = new Form(data)
 
-    form.fieldChanged('some_field_1')
+    form.$fieldChanged('some_field_1')
     expect(warnMock).toHaveBeenCalledTimes(1)
 
     warnMock.mockClear()
 
-    form.fieldBlurred('some_field_2')
+    form.$fieldBlurred('some_field_2')
     expect(warnMock).toHaveBeenCalledTimes(1)
 
     warnMock.mockClear()
 
-    form.fieldFocused('some_field_3')
+    form.$fieldFocused('some_field_3')
     expect(warnMock).toHaveBeenCalledTimes(1)
   })
 })
