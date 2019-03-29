@@ -1,7 +1,7 @@
 import { Form } from '../../src/core/Form'
+import { RulesManager } from '../../src/core/RulesManager'
 import { Validator } from '../../src/core/Validator'
 import defaultOptions from '../../src/default-options'
-import { Rule } from '../../src/core/Rule'
 import { Field } from '../../src/types/Field'
 import { FieldValidationError } from '../../src/errors/FieldValidationError'
 import { ValidationOptions } from '../../src/types/Options'
@@ -10,98 +10,26 @@ import { FieldKeysCollection } from '../../src/core/FieldKeysCollection'
 
 jest.mock('../../src/core/Form')
 
-describe('Validator.js', () => {
+describe('Validator.ts', () => {
   let fakeForm: Form = new Form({})
   let defaultValidationOptions: ValidationOptions
-  let rules = {
-    first_name: [() => true],
-    last_name: [
-      {
-        passes: () => false,
-        message: 'Invalid',
-      },
-      () => true,
-    ],
-    is_developer: [
-      {
-        passes: ({ value }) => value,
-        message: ({ label, value }) =>
-          `${label} is invalid. the ${value} is incorrect`,
-      },
-      {
-        passes: () => Promise.resolve(),
-        returnsPromise: true,
-      },
-      {
-        passes: () => Promise.reject(),
-        returnsPromise: true,
-      },
-    ],
-  }
 
   beforeEach(() => {
     defaultValidationOptions = { ...defaultOptions.validation }
   })
 
   it('should construct correctly', () => {
-    let buildFromRawValueSpy = jest.spyOn(Rule, 'buildFromRawValue')
 
-    defaultValidationOptions.defaultMessage = 'This is try'
-
-    let validator = new Validator(rules, defaultValidationOptions)
-
-    expect(Object.keys(validator.$rules)).toEqual([
-      'first_name',
-      'last_name',
-      'is_developer',
-    ])
+    let validator = new Validator(defaultValidationOptions)
 
     expect(validator.$validating).toBeInstanceOf(FieldKeysCollection)
-    expect(validator.$rules.first_name).toHaveLength(1)
-    expect(validator.$rules.last_name).toHaveLength(2)
-    expect(validator.$rules.is_developer).toHaveLength(3)
-
-    expect(buildFromRawValueSpy).toHaveBeenCalledTimes(6)
-
-    let callNumber: number = 1
-    Object.keys(validator.$rules).forEach(fieldKey => {
-      validator.$rules[fieldKey].forEach((rule, index) => {
-        expect(rule).toBeInstanceOf(Rule)
-        expect(buildFromRawValueSpy).toHaveBeenNthCalledWith(
-          callNumber,
-          rules[fieldKey][index],
-          expect.toBeFunction()
-        )
-        callNumber++
-      })
-    })
-  })
-
-  it('should determine if has rule', () => {
-    let validator = new Validator(rules, defaultOptions.validation)
-
-    expect(validator.has('first_name')).toBe(true)
-    expect(validator.has('last_name')).toBe(true)
-    expect(validator.has('is_developer')).toBe(true)
-    expect(validator.has('other')).toBe(false)
-  })
-
-  it('should get the rules of the field key that requested', () => {
-    let validator = new Validator(rules, defaultOptions.validation)
-
-    expect(validator.get('first_name')).toBeInstanceOf(Array)
-    expect(validator.get('last_name')).toBeInstanceOf(Array)
-    expect(validator.get('other')).toBe(undefined)
   })
 
   it('should return a resolved promise if fieldKey is not exists', () => {
-    const validator = new Validator(
-      { name: [() => true] },
-      defaultValidationOptions
-    )
+    const validator = new Validator(defaultValidationOptions)
 
     let fakeField: Field = { key: 'a', label: 'a', value: 'a' }
-    let response = validator.validateField(fakeField, fakeForm)
+    let response = validator.validateField([], fakeField, fakeForm)
 
     expect(response).toResolve()
   })
@@ -111,7 +39,7 @@ describe('Validator.js', () => {
     const passesMock2 = jest.fn(() => true)
     const passesMock3 = jest.fn(() => Promise.resolve())
 
-    const validator = new Validator(
+    let rulesManager = new RulesManager(
       {
         name: [
           passesMock1,
@@ -119,12 +47,18 @@ describe('Validator.js', () => {
           { passes: passesMock3, returnsPromise: true },
         ],
       },
-      defaultValidationOptions
+      defaultValidationOptions.defaultMessage
     )
+
+    const validator = new Validator(defaultValidationOptions)
 
     const field: Field = { key: 'name', value: 'a', label: 'a' }
 
-    const response = await validator.validateField(field, fakeForm)
+    const response = await validator.validateField(
+      rulesManager.get('name'),
+      field,
+      fakeForm
+    )
 
     expect(response).toBe(field)
 
@@ -141,7 +75,7 @@ describe('Validator.js', () => {
 
     defaultValidationOptions.stopAfterFirstRuleFailed = false
 
-    const validator = new Validator(
+    const ruleManager = new RulesManager(
       {
         name: [
           passesMock1,
@@ -149,14 +83,16 @@ describe('Validator.js', () => {
           { passes: passesMock3, message: 'bbb' },
         ],
       },
-      defaultValidationOptions
+      defaultValidationOptions.defaultMessage
     )
+
+    const validator = new Validator(defaultValidationOptions)
 
     expect.assertions(6)
 
     const field: Field = { key: 'name', value: 'a', label: 'a' }
     try {
-      await validator.validateField(field, fakeForm)
+      await validator.validateField(ruleManager.get('name'), field, fakeForm)
     } catch (e) {
       expect(e).toBeInstanceOf(FieldValidationError)
       expect(e.messages).toEqual(['aaa', 'bbb'])
@@ -180,7 +116,7 @@ describe('Validator.js', () => {
 
     defaultValidationOptions.stopAfterFirstRuleFailed = true
 
-    const validator = new Validator(
+    const ruleManager = new RulesManager(
       {
         name: [
           {
@@ -191,15 +127,17 @@ describe('Validator.js', () => {
           passesMock2,
         ],
       },
-      defaultValidationOptions
+      defaultValidationOptions.defaultMessage
     )
+
+    const validator = new Validator(defaultValidationOptions)
 
     const field: Field = { key: 'name', value: 'a', label: 'a' }
 
     expect.assertions(5)
 
     try {
-      await validator.validateField(field, fakeForm)
+      await validator.validateField(ruleManager.get('name'), field, fakeForm)
     } catch (e) {
       expect(e).toBeInstanceOf(FieldValidationError)
       expect(e.messages).toEqual(['a invalid'])
@@ -218,17 +156,19 @@ describe('Validator.js', () => {
 
     defaultValidationOptions.stopAfterFirstRuleFailed = false
 
-    const validator = new Validator(
+    const ruleManager = new RulesManager(
       {
         name: [passesMock1, passesMock2],
       },
-      defaultValidationOptions
+      defaultValidationOptions.defaultMessage
     )
+
+    const validator = new Validator(defaultValidationOptions)
 
     const field: Field = { key: 'name', value: 'a', label: 'a' }
 
     try {
-      await validator.validateField(field, fakeForm)
+      await validator.validateField(ruleManager.get('name'), field, fakeForm)
     } catch (e) {
       expect(e).toBeInstanceOf(Error)
       expect(e.message).toBe('Error!!')
@@ -240,16 +180,18 @@ describe('Validator.js', () => {
   })
 
   it('should add the fieldKey to $validation collection if the field is on validation ', () => {
-    const validator = new Validator(
+    const ruleManager = new RulesManager(
       { name: [() => true] },
-      defaultValidationOptions
+      defaultValidationOptions.defaultMessage
     )
+
+    const validator = new Validator(defaultValidationOptions)
 
     const field: Field = { key: 'name', value: 'a', label: 'a' }
 
     expect(validator.$validating.has('name')).toBe(false)
 
-    validator.validateField(field, fakeForm)
+    validator.validateField(ruleManager.get('name'), field, fakeForm)
 
     expect(validator.$validating.has('name')).toBe(true)
   })

@@ -7,9 +7,11 @@ import defaultOptionsSource from '../../../src/default-options'
 import { InterceptorManager } from '../../../src/core/InterceptorManager'
 import * as utils from '../../../src/utils'
 import generateDebouncedValidateField from '../../../src/helpers/generateDebouncedValidateField'
+import { RulesManager } from '../../../src/core/RulesManager'
 
 jest.mock('../../../src/core/Errors')
 jest.mock('../../../src/core/Validator')
+jest.mock('../../../src/core/RulesManager')
 jest.mock('../../../src/core/FieldKeysCollection')
 jest.mock('../../../src/helpers/generateDebouncedValidateField', () => {
   return {
@@ -74,13 +76,16 @@ describe('Form.ts', () => {
         options: [1, 0],
       },
     })
-    expect(Validator).toHaveBeenCalledWith(
+
+    expect(RulesManager).toHaveBeenCalledWith(
       {
         first_name: rulesArray,
         is_developer: isDeveloperRulesArray,
       },
-      defaultOptions.validation
+      defaultOptions.validation.defaultMessage
     )
+
+    expect(Validator).toHaveBeenCalledWith(defaultOptions.validation)
     expect(Errors).toHaveBeenCalled()
     expect(FieldKeysCollection).toHaveBeenCalled()
     expect(form.$interceptors.beforeSubmission).toBeInstanceOf(

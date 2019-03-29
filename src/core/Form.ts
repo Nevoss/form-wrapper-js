@@ -2,6 +2,7 @@ import { Errors } from './Errors'
 import { Validator } from './Validator'
 import { FieldKeysCollection } from './FieldKeysCollection'
 import { InterceptorManager } from './InterceptorManager'
+import { RulesManager } from './RulesManager'
 import { isObject, warn } from '../utils'
 import generateDebouncedValidateField from '../helpers/generateDebouncedValidateField'
 import generateDefaultLabel from '../helpers/generateDefaultLabel'
@@ -48,6 +49,11 @@ export class Form {
    * Touched - holds all the fields that was touched
    */
   public $touched: FieldKeysCollection
+
+  /**
+   * RulesManager - hold all the fields rules.
+   */
+  public $rules: RulesManager
 
   /**
    * Holds all the labels of the fields
@@ -237,6 +243,7 @@ export class Form {
 
     try {
       await this.$validator.validateField(
+        this.$rules.get(fieldKey),
         this._buildFieldObject(fieldKey),
         this
       )
@@ -443,7 +450,11 @@ export class Form {
     this.$initialValues = originalData
     this.$labels = labels
     this.$extra = extra
-    this.$validator = new Validator(rules, this.$options.validation)
+    this.$rules = new RulesManager(
+      rules,
+      this.$options.validation.defaultMessage
+    )
+    this.$validator = new Validator(this.$options.validation)
     this.$errors = new Errors()
     this.$touched = new FieldKeysCollection()
     this.$interceptors = {
