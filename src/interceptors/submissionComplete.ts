@@ -31,7 +31,7 @@ export const clearForm: InterceptorHandler = {
 
     form.$options.successfulSubmission.clearErrors && form.$errors.clear()
     form.$options.successfulSubmission.clearTouched && form.$touched.clear()
-    form.$options.successfulSubmission.resetValues && form.resetValues()
+    form.$options.successfulSubmission.resetValues && form.$resetValues()
 
     return Promise.resolve(response)
   },

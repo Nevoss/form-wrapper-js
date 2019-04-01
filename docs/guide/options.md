@@ -25,7 +25,7 @@ const form = new Form(
 ```js
 const form = new Form({ name: null })
 
-form.assignOptions({
+form.$assignOptions({
   // override options object
 })
 
@@ -49,7 +49,7 @@ Form.defaults.options.validation.onFieldChanged = true // change specific defaul
 ## Default options
 
 This deceleration snippet was taken from the code itself. you can overview the whole 
-`options` object and the default values of it.
+`$options` object and the default values of it.
 
 ```js
 export default {
@@ -115,6 +115,6 @@ export default {
 
 ::: warning
 
-- `validation.onFieldChange` - will work only if the [field event `fieldChange`](/guide/field-events.md) was bounded to the field element.
-- `validation.onFieldBlurred` - will work only if the [field event `fieldBlurred`](/guide/field-events.md) was bounded to the field element.
+- `validation.onFieldChange` - will work only if the [field event `$fieldChange`](/guide/field-events.md) was bounded to the field element.
+- `validation.onFieldBlurred` - will work only if the [field event `$fieldBlurred`](/guide/field-events.md) was bounded to the field element.
   :::

@@ -7,9 +7,11 @@ import defaultOptionsSource from '../../../src/default-options'
 import { InterceptorManager } from '../../../src/core/InterceptorManager'
 import * as utils from '../../../src/utils'
 import generateDebouncedValidateField from '../../../src/helpers/generateDebouncedValidateField'
+import { RulesManager } from '../../../src/core/RulesManager'
 
 jest.mock('../../../src/core/Errors')
 jest.mock('../../../src/core/Validator')
+jest.mock('../../../src/core/RulesManager')
 jest.mock('../../../src/core/FieldKeysCollection')
 jest.mock('../../../src/helpers/generateDebouncedValidateField', () => {
   return {
@@ -41,7 +43,7 @@ describe('Form.ts', () => {
     const rulesArray = [() => true]
     const isDeveloperRulesArray = [() => false]
 
-    const assignOptionsSpy = jest.spyOn(Form.prototype, 'assignOptions')
+    const assignOptionsSpy = jest.spyOn(Form.prototype, '$assignOptions')
 
     let form = new Form({
       first_name: {
@@ -74,13 +76,16 @@ describe('Form.ts', () => {
         options: [1, 0],
       },
     })
-    expect(Validator).toHaveBeenCalledWith(
+
+    expect(RulesManager).toHaveBeenCalledWith(
       {
         first_name: rulesArray,
         is_developer: isDeveloperRulesArray,
       },
-      defaultOptions.validation
+      defaultOptions.validation.defaultMessage
     )
+
+    expect(Validator).toHaveBeenCalledWith(defaultOptions.validation)
     expect(Errors).toHaveBeenCalled()
     expect(FieldKeysCollection).toHaveBeenCalled()
     expect(form.$interceptors.beforeSubmission).toBeInstanceOf(
@@ -112,11 +117,11 @@ describe('Form.ts', () => {
       successfulSubmission: { clearErrors: false },
     }
 
-    form.assignOptions(newOptions)
+    form.$assignOptions(newOptions)
 
     expect(form.$options).toEqual(generateOptions(defaultOptions, newOptions))
     expect(generateDebouncedValidateField).toHaveBeenLastCalledWith(form)
-    expect(form.debouncedValidateField).toBe('fakeResponse')
+    expect(form.$debouncedValidateField).toBe('fakeResponse')
   })
 
   it('should returns the values on call', function() {
@@ -127,7 +132,7 @@ describe('Form.ts', () => {
 
     form.not_real_prop = 'Somthing'
 
-    expect(form.values()).toEqual({
+    expect(form.$values()).toEqual({
       ...data,
       first_name: 'Nevo',
       last_name: 'Golan',
@@ -143,7 +148,7 @@ describe('Form.ts', () => {
 
     form.not_real_prop = 'Somthing'
 
-    const formData = form.valuesAsFormData()
+    const formData = form.$valuesAsFormData()
 
     expect(formData).toBeInstanceOf(FormData)
     expect(formData.get('first_name')).toBe('Nevo')
@@ -161,9 +166,9 @@ describe('Form.ts', () => {
 
     form.not_real_prop = 'Somthing'
 
-    const valueAsJson = form.valuesAsJson()
+    const valueAsJson = form.$valuesAsJson()
 
-    expect(valueAsJson).toBe(JSON.stringify(form.values()))
+    expect(valueAsJson).toBe(JSON.stringify(form.$values()))
   })
 
   it('should resetValues the values of the form', () => {
@@ -172,9 +177,9 @@ describe('Form.ts', () => {
     form.first_name = 'Nevo'
     form.last_name = 'Golan'
 
-    form.resetValues()
+    form.$resetValues()
 
-    expect(form.values()).toEqual(data)
+    expect(form.$values()).toEqual(data)
   })
 
   it('should fill the form with new values', () => {
@@ -186,9 +191,9 @@ describe('Form.ts', () => {
       not_real_prop: 'Somthing',
     }
 
-    form.fill(newData)
+    form.$fill(newData)
 
-    expect(form.values()).toEqual(
+    expect(form.$values()).toEqual(
       Object.assign({}, data, {
         first_name: 'Nevo',
         last_name: 'Golan',
@@ -244,8 +249,8 @@ describe('Form.ts', () => {
 
     form.first_name = 'something else'
 
-    expect(form.isFieldDirty('first_name')).toBe(true)
-    expect(form.isFieldDirty('last_name')).toBe(false)
+    expect(form.$isFieldDirty('first_name')).toBe(true)
+    expect(form.$isFieldDirty('last_name')).toBe(false)
   })
 
   it('should warn if field key that passed to isDirtyField is not exists', () => {
@@ -253,7 +258,7 @@ describe('Form.ts', () => {
 
     let form = new Form({ name: null })
 
-    form.isFieldDirty('some_key')
+    form.$isFieldDirty('some_key')
 
     expect(warnMock).toHaveBeenCalledTimes(1)
   })
@@ -261,31 +266,31 @@ describe('Form.ts', () => {
   it('should run isFieldDirty (argument passes to "isDirty")', () => {
     let form = new Form(data) as Form & FormData
 
-    form.isFieldDirty = jest.fn(() => false)
+    form.$isFieldDirty = jest.fn(() => false)
 
-    let res = form.isDirty('first_name')
-    expect(form.isFieldDirty).toHaveBeenCalledWith('first_name')
+    let res = form.$isDirty('first_name')
+    expect(form.$isFieldDirty).toHaveBeenCalledWith('first_name')
     expect(res).toBe(false)
   })
 
   it('should determine if the whole form is dirty or not', () => {
     let form = new Form(data) as Form & FormData
 
-    expect(form.isDirty()).toBe(false)
+    expect(form.$isDirty()).toBe(false)
 
     form.last_name = 'somthing else'
 
-    expect(form.isDirty()).toBe(true)
+    expect(form.$isDirty()).toBe(true)
   })
 
   it('should reset all the form state', () => {
     let form = new Form(data)
 
-    form.resetValues = jest.fn()
+    form.$resetValues = jest.fn()
 
-    form.reset()
+    form.$reset()
 
-    expect(form.resetValues).toHaveBeenCalledTimes(1)
+    expect(form.$resetValues).toHaveBeenCalledTimes(1)
     expect(form.$errors.clear).toHaveBeenCalledTimes(1)
     expect(form.$touched.clear).toHaveBeenCalledTimes(1)
   })

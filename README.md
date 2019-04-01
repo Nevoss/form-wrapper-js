@@ -73,7 +73,7 @@ export default {
   },
   methods: {
     async submit() {
-      const { response } = await this.form.submit(form => axios.post('some-url', form.values()))
+      const { response } = await this.form.$submit(form => axios.post('some-url', form.$values()))
     }
   },
 }

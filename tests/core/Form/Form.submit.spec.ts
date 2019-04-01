@@ -14,7 +14,7 @@ describe('Form.submit.ts', () => {
       data: {},
     }
 
-    form.resetValues = jest.fn()
+    form.$resetValues = jest.fn()
 
     expect.assertions(6)
 
@@ -24,12 +24,12 @@ describe('Form.submit.ts', () => {
       return Promise.resolve(responseParam)
     })
 
-    let response = await form.submit(mockCallable)
+    let response = await form.$submit(mockCallable)
 
     expect(mockCallable.mock.calls.length).toBe(1)
     expect(form.$errors.clear).toHaveBeenCalledTimes(1)
     expect(form.$touched.clear).toHaveBeenCalledTimes(1)
-    expect(form.resetValues).toHaveBeenCalledTimes(1)
+    expect(form.$resetValues).toHaveBeenCalledTimes(1)
     expect(response).toEqual({ form, response: responseParam })
   })
 
@@ -45,7 +45,7 @@ describe('Form.submit.ts', () => {
     expect.assertions(2)
 
     try {
-      await form.submit(mockCallable)
+      await form.$submit(mockCallable)
     } catch (e) {
       expect(mockCallable.mock.calls.length).toBe(1)
       expect(e).toEqual({ error: responseParam, form })
@@ -69,13 +69,13 @@ describe('Form.submit.ts', () => {
     )
     form.$errors.any = jest.fn(() => true)
 
-    const validateSpy = jest.spyOn(form, 'validate')
+    const validateSpy = jest.spyOn(form, '$validate')
     const callback = jest.fn(() => Promise.resolve())
 
     expect.assertions(5)
 
     try {
-      await form.submit(callback)
+      await form.$submit(callback)
     } catch (e) {
       expect(validateSpy).toBeCalledTimes(1)
       expect(e.hasOwnProperty('error')).toBe(true)
@@ -97,9 +97,9 @@ describe('Form.submit.ts', () => {
       }
     )
 
-    const validateSpy = jest.spyOn(form, 'validate')
+    const validateSpy = jest.spyOn(form, '$validate')
 
-    await form.submit(() => Promise.resolve())
+    await form.$submit(() => Promise.resolve())
 
     expect(validateSpy).toBeCalledTimes(0)
   })
@@ -107,12 +107,12 @@ describe('Form.submit.ts', () => {
   it('should set $submitting as true if submit method is called', () => {
     let form = new Form({}) as Form
 
-    form.validate = jest.fn(() => Promise.resolve())
+    form.$validate = jest.fn(() => Promise.resolve())
 
     expect.assertions(2)
 
     return form
-      .submit(formParam => {
+      .$submit(formParam => {
         expect(formParam.$submitting).toBe(true)
 
         return new Promise(resolve => resolve('Yay!'))
@@ -128,7 +128,7 @@ describe('Form.submit.ts', () => {
     let mockCallable = jest.fn(() => Promise.resolve())
     form.$errors.any = jest.fn(() => true)
 
-    form.submit(mockCallable).catch(() => false)
+    form.$submit(mockCallable).catch(() => false)
 
     expect(form.$submitting).toBe(false)
     expect(mockCallable).toHaveBeenCalledTimes(0)
@@ -144,13 +144,13 @@ describe('Form.submit.ts', () => {
       }
     ) as Form
 
-    form.resetValues = jest.fn()
+    form.$resetValues = jest.fn()
 
-    await form.submit(() => Promise.resolve())
+    await form.$submit(() => Promise.resolve())
 
     expect(form.$errors.clear).toHaveBeenCalledTimes(1)
     expect(form.$touched.clear).toHaveBeenCalledTimes(1)
-    expect(form.resetValues).not.toHaveBeenCalled()
+    expect(form.$resetValues).not.toHaveBeenCalled()
   })
 
   it('should not clear errors after success submission if clearErrorsAfterSuccessfulSubmission option is false', async () => {
@@ -163,13 +163,13 @@ describe('Form.submit.ts', () => {
       }
     ) as Form
 
-    form.resetValues = jest.fn()
+    form.$resetValues = jest.fn()
 
-    await form.submit(() => Promise.resolve())
+    await form.$submit(() => Promise.resolve())
 
     expect(form.$errors.clear).not.toHaveBeenCalled()
     expect(form.$touched.clear).toHaveBeenCalledTimes(1)
-    expect(form.resetValues).toHaveBeenCalledTimes(1)
+    expect(form.$resetValues).toHaveBeenCalledTimes(1)
   })
 
   it('should not clear touched after success submission if successfulSubmission.clearTouched set to false', async () => {
@@ -182,12 +182,12 @@ describe('Form.submit.ts', () => {
       }
     ) as Form & FormData
 
-    form.resetValues = jest.fn()
+    form.$resetValues = jest.fn()
 
-    await form.submit(() => Promise.resolve())
+    await form.$submit(() => Promise.resolve())
 
     expect(form.$errors.clear).toHaveBeenCalledTimes(1)
     expect(form.$touched.clear).not.toHaveBeenCalled()
-    expect(form.resetValues).toHaveBeenCalledTimes(1)
+    expect(form.$resetValues).toHaveBeenCalledTimes(1)
   })
 })

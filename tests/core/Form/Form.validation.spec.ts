@@ -20,7 +20,7 @@ describe('Form.validation.ts', () => {
       Promise.reject(new FieldValidationError(['error']))
     )
 
-    await form.validateField('name')
+    await form.$validateField('name')
 
     expect(form.$errors.unset).toHaveBeenCalledTimes(1)
     expect(form.$errors.unset).toBeCalledWith('name')
@@ -29,6 +29,7 @@ describe('Form.validation.ts', () => {
       name: ['error'],
     })
     expect(form.$validator.validateField).toBeCalledWith(
+      form.$rules.get('name'),
       { label: 'The Name', value: 'a', key: 'name' },
       form
     )
@@ -38,7 +39,7 @@ describe('Form.validation.ts', () => {
 
     form.$validator.validateField = jest.fn(() => Promise.resolve())
 
-    await form.validateField('name')
+    await form.$validateField('name')
     expect(form.$errors.push).toHaveBeenCalledTimes(0)
     expect(form.$errors.unset).toHaveBeenCalledTimes(1)
     expect(form.$errors.unset).toBeCalledWith('name')
@@ -49,7 +50,7 @@ describe('Form.validation.ts', () => {
 
     let form = new Form({ name: null })
 
-    await form.validateField('first_name')
+    await form.$validateField('first_name')
 
     expect(warnSpy).toHaveBeenCalledTimes(1)
     warnSpy.mockClear()
@@ -67,35 +68,35 @@ describe('Form.validation.ts', () => {
       },
     })
 
-    form.validateField = jest
+    form.$validateField = jest
       .fn()
       .mockReturnValueOnce(Promise.resolve())
       .mockReturnValueOnce(Promise.resolve())
 
-    await form.validateAll()
+    await form.$validateAll()
 
-    expect(form.validateField).toHaveBeenNthCalledWith(1, 'name')
-    expect(form.validateField).toHaveBeenNthCalledWith(2, 'last_name')
+    expect(form.$validateField).toHaveBeenNthCalledWith(1, 'name')
+    expect(form.$validateField).toHaveBeenNthCalledWith(2, 'last_name')
   })
 
   it('should call to validate specific field or all the fields', async () => {
     let form = new Form({ first_name: null })
 
-    form.validateAll = jest.fn()
-    form.validateField = jest.fn()
+    form.$validateAll = jest.fn()
+    form.$validateField = jest.fn()
 
-    await form.validate()
+    await form.$validate()
 
-    expect(form.validateAll).toHaveBeenCalledTimes(1)
-    expect(form.validateField).toHaveBeenCalledTimes(0)
+    expect(form.$validateAll).toHaveBeenCalledTimes(1)
+    expect(form.$validateField).toHaveBeenCalledTimes(0)
 
-    mocked(form.validateAll).mockClear()
-    mocked(form.validateField).mockClear()
+    mocked(form.$validateAll).mockClear()
+    mocked(form.$validateField).mockClear()
 
-    await form.validate('first_name')
+    await form.$validate('first_name')
 
-    expect(form.validateAll).toHaveBeenCalledTimes(0)
-    expect(form.validateField).toHaveBeenCalledTimes(1)
+    expect(form.$validateAll).toHaveBeenCalledTimes(0)
+    expect(form.$validateField).toHaveBeenCalledTimes(1)
   })
 
   it('should bubble up errors that are not FieldValidationError on validateField method', async () => {
@@ -108,7 +109,7 @@ describe('Form.validation.ts', () => {
     expect.assertions(2)
 
     try {
-      await form.validateField('name')
+      await form.$validateField('name')
     } catch (e) {
       expect(e).toBeInstanceOf(Error)
       expect(e.message).toBe('error')
@@ -120,12 +121,12 @@ describe('Form.validation.ts', () => {
 
     form.$validator.$validating.has = jest.fn(() => true)
 
-    expect(form.isValidating('name')).toBe(true)
+    expect(form.$isValidating('name')).toBe(true)
     expect(form.$validator.$validating.has).toHaveBeenCalledWith('name')
 
     form.$validator.$validating.has = jest.fn(() => false)
 
-    expect(form.isValidating('name')).toBe(false)
+    expect(form.$isValidating('name')).toBe(false)
     expect(form.$validator.$validating.has).toHaveBeenCalledWith('name')
   })
 
@@ -134,12 +135,12 @@ describe('Form.validation.ts', () => {
 
     form.$validator.$validating.any = jest.fn(() => true)
 
-    expect(form.isValidating()).toBe(true)
+    expect(form.$isValidating()).toBe(true)
     expect(form.$validator.$validating.any).toHaveBeenCalledTimes(1)
 
     form.$validator.$validating.any = jest.fn(() => false)
 
-    expect(form.isValidating()).toBe(false)
+    expect(form.$isValidating()).toBe(false)
     expect(form.$validator.$validating.any).toHaveBeenCalledTimes(1)
   })
 
@@ -148,7 +149,7 @@ describe('Form.validation.ts', () => {
 
     let form = new Form({ name: null })
 
-    form.isValidating('loYodea')
+    form.$isValidating('loYodea')
 
     expect(warnSpy).toHaveBeenCalledTimes(1)
     warnSpy.mockClear()
