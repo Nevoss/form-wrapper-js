@@ -3,10 +3,9 @@ import { Validator } from './Validator'
 import { FieldKeysCollection } from './FieldKeysCollection'
 import { InterceptorManager } from './InterceptorManager'
 import { RulesManager } from './RulesManager'
-import { isObject, warn } from '../utils'
+import { warn } from '../utils'
 import generateDebouncedValidateField from '../helpers/generateDebouncedValidateField'
 import generateFieldOptions from '../helpers/generateFieldOptions'
-import generateDefaultLabel from '../helpers/generateDefaultLabel'
 import generateOptions from '../helpers/generateOptions'
 import defaultOptions from '../default-options'
 import basicInterceptors from '../interceptors/index'
@@ -59,7 +58,7 @@ export class Form {
   /**
    * Holds all the labels of the fields
    */
-  public $labels: Object
+  public $labels: Object = {}
 
   /**
    * hold the input that is on focus right now
@@ -70,7 +69,7 @@ export class Form {
    * all the extra values that provide in the construction of this class
    * will be hold here.
    */
-  public $extra: Object
+  public $extra: Object = {}
 
   /**
    * Options of the Form
@@ -91,7 +90,7 @@ export class Form {
   /**
    * The initiate values that was provide to the form
    */
-  public $initialValues: Object
+  public $initialValues: Object = {}
 
   /**
    * constructor of the class
@@ -101,8 +100,20 @@ export class Form {
    */
   constructor(fields: RawFormFields = {}, options: Options = {}) {
     this.$assignOptions(options)
-      ._init(fields)
-      .$resetValues()
+    this.$rules = new RulesManager({}, this.$options.validation.defaultMessage)
+    this.$validator = new Validator(this.$options.validation)
+    this.$errors = new Errors()
+    this.$touched = new FieldKeysCollection()
+    this.$interceptors = {
+      beforeSubmission: new InterceptorManager(
+        Form.defaults.interceptors.beforeSubmission.all()
+      ),
+      submissionComplete: new InterceptorManager(
+        Form.defaults.interceptors.submissionComplete.all()
+      ),
+    }
+
+    this.$addFields(fields)
   }
 
   /**
@@ -482,58 +493,6 @@ export class Form {
     }
 
     return promise
-  }
-
-  /**
-   * Init the form
-   * fill all the values that should be filled (Validator, OriginalData etc..)
-   *
-   * @param data
-   * @private
-   */
-  private _init(data: Object): Form {
-    let rules = {}
-    let originalData = {}
-    let labels = {}
-    let extra = {}
-
-    Object.keys(data).forEach(key => {
-      let isKeyObject = isObject(data[key])
-
-      originalData[key] = isKeyObject ? data[key].value : data[key]
-      labels[key] =
-        isKeyObject && data[key].hasOwnProperty('label')
-          ? data[key].label
-          : generateDefaultLabel(key)
-      extra[key] =
-        isKeyObject && data[key].hasOwnProperty('extra') ? data[key].extra : {}
-      rules = {
-        ...rules,
-        ...(isKeyObject &&
-          data[key].hasOwnProperty('rules') && { [key]: data[key].rules }),
-      }
-    })
-
-    this.$initialValues = originalData
-    this.$labels = labels
-    this.$extra = extra
-    this.$rules = new RulesManager(
-      rules,
-      this.$options.validation.defaultMessage
-    )
-    this.$validator = new Validator(this.$options.validation)
-    this.$errors = new Errors()
-    this.$touched = new FieldKeysCollection()
-    this.$interceptors = {
-      beforeSubmission: new InterceptorManager(
-        Form.defaults.interceptors.beforeSubmission.all()
-      ),
-      submissionComplete: new InterceptorManager(
-        Form.defaults.interceptors.submissionComplete.all()
-      ),
-    }
-
-    return this
   }
 
   /**

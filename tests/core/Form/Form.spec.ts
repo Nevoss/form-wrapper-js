@@ -78,10 +78,7 @@ describe('Form.ts', () => {
     })
 
     expect(RulesManager).toHaveBeenCalledWith(
-      {
-        first_name: rulesArray,
-        is_developer: isDeveloperRulesArray,
-      },
+      {},
       defaultOptions.validation.defaultMessage
     )
 

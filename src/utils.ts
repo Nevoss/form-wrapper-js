@@ -34,7 +34,7 @@ export const isPromise = (value: any): value is Promise<any> => {
  * @param value
  */
 export const isRawRule = (value: any): value is RawRule => {
-  return isObject(value) && value.passes
+  return isObject(value) && typeof value.passes === 'function'
 }
 
 /**
@@ -43,7 +43,7 @@ export const isRawRule = (value: any): value is RawRule => {
  * @param value
  */
 export const isFieldOptions = (value: any): value is FieldOptions => {
-  return isObject(value) && value.value
+  return isObject(value) && typeof value.value !== 'undefined'
 }
 
 /**
