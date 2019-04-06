@@ -1,5 +1,5 @@
 import { Form } from '../../../src/core/Form'
-import { mocked } from 'ts-jest/utils'
+import * as utils from '../../../src/utils'
 
 jest.mock('../../../src/core/RulesManager')
 
@@ -32,6 +32,19 @@ describe('Form.fields.ts', () => {
     expect(form.$extra['name']).toBe(extra)
   })
 
+  it('should warn if trying to add an existed field', () => {
+    const warnMock = jest.spyOn(utils, 'warn')
+
+    const form = new Form({
+      name: null,
+    })
+
+    form.$addField('name', null)
+
+    expect(warnMock).toHaveBeenCalledTimes(1)
+    warnMock.mockClear()
+  })
+
   it('should add an object of fields to the form', () => {
     const form = new Form()
     form.$addField = jest.fn()
@@ -52,5 +65,44 @@ describe('Form.fields.ts', () => {
       'last_name',
       lastNameFieldOption
     )
+  })
+
+  it('should remove field from the form', () => {
+    const form = new Form({
+      first_name: null,
+      last_name: null,
+    })
+
+    form.$removeField('first_name')
+
+    expect(form.$hasField('first_name')).toBe(false)
+    expect(form.$initialValues.hasOwnProperty('first_name')).toBe(false)
+    expect(form.$extra.hasOwnProperty('first_name')).toBe(false)
+    expect(form.$rules.unset).toBeCalledWith('first_name')
+  })
+
+  it('should warn if trying to remove an un existed field', () => {
+    const warnMock = jest.spyOn(utils, 'warn')
+
+    const form = new Form()
+
+    form.$removeField('name')
+
+    expect(warnMock).toHaveBeenCalledTimes(1)
+    warnMock.mockClear()
+  })
+
+  it('should remove number of fields', () => {
+    const form = new Form({
+      name: null,
+      last_name: null,
+    })
+
+    form.$removeField = jest.fn()
+
+    form.$removeFields(['name', 'last_name'])
+
+    expect(form.$removeField).toHaveBeenNthCalledWith(1, 'name')
+    expect(form.$removeField).toHaveBeenNthCalledWith(2, 'last_name')
   })
 })

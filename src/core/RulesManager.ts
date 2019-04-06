@@ -49,6 +49,21 @@ export class RulesManager {
   }
 
   /**
+   * Unset a field from the rules stack
+   *
+   * @param fieldKey
+   */
+  public unset(fieldKey: string): RulesManager {
+    if (this.has(fieldKey)) {
+      delete this._rules[fieldKey]
+
+      this._rules = { ...this._rules }
+    }
+
+    return this
+  }
+
+  /**
    * return the whole fields rules
    */
   public all(): RulesStack {
