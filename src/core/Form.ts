@@ -3,13 +3,13 @@ import { Validator } from './Validator'
 import { FieldKeysCollection } from './FieldKeysCollection'
 import { InterceptorManager } from './InterceptorManager'
 import { RulesManager } from './RulesManager'
-import { isObject, warn } from '../utils'
+import { isFieldOptions, isObject, warn } from '../utils'
 import generateDebouncedValidateField from '../helpers/generateDebouncedValidateField'
 import generateDefaultLabel from '../helpers/generateDefaultLabel'
 import generateOptions from '../helpers/generateOptions'
 import defaultOptions from '../default-options'
 import basicInterceptors from '../interceptors/index'
-import { Field } from '../types/Field'
+import { Field, FieldOptions, RawFormFields } from '../types/Field'
 import { FormDefaults } from '../types/Form'
 import { Options } from '../types/Options'
 import { SubmitCallback } from '../types/Form'
@@ -18,6 +18,7 @@ import {
   InterceptorManagersObject,
 } from '../types/Interceptors'
 import { FieldValidationError } from '../errors/FieldValidationError'
+import generateFieldOptions from '../helpers/generateFieldOptions'
 
 export class Form {
   /**
@@ -66,11 +67,6 @@ export class Form {
   public $onFocus: string | null = null
 
   /**
-   * The initiate values that was provide to the form
-   */
-  public $initialValues: Object
-
-  /**
    * all the extra values that provide in the construction of this class
    * will be hold here.
    */
@@ -93,14 +89,19 @@ export class Form {
   public $debouncedValidateField: Function
 
   /**
+   * The initiate values that was provide to the form
+   */
+  public _initialValues: Object
+
+  /**
    * constructor of the class
    *
-   * @param data
+   * @param fields
    * @param options
    */
-  constructor(data: Object, options: Options = {}) {
+  constructor(fields: RawFormFields = {}, options: Options = {}) {
     this.$assignOptions(options)
-      ._init(data)
+      ._init(fields)
       .$resetValues()
   }
 
@@ -127,6 +128,32 @@ export class Form {
   }
 
   /**
+   * Add field to the form
+   *
+   * @param fieldKey
+   * @param value
+   */
+  public $addField(fieldKey: string, value: any | FieldOptions): Form {
+    const fieldOptions: FieldOptions = generateFieldOptions(fieldKey, value)
+
+    this[fieldKey] = fieldOptions.value
+    this._initialValues[fieldKey] = fieldOptions.value
+    this.$rules.buildFieldRules(fieldKey, fieldOptions.rules)
+    this.$extra[fieldKey] = fieldOptions.extra
+    this.$labels[fieldKey] = fieldOptions.label
+
+    return this
+  }
+
+  public $addFields(fields: RawFormFields): Form {
+    Object.keys(fields).forEach(fieldKey => {
+      this.$addField(fieldKey, fields[fieldKey])
+    })
+
+    return this
+  }
+
+  /**
    * checks if field exits or not in the form class
    *
    * @param fieldKey
@@ -139,9 +166,9 @@ export class Form {
    * Set all the fields value same as $initialValues fields value
    */
   public $resetValues(): Form {
-    for (let fieldName in this.$initialValues) {
-      if (this.$initialValues.hasOwnProperty(fieldName)) {
-        this[fieldName] = this.$initialValues[fieldName]
+    for (let fieldName in this._initialValues) {
+      if (this._initialValues.hasOwnProperty(fieldName)) {
+        this[fieldName] = this._initialValues[fieldName]
       }
     }
 
@@ -165,7 +192,7 @@ export class Form {
   public $values(): Object {
     let dataObj = {}
 
-    Object.keys(this.$initialValues).forEach(fieldKey => {
+    Object.keys(this._initialValues).forEach(fieldKey => {
       if (this.$hasField(fieldKey)) {
         dataObj[fieldKey] = this[fieldKey]
       }
@@ -262,7 +289,7 @@ export class Form {
    * validate all the fields of the form
    */
   public $validateAll(): Promise<any> {
-    const promises = Object.keys(this.$initialValues).map(fieldKey => {
+    const promises = Object.keys(this._initialValues).map(fieldKey => {
       return this.$validateField(fieldKey)
     })
 
@@ -298,7 +325,7 @@ export class Form {
 
     let dirty = false
 
-    for (let originalFieldKey in this.$initialValues) {
+    for (let originalFieldKey in this._initialValues) {
       if (this.$isFieldDirty(originalFieldKey)) {
         dirty = true
         break
@@ -320,7 +347,7 @@ export class Form {
       return false
     }
 
-    return this[fieldKey] !== this.$initialValues[fieldKey]
+    return this[fieldKey] !== this._initialValues[fieldKey]
   }
 
   /**
@@ -447,7 +474,7 @@ export class Form {
       }
     })
 
-    this.$initialValues = originalData
+    this._initialValues = originalData
     this.$labels = labels
     this.$extra = extra
     this.$rules = new RulesManager(
