@@ -132,3 +132,70 @@ It is important to understand that you can set any property you like in `extras`
 ---
 
 **As we say before `rules` property will be cover later on [validation](/guide/validation.md) section.**
+
+
+
+## Adding and removing fields
+When you need to add or remove fields dynamicly from your form, there is 4 methods that can help you with that.
+
+1. Add single field
+
+```js 
+import { Form } from 'form-wrapper-js' 
+
+const form = new Form({email: null})
+
+form.$addField('first_name', null)
+
+// Or
+
+form.$addField('last_name', {
+  value: null,
+  label: 'Somthing',
+})
+
+form.$values() // -> { email: null, first_name: null, last_name: null }
+
+```
+
+2. Add a number of fields
+
+```js
+import { Form } from 'form-wrapper-js' 
+
+const form = new Form({ email: null })
+
+form.$addFields({
+  first_name: null,
+  last_name: {
+    value: null,
+    label: 'The last name',
+  }
+})
+
+form.$values() // -> { first_name: null, last_name: null, email: null }
+```
+
+3. Remove a field
+
+```js
+import { Form } from 'form-wrapper-js' 
+
+const form = new Form({ first_name: null, last_name: null })
+
+form.$removeField('first_name');
+
+form.$values() // -> { last_name: null }
+```
+
+4. Remove a number of fields:
+
+```js
+import { Form } from 'form-wrapper-js' 
+
+const form = new Form({ first_name: null, last_name: null, email: null })
+
+form.$removeFields(['first_name', 'last_name'])
+
+form.$values() // -> { email: null }
+```

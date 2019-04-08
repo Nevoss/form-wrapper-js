@@ -1,4 +1,5 @@
 import { RawRule } from './types/Validator'
+import { FieldOptions } from './types/Field'
 
 /**
  * determine if value is a boolean
@@ -28,12 +29,21 @@ export const isPromise = (value: any): value is Promise<any> => {
 }
 
 /**
- * checks if value is implements RawRule interface
+ * checks if value implements implements RawRule interface
  *
  * @param value
  */
 export const isRawRule = (value: any): value is RawRule => {
-  return isObject(value) && value.passes
+  return isObject(value) && typeof value.passes === 'function'
+}
+
+/**
+ * checks if value implements FieldOption interface
+ *
+ * @param value
+ */
+export const isFieldOptions = (value: any): value is FieldOptions => {
+  return isObject(value) && typeof value.value !== 'undefined'
 }
 
 /**

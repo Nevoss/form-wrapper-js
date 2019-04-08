@@ -11,6 +11,10 @@ jest.mock('../../src/utils', () => {
 
 describe('generateDebouncedValidateField.ts', () => {
   it('should generate a debounced version of validate field method', () => {
+    // Mock it just to quickly resolve a problem with the Form constructor
+    // and the mock of the utils.
+    Form.prototype.$addFields = jest.fn()
+
     let form = new Form({ name: null })
 
     Function.prototype.bind = jest.fn(function() {

@@ -3,6 +3,7 @@ import { RulesManager } from '../../src/core/RulesManager'
 import { Rule } from '../../src/core/Rule'
 import { ValidationOptions } from '../../src/types/Options'
 import generateMessageFunction from '../../src/helpers/generateMessageFunction'
+import * as utils from '../../src/utils'
 
 jest.mock('../../src/helpers/generateMessageFunction', () => {
   return {
@@ -151,5 +152,16 @@ describe('RulesManager.ts', () => {
 
       callNumber++
     })
+  })
+
+  it('should unset a field rules', () => {
+    let rulesManager = new RulesManager(
+      rules,
+      defaultValidationOptions.defaultMessage
+    )
+
+    rulesManager.unset('first_name')
+
+    expect(rulesManager.has('first_name')).toBe(false)
   })
 })
