@@ -1,10 +1,10 @@
-import { RawRule } from '../types/Validator'
-import { MessageFunction, PassesFunction } from '../types/Errors'
-import generateMessageFunction from '../helpers/generateMessageFunction'
-import { isBoolean, isPromise, isRawRule } from '../utils'
-import { Field } from '../types/Field'
-import { Form } from './Form'
-import { RuleValidationError } from '../errors/RuleValidationError'
+import { RawRule } from '../../types/Validator'
+import { MessageFunction, PassesFunction } from '../../types/Errors'
+import generateMessageFunction from '../../helpers/generateMessageFunction'
+import { isBoolean, isPromise, isRawRule } from '../../utils'
+import { Field } from '../../types/Field'
+import { Form } from '../Form'
+import { RuleValidationError } from '../../errors/RuleValidationError'
 
 export class Rule {
   /**

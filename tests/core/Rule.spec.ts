@@ -1,5 +1,5 @@
 import { mocked } from 'ts-jest/utils'
-import { Rule } from '../../src/core/Rule'
+import { Rule } from '../../src/core/validation/Rule'
 import { MessageFunction, PassesFunction } from '../../src/types/Errors'
 import { RawRule } from '../../src/types/Validator'
 import generateMessageFunction from '../../src/helpers/generateMessageFunction'

@@ -1,8 +1,7 @@
-import { RawRule, RulesStack } from '../types/Validator'
+import { RawRule, RulesStack } from '../../types/Validator'
 import { Rule } from './Rule'
-import { ValidationOptions } from '../types/Options'
-import generateMessageFunction from '../helpers/generateMessageFunction'
-import { MessageFunction, PassesFunction } from '../types/Errors'
+import generateMessageFunction from '../../helpers/generateMessageFunction'
+import { MessageFunction, PassesFunction } from '../../types/Errors'
 
 export class RulesManager {
   /**

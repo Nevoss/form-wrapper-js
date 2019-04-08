@@ -1,5 +1,5 @@
-import { Errors } from '../../../src/core/Errors'
-import { Validator } from '../../../src/core/Validator'
+import { Errors } from '../../../src/core/validation/Errors'
+import { Validator } from '../../../src/core/validation/Validator'
 import { FieldKeysCollection } from '../../../src/core/FieldKeysCollection'
 import { Form } from '../../../src/core/Form'
 import generateOptions from '../../../src/helpers/generateOptions'
@@ -7,11 +7,11 @@ import defaultOptionsSource from '../../../src/default-options'
 import { InterceptorManager } from '../../../src/core/InterceptorManager'
 import * as utils from '../../../src/utils'
 import generateDebouncedValidateField from '../../../src/helpers/generateDebouncedValidateField'
-import { RulesManager } from '../../../src/core/RulesManager'
+import { RulesManager } from '../../../src/core/validation/RulesManager'
 
-jest.mock('../../../src/core/Errors')
-jest.mock('../../../src/core/Validator')
-jest.mock('../../../src/core/RulesManager')
+jest.mock('../../../src/core/validation/Errors')
+jest.mock('../../../src/core/validation/Validator')
+jest.mock('../../../src/core/validation/RulesManager')
 jest.mock('../../../src/core/FieldKeysCollection')
 jest.mock('../../../src/helpers/generateDebouncedValidateField', () => {
   return {

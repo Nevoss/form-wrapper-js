@@ -1,14 +1,10 @@
-import { Form } from './Form'
+import { Form } from '../Form'
 import { Rule } from './Rule'
-import { FieldKeysCollection } from './FieldKeysCollection'
-import { RuleValidationError } from '../errors/RuleValidationError'
-import { FieldValidationError } from '../errors/FieldValidationError'
-import generateMessageFunction from '../helpers/generateMessageFunction'
-import { Field } from '../types/Field'
-import { RulesStack } from '../types/Validator'
-import { ValidationOptions } from '../types/Options'
-import { MessageFunction } from '../types/Errors'
-import { RulesManager } from './RulesManager'
+import { FieldKeysCollection } from '../FieldKeysCollection'
+import { RuleValidationError } from '../../errors/RuleValidationError'
+import { FieldValidationError } from '../../errors/FieldValidationError'
+import { Field } from '../../types/Field'
+import { ValidationOptions } from '../../types/Options'
 
 /**
  * Validator Class

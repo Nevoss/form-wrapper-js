@@ -1,9 +1,8 @@
 import defaultOptions from '../../src/default-options'
-import { RulesManager } from '../../src/core/RulesManager'
-import { Rule } from '../../src/core/Rule'
+import { RulesManager } from '../../src/core/validation/RulesManager'
+import { Rule } from '../../src/core/validation/Rule'
 import { ValidationOptions } from '../../src/types/Options'
 import generateMessageFunction from '../../src/helpers/generateMessageFunction'
-import * as utils from '../../src/utils'
 
 jest.mock('../../src/helpers/generateMessageFunction', () => {
   return {

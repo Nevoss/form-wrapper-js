@@ -1,7 +1,7 @@
 import { Form } from '../../../src/core/Form'
 import * as utils from '../../../src/utils'
 
-jest.mock('../../../src/core/RulesManager')
+jest.mock('../../../src/core/validation/RulesManager')
 
 describe('Form.fields.ts', () => {
   it('should add new field with native value to the form fields', () => {

@@ -1,8 +1,8 @@
 import { Form } from '../../../src/core/Form'
 import { FieldValidationError } from '../../../src/errors/FieldValidationError'
 
-jest.mock('../../../src/core/Errors')
-jest.mock('../../../src/core/Validator')
+jest.mock('../../../src/core/validation/Errors')
+jest.mock('../../../src/core/validation/Validator')
 jest.mock('../../../src/core/FieldKeysCollection')
 
 describe('Form.submit.ts', () => {

@@ -1,6 +1,6 @@
 import { Form } from '../../src/core/Form'
-import { RulesManager } from '../../src/core/RulesManager'
-import { Validator } from '../../src/core/Validator'
+import { RulesManager } from '../../src/core/validation/RulesManager'
+import { Validator } from '../../src/core/validation/Validator'
 import defaultOptions from '../../src/default-options'
 import { Field } from '../../src/types/Field'
 import { FieldValidationError } from '../../src/errors/FieldValidationError'

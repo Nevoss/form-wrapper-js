@@ -3,7 +3,7 @@ import { FieldValidationError } from '../../../src/errors/FieldValidationError'
 import * as utils from '../../../src/utils'
 import { mocked } from 'ts-jest/utils'
 
-jest.mock('../../../src/core/Errors')
+jest.mock('../../../src/core/validation/Errors')
 jest.mock('../../../src/core/FieldKeysCollection')
 
 describe('Form.validation.ts', () => {
