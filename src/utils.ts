@@ -47,6 +47,13 @@ export const isFieldOptions = (value: any): value is FieldOptions => {
 }
 
 /**
+ * will generate a good enough unique ID
+ */
+export const uniqueId = (): string => {
+  return String(Date.now() + Math.random())
+}
+
+/**
  * sending a warning message
  *
  * @param message

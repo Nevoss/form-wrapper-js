@@ -3,7 +3,7 @@ import { Validator } from './validation/Validator'
 import { FieldKeysCollection } from './FieldKeysCollection'
 import { InterceptorManager } from './InterceptorManager'
 import { RulesManager } from './validation/RulesManager'
-import { warn } from '../utils'
+import { uniqueId, warn } from '../utils'
 import generateDebouncedValidateField from '../helpers/generateDebouncedValidateField'
 import generateFieldOptions from '../helpers/generateFieldOptions'
 import generateOptions from '../helpers/generateOptions'
@@ -30,6 +30,14 @@ export class Form {
       submissionComplete: new InterceptorManager(),
     },
   }
+
+  /**
+   * Unique id for the Form instance.
+   * the main use case for it is in the FormCollection
+   * than every Form instance has unique id.
+   */
+  public $id: string
+
   /**
    * determine if the form is on submitting mode
    */
@@ -99,6 +107,8 @@ export class Form {
    * @param options
    */
   constructor(fields: RawFormFields = {}, options: Options = {}) {
+    this.$id = uniqueId()
+
     this.$assignOptions(options)
     this.$rules = new RulesManager({}, this.$options.validation.defaultMessage)
     this.$validator = new Validator(this.$options.validation)

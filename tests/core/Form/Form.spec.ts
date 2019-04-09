@@ -44,6 +44,7 @@ describe('Form.ts', () => {
     const isDeveloperRulesArray = [() => false]
 
     const assignOptionsSpy = jest.spyOn(Form.prototype, '$assignOptions')
+    const uniqueIdSpy = jest.spyOn(utils, 'uniqueId')
 
     let form = new Form({
       first_name: {
@@ -76,6 +77,9 @@ describe('Form.ts', () => {
         options: [1, 0],
       },
     })
+
+    expect(uniqueIdSpy).toHaveBeenCalledTimes(1)
+    expect(form.$id).toBe(uniqueIdSpy.mock.results[0].value)
 
     expect(RulesManager).toHaveBeenCalledWith(
       {},

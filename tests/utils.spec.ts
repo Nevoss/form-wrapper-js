@@ -1,4 +1,4 @@
-import { isObject, warn, debounce } from '../src/utils'
+import { isObject, warn, debounce, uniqueId } from '../src/utils'
 
 describe('utils.js', () => {
   it('should determine if value is object', () => {
@@ -32,5 +32,12 @@ describe('utils.js', () => {
 
     expect(callback).toHaveBeenCalledTimes(1)
     expect(callback).toHaveBeenCalledWith('argument1', 2)
+  })
+
+  it('should generate a good enough unique id', () => {
+    const id = uniqueId()
+
+    expect(id).toBeString()
+    expect(id.length).toBeGreaterThan(12)
   })
 })
