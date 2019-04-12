@@ -1,10 +1,10 @@
-import defaultOptions from '../../src/default-options'
-import { RulesManager } from '../../src/core/validation/RulesManager'
-import { Rule } from '../../src/core/validation/Rule'
-import { ValidationOptions } from '../../src/types/Options'
-import generateMessageFunction from '../../src/helpers/generateMessageFunction'
+import defaultOptions from '../../../src/default-options'
+import { RulesManager } from '../../../src/core/validation/RulesManager'
+import { Rule } from '../../../src/core/validation/Rule'
+import { ValidationOptions } from '../../../src/types/Options'
+import generateMessageFunction from '../../../src/helpers/generateMessageFunction'
 
-jest.mock('../../src/helpers/generateMessageFunction', () => {
+jest.mock('../../../src/helpers/generateMessageFunction', () => {
   return {
     __esModule: true,
     default: jest.fn(() => () => {}),
