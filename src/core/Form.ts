@@ -18,6 +18,7 @@ import {
   InterceptorManagersObject,
 } from '../types/Interceptors'
 import { FieldValidationError } from '../errors/FieldValidationError'
+import { FormCollection } from './FormCollection'
 
 export class Form {
   /**
@@ -255,7 +256,10 @@ export class Form {
 
     Object.keys(this.$initialValues).forEach(fieldKey => {
       if (this.$hasField(fieldKey)) {
-        dataObj[fieldKey] = this[fieldKey]
+        dataObj[fieldKey] =
+          this[fieldKey] instanceof FormCollection
+            ? this[fieldKey].values()
+            : this[fieldKey]
       }
     })
 
@@ -294,12 +298,18 @@ export class Form {
    * fill the Form values with new values.
    * without remove another fields values.
    *
-   * @param newData
+   * @param data
    */
-  public $fill(newData: Object): Form {
-    for (let fieldName in newData) {
-      if (newData.hasOwnProperty(fieldName) && this.$hasField(fieldName)) {
-        this[fieldName] = newData[fieldName]
+  public $fill(data: Object): Form {
+    for (let fieldName in data) {
+      if (data.hasOwnProperty(fieldName) && this.$hasField(fieldName)) {
+        if (this[fieldName] instanceof FormCollection) {
+          this[fieldName].fill(data[fieldName])
+
+          continue
+        }
+
+        this[fieldName] = data[fieldName]
       }
     }
 
