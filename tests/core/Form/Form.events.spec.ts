@@ -1,8 +1,8 @@
 import { Form } from '../../../src/core/Form'
 import * as utils from '../../../src/utils'
 
-jest.mock('../../../src/core/Errors')
-jest.mock('../../../src/core/Validator')
+jest.mock('../../../src/core/validation/Errors')
+jest.mock('../../../src/core/validation/Validator')
 jest.mock('../../../src/core/FieldKeysCollection')
 
 describe('Form.events.ts', () => {

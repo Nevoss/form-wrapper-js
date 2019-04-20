@@ -1,17 +1,19 @@
-import { Errors } from '../../../src/core/Errors'
-import { Validator } from '../../../src/core/Validator'
+import { Errors } from '../../../src/core/validation/Errors'
+import { Validator } from '../../../src/core/validation/Validator'
 import { FieldKeysCollection } from '../../../src/core/FieldKeysCollection'
+import { FormCollection } from '../../../src/core/FormCollection'
 import { Form } from '../../../src/core/Form'
 import generateOptions from '../../../src/helpers/generateOptions'
 import defaultOptionsSource from '../../../src/default-options'
 import { InterceptorManager } from '../../../src/core/InterceptorManager'
 import * as utils from '../../../src/utils'
 import generateDebouncedValidateField from '../../../src/helpers/generateDebouncedValidateField'
-import { RulesManager } from '../../../src/core/RulesManager'
+import { RulesManager } from '../../../src/core/validation/RulesManager'
 
-jest.mock('../../../src/core/Errors')
-jest.mock('../../../src/core/Validator')
-jest.mock('../../../src/core/RulesManager')
+jest.mock('../../../src/core/validation/Errors')
+jest.mock('../../../src/core/validation/Validator')
+jest.mock('../../../src/core/validation/RulesManager')
+jest.mock('../../../src/core/FormCollection')
 jest.mock('../../../src/core/FieldKeysCollection')
 jest.mock('../../../src/helpers/generateDebouncedValidateField', () => {
   return {
@@ -44,6 +46,7 @@ describe('Form.ts', () => {
     const isDeveloperRulesArray = [() => false]
 
     const assignOptionsSpy = jest.spyOn(Form.prototype, '$assignOptions')
+    const uniqueIdSpy = jest.spyOn(utils, 'uniqueId')
 
     let form = new Form({
       first_name: {
@@ -76,6 +79,9 @@ describe('Form.ts', () => {
         options: [1, 0],
       },
     })
+
+    expect(uniqueIdSpy).toHaveBeenCalledTimes(1)
+    expect(form.$id).toBe(uniqueIdSpy.mock.results[0].value)
 
     expect(RulesManager).toHaveBeenCalledWith(
       {},
@@ -133,6 +139,27 @@ describe('Form.ts', () => {
       ...data,
       first_name: 'Nevo',
       last_name: 'Golan',
+    })
+  })
+
+  it('should call values on FormCollection if the field is FormCollection', () => {
+    const mockText = 'This is a mock test'
+    FormCollection.prototype.values = jest.fn(() => mockText)
+
+    const form = new Form({
+      name: null,
+      emails: new FormCollection({
+        email: null,
+        type: null,
+      }),
+    })
+
+    const values = form.$values()
+
+    expect(form['emails'].values).toHaveBeenCalledTimes(1)
+    expect(values).toEqual({
+      name: null,
+      emails: mockText,
     })
   })
 
@@ -196,6 +223,33 @@ describe('Form.ts', () => {
         last_name: 'Golan',
       })
     )
+  })
+
+  it('should be able to fill the form with FormCollection property', () => {
+    const emailsValues = [
+      {
+        email: 'nevos@gmail.com',
+        type: 1,
+      },
+    ]
+
+    const mockValues = {
+      name: 'Nevo',
+      emails: emailsValues,
+    }
+
+    const form = new Form({
+      name: null,
+      emails: new FormCollection({
+        email: null,
+        type: null,
+      }),
+    })
+
+    form.$fill(mockValues)
+
+    expect(form['emails'].fill).toHaveBeenCalledWith(emailsValues)
+    expect(form['name']).toBe('Nevo')
   })
 
   it('should change the defaultOptions options of the Form', () => {

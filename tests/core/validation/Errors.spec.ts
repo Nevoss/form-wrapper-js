@@ -1,4 +1,4 @@
-import { Errors } from '../../src/core/Errors'
+import { Errors } from '../../../src/core/validation/Errors'
 
 describe('Errors.ts', () => {
   let errorsData = {

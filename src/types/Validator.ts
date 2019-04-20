@@ -1,5 +1,5 @@
 import { MessageFunction, PassesFunction } from './Errors'
-import { Rule } from '../core/Rule'
+import { Rule } from '../core/validation/Rule'
 
 /**
  * Raw Rule is an object that can be transfer eventually to a normal Rule Object

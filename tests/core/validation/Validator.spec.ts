@@ -1,14 +1,14 @@
-import { Form } from '../../src/core/Form'
-import { RulesManager } from '../../src/core/RulesManager'
-import { Validator } from '../../src/core/Validator'
-import defaultOptions from '../../src/default-options'
-import { Field } from '../../src/types/Field'
-import { FieldValidationError } from '../../src/errors/FieldValidationError'
-import { ValidationOptions } from '../../src/types/Options'
-import { RuleValidationError } from '../../src'
-import { FieldKeysCollection } from '../../src/core/FieldKeysCollection'
+import { Form } from '../../../src/core/Form'
+import { RulesManager } from '../../../src/core/validation/RulesManager'
+import { Validator } from '../../../src/core/validation/Validator'
+import defaultOptions from '../../../src/default-options'
+import { Field } from '../../../src/types/Field'
+import { FieldValidationError } from '../../../src/errors/FieldValidationError'
+import { ValidationOptions } from '../../../src/types/Options'
+import { RuleValidationError } from '../../../src/index'
+import { FieldKeysCollection } from '../../../src/core/FieldKeysCollection'
 
-jest.mock('../../src/core/Form')
+jest.mock('../../../src/core/Form')
 
 describe('Validator.ts', () => {
   let fakeForm: Form = new Form({})

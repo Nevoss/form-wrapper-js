@@ -1,4 +1,4 @@
-import { ErrorsStack } from '../types/Errors'
+import { ErrorsStack } from '../../types/Errors'
 
 export class Errors {
   /**

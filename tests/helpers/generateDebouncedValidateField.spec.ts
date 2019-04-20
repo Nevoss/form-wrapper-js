@@ -6,6 +6,7 @@ jest.mock('../../src/utils', () => {
   return {
     debounce: jest.fn(() => 'example'),
     isObject: () => false,
+    uniqueId: () => '123',
   }
 })
 
