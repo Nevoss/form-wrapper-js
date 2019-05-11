@@ -1,6 +1,6 @@
 {
   "name": "form-wrapper-js",
-  "version": "0.8.0",
+  "version": "1.0.0",
   "description": "JS abstraction for forms",
   "main": "dist/index.js",
   "module": "dist/index.es.js",
@@ -9,8 +9,10 @@
     "dist"
   ],
   "scripts": {
+    "lint": "eslint src/**/*.ts",
     "test": "jest",
-    "build": "rollup -c",
+    "test:prod": "jest --collectCoverage && npm run lint",
+    "build": "tsc --module commonjs && rollup -c rollup.config.js",
     "watch": "rollup -cw",
     "codecov": "codecov",
     "prepublishOnly": "npm run build",
@@ -37,17 +39,24 @@
   "author": "Nevo Golan <nevos12@gmail.com>",
   "license": "MIT",
   "devDependencies": {
-    "@types/jest": "^23.3.10",
-    "codecov": "^3.1.0",
-    "gh-pages": "^2.0.1",
-    "jest": "^23.6.0",
-    "jest-extended": "^0.11.0",
-    "prettier": "1.15.3",
-    "rollup": "^0.67.4",
-    "rollup-plugin-typescript2": "^0.18.1",
-    "ts-jest": "^23.10.5",
-    "typescript": "^3.2.2",
-    "vuepress": "^0.14.8"
+    "@types/faker": "^4.1.5",
+    "@types/jest": "^24.0.11",
+    "@typescript-eslint/eslint-plugin": "^1.7.0",
+    "@typescript-eslint/parser": "^1.7.0",
+    "eslint": "^5.16.0",
+    "eslint-config-prettier": "^4.1.0",
+    "eslint-plugin-prettier": "^3.0.1",
+    "faker": "^4.1.0",
+    "jest": "^24.7.1",
+    "prettier": "^1.17.0",
+    "rimraf": "^2.6.3",
+    "rollup": "^1.10.1",
+    "rollup-plugin-sourcemaps": "^0.4.2",
+    "rollup-plugin-typescript2": "^0.21.0",
+    "ts-jest": "^24.0.2",
+    "typescript": "^3.4.5",
+    "vuepress": "^1.0.0-alpha.47"
   },
-  "dependencies": {}
+  "dependencies": {},
+  "peerDependencies": {}
 }

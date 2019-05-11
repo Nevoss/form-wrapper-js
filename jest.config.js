@@ -1,7 +1,9 @@
 module.exports = {
   preset: 'ts-jest',
-  collectCoverage: true,
   coverageDirectory: './coverage',
-  setupTestFrameworkScriptFile: 'jest-extended',
+  moduleNameMapper: {
+    '~(.*)$': '<rootDir>/src/$1',
+  },
   setupFiles: ['<rootDir>/tests/jest.setup.ts'],
+  // setupTestFrameworkScriptFile: 'jest-extended',
 }

@@ -1,22 +1,44 @@
 import { Form } from './Form'
-import { RawFormFields } from '../types/Field'
-import { Options } from '../types/Options'
+import { OptionalOptions } from '../types/Options'
+import { FieldsDeclaration } from '../types/fields'
+import { FormWithFields } from '../types/form'
 
 export class FormCollection {
   /**
-   * The prototype for the a form item
+   * a shortcut to create FormCollection
+   *
+   * @param prototype
+   * @param prototypeOptions
    */
-  public $prototype: RawFormFields
+  public static create(
+    prototype: FieldsDeclaration = {},
+    prototypeOptions: OptionalOptions = {}
+  ): FormCollection {
+    return new FormCollection(prototype, prototypeOptions)
+  }
 
   /**
-   * The options for the form item
+   * The prototype for a Form item
    */
-  public $prototypeOptions: Options
+  public prototype: FieldsDeclaration
+
+  /**
+   * The options for a Form item
+   */
+  public prototypeOptions: OptionalOptions
 
   /**
    * The forms array - holds the current Forms
    */
-  public $forms: Form[] = []
+  public forms: FormWithFields[] = []
+
+  /**
+   * Holds the ids of the form that was declared as initials forms.
+   * The main reason is to make a compare between the new forms and the initials
+   * forms and then see if this form collection is dirty or not
+   * (take a look at `isDirty` method)
+   */
+  private _initialFormsIds: string[] = []
 
   /**
    * Constructor
@@ -24,23 +46,26 @@ export class FormCollection {
    * @param prototype
    * @param prototypeOptions
    */
-  constructor(prototype: RawFormFields = {}, prototypeOptions: Options = {}) {
-    this.$prototype = prototype
-    this.$prototypeOptions = prototypeOptions
+  public constructor(
+    prototype: FieldsDeclaration = {},
+    prototypeOptions: OptionalOptions = {}
+  ) {
+    this.prototype = prototype
+    this.prototypeOptions = prototypeOptions
   }
 
   /**
    * Return the all the forms
    */
-  public all(): Form[] {
-    return this.$forms
+  public all(): FormWithFields[] {
+    return this.forms
   }
 
   /**
    * Clear the forms array
    */
   public clear(): FormCollection {
-    this.$forms = []
+    this.forms = []
 
     return this
   }
@@ -48,10 +73,10 @@ export class FormCollection {
   /**
    * Add new form to the forms array
    */
-  public add(): Form {
-    const form = new Form(this.$prototype, this.$prototypeOptions)
+  public add(): FormWithFields {
+    const form = Form.create(this.prototype, this.prototypeOptions)
 
-    this.$forms.push(form)
+    this.forms.push(form)
 
     return form
   }
@@ -62,7 +87,7 @@ export class FormCollection {
    * @param index
    */
   public remove(index: number): FormCollection {
-    this.$forms = this.$forms.filter(
+    this.forms = this.forms.filter(
       (form: Form, key: number): boolean => index !== key
     )
 
@@ -75,7 +100,7 @@ export class FormCollection {
    * @param id
    */
   public removeById(id: string): FormCollection {
-    this.$forms = this.$forms.filter((form: Form): boolean => form.$id !== id)
+    this.forms = this.forms.filter((form: Form): boolean => form.$id !== id)
 
     return this
   }
@@ -83,22 +108,63 @@ export class FormCollection {
   /**
    * return all the values of the forms in array
    */
-  public values(): Object[] {
-    return this.$forms.map((form: Form) => {
-      return form.$values()
-    })
+  public values(): ({ [key: string]: any })[] {
+    return this.forms.map(
+      (form: Form): { [key: string]: any } => {
+        return form.$values()
+      }
+    )
   }
 
   /**
-   * Filling the forms with data
+   * Fill the form inside the collection.
+   * if the flag updateInitialValues is passes as true
+   * it will update the _initialFormsIds to make a compare if
+   * `isDirty` called
    *
    * @param data
+   * @param updateInitialValues
    */
-  public fill(data: Object[]): FormCollection {
-    data.forEach((data: Object) => {
-      this.add().$fill(data)
-    })
+  public fill(
+    data: ({ [key: string]: any })[],
+    updateInitialValues: boolean = false
+  ): FormCollection {
+    this.clear()
+
+    if (updateInitialValues) {
+      this._initialFormsIds = []
+    }
+
+    data.forEach(
+      (data: { [key: string]: any }): void => {
+        const form = this.add().$fill(data, updateInitialValues)
+
+        if (updateInitialValues) {
+          this._initialFormsIds.push(form.$id)
+        }
+      }
+    )
 
     return this
+  }
+
+  /**
+   * Checks id the FormCollection is dirty or not
+   */
+  public isDirty(): boolean {
+    return (
+      this._initialFormsIds.length !== this.forms.length ||
+      this.forms.some(
+        (form: Form): boolean =>
+          !this._initialFormsIds.includes(form.$id) || form.$isFormDirty()
+      )
+    )
+  }
+
+  /**
+   * Returns _initialFormsIds
+   */
+  public getInitialFormsIds(): string[] {
+    return this._initialFormsIds
   }
 }

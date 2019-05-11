@@ -1,20 +1,29 @@
 {
   "compilerOptions": {
-    "outDir": "./dist/",
-    "module": "es2015",
-    "target": "es2015",
-    "declaration": true,
-    "esModuleInterop": true,
+    "noImplicitAny": false,
     "moduleResolution": "node",
-    "types": [
-      "jest",
-      "jest-extended"
+    "target": "es2015",
+    "module":"es2015",
+    "lib": ["es2015", "es2016", "es2017", "dom"],
+    "strict": true,
+    "sourceMap": true,
+    "declaration": true,
+    "allowSyntheticDefaultImports": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "declarationDir": "dist/types",
+    "esModuleInterop": true,
+    "outDir": "dist/lib",
+    "typeRoots": [
+      "node_modules/@types"
     ]
   },
   "include": [
-    "./src/**/*", "./tests/**/*"
+    "./src/**/*",
+    "./tests/**/*"
   ],
   "exclude": [
-    "node_modules", "./tests/**/*"
+    "node_modules",
+    "./tests/**/*"
   ]
 }

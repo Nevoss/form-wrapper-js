@@ -1,8 +1,8 @@
-import generateOptions from '../../src/helpers/generateOptions'
-import defaultOptions from '../../src/default-options'
+import generateOptions from '../../../src/helpers/generateOptions'
+import defaultOptions from '../../../src/default-options'
 
-describe('generateOptions.ts', () => {
-  it('should generate new options object from default options and new options Object', () => {
+describe('helpers/generateOptions.ts', (): void => {
+  it('should generate new options object from default options and new options Object', (): void => {
     expect(defaultOptions.successfulSubmission.resetValues).toBe(true)
     expect(defaultOptions.successfulSubmission.clearErrors).toBe(true)
     expect(defaultOptions.validation.onSubmission).toBe(true)

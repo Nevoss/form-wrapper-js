@@ -1,32 +1,32 @@
-import { FieldKeysCollection } from '../../src/core/FieldKeysCollection'
+import { FieldKeysCollection } from '../../../src/helpers/FieldKeysCollection'
 
-describe('FieldKeysCollection.ts', () => {
-  it('should returns all the field keys array', () => {
+describe('core/helpers/fieldKeysCollection.ts', (): void => {
+  it('should returns all the field keys array', (): void => {
     let fieldKeysCollection = new FieldKeysCollection()
-    fieldKeysCollection.$fieldKeys = ['a', 'b']
+    fieldKeysCollection.keys = ['a', 'b']
 
     expect(fieldKeysCollection.all()).toEqual(['a', 'b'])
   })
 
-  it('should record field keys', () => {
+  it('should fill keys', (): void => {
     let fieldKeysCollection = new FieldKeysCollection()
-    fieldKeysCollection.record(['a', 'b'])
+    fieldKeysCollection.fill(['a', 'b'])
 
     expect(fieldKeysCollection.all()).toEqual(['a', 'b'])
   })
 
-  it('should check if field key is exists', () => {
+  it('should check if key is exists', (): void => {
     let fieldKeysCollection = new FieldKeysCollection()
-    fieldKeysCollection.record(['a', 'b'])
+    fieldKeysCollection.fill(['a', 'b'])
 
     expect(fieldKeysCollection.has('a')).toBe(true)
     expect(fieldKeysCollection.has('b')).toBe(true)
     expect(fieldKeysCollection.has('c')).toBe(false)
   })
 
-  it('should add field to the field keys array', () => {
+  it('should add key to the keys', (): void => {
     let fieldKeysCollection = new FieldKeysCollection()
-    fieldKeysCollection.record(['a', 'b'])
+    fieldKeysCollection.fill(['a', 'b'])
 
     fieldKeysCollection.push('c')
     fieldKeysCollection.push('c')
@@ -34,28 +34,28 @@ describe('FieldKeysCollection.ts', () => {
     expect(fieldKeysCollection.all()).toEqual(['a', 'b', 'c'])
   })
 
-  it('should clear all the field keys array', () => {
+  it('should clear all the keys', (): void => {
     let fieldKeysCollection = new FieldKeysCollection()
-    fieldKeysCollection.record(['a', 'b'])
+    fieldKeysCollection.fill(['a', 'b'])
 
     fieldKeysCollection.clear()
 
     expect(fieldKeysCollection.all()).toEqual([])
   })
 
-  it('should check if there is any field key', () => {
+  it('should check if there is any key', (): void => {
     let fieldKeysCollection = new FieldKeysCollection()
 
     expect(fieldKeysCollection.any()).toBe(false)
 
-    fieldKeysCollection.record(['a', 'b'])
+    fieldKeysCollection.fill(['a', 'b'])
 
     expect(fieldKeysCollection.any()).toBe(true)
   })
 
-  it('should unset field from the field keys array', () => {
+  it('should unset key from the keys', (): void => {
     let fieldKeysCollection = new FieldKeysCollection()
-    fieldKeysCollection.record(['a', 'b'])
+    fieldKeysCollection.fill(['a', 'b'])
 
     fieldKeysCollection.unset('a')
 

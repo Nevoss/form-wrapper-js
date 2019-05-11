@@ -1,13 +1,9 @@
-import { RawRule } from './types/Validator'
-import { FieldOptions } from './types/Field'
-
 /**
- * determine if value is a boolean
- *
- * @param value
+ * Generate a good enough unique ID
  */
-export const isBoolean = (value: any): value is boolean => {
-  return typeof value === 'boolean'
+
+export const uniqueId = (): string => {
+  return String(Date.now() + Math.random())
 }
 
 /**
@@ -20,6 +16,15 @@ export const isObject = (value: any): boolean => {
 }
 
 /**
+ * determine if value is a boolean
+ *
+ * @param value
+ */
+export const isBoolean = (value: any): value is boolean => {
+  return typeof value === 'boolean'
+}
+
+/**
  * determine if value is a Promise
  *
  * @param value
@@ -29,37 +34,42 @@ export const isPromise = (value: any): value is Promise<any> => {
 }
 
 /**
- * checks if value implements implements RawRule interface
+ * convert an object to FormData object
+ * Thanks to this gist: https://gist.github.com/ghinda/8442a57f22099bdb2e34
  *
- * @param value
+ * @param values
+ * @param contextFormData
+ * @param namespace
  */
-export const isRawRule = (value: any): value is RawRule => {
-  return isObject(value) && typeof value.passes === 'function'
-}
+export const objectToFormData = (
+  values: object | [],
+  contextFormData?: FormData,
+  namespace?: string
+): FormData => {
+  const formData: FormData = contextFormData || new FormData()
 
-/**
- * checks if value implements FieldOption interface
- *
- * @param value
- */
-export const isFieldOptions = (value: any): value is FieldOptions => {
-  return isObject(value) && typeof value.value !== 'undefined'
-}
+  Object.keys(values).forEach(
+    (key: string): void => {
+      const value = values[key]
+      key = namespace ? `${namespace}[${key}]` : key
 
-/**
- * will generate a good enough unique ID
- */
-export const uniqueId = (): string => {
-  return String(Date.now() + Math.random())
-}
+      if ([undefined, false, null].indexOf(value) > -1) {
+        return
+      }
 
-/**
- * sending a warning message
- *
- * @param message
- */
-export const warn = (message): void => {
-  console.error(`[Form-wrapper-js warn]: ${message}`)
+      if (
+        (isObject(value) && !(value instanceof File)) ||
+        Array.isArray(value)
+      ) {
+        objectToFormData(value, formData, key)
+        return
+      }
+
+      formData.append(key, value)
+    }
+  )
+
+  return formData
 }
 
 /**
@@ -68,12 +78,15 @@ export const warn = (message): void => {
  * @param callback
  * @param time
  */
-export const debounce = (callback: Function, time: number): Function => {
+export const debounce = (
+  callback: (...args: any[]) => void,
+  time?: number
+): ((...args: any[]) => void) => {
   let interval
 
-  return (...args) => {
+  return (...args): void => {
     clearTimeout(interval)
-    interval = setTimeout(() => {
+    interval = setTimeout((): void => {
       interval = null
 
       callback(...args)
