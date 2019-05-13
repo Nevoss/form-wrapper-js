@@ -28,4 +28,16 @@ describe('core/Errors.ts', (): void => {
 
     expect(errors.get('name')).toEqual([])
   })
+
+  it('should push an error to specific key', (): void => {
+    const errors = new Errors()
+
+    errors.push('name', 'a')
+
+    expect(errors.get('name')).toEqual(['a'])
+
+    errors.push('name', 'b')
+
+    expect(errors.get('name')).toEqual(['a', 'b'])
+  })
 })

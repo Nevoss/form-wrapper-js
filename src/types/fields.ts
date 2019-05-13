@@ -8,7 +8,7 @@ export interface Field {
   key: string
   label: string
   value: any
-  extras: any
+  extra: any
 }
 
 /**

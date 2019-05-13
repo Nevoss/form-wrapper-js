@@ -6,6 +6,7 @@ import { FormCollection } from './FormCollection'
 import { OptionalOptions, Options } from '../types/options'
 import { FormDefaults, FormWithFields } from '../types/form'
 import {
+  Field,
   FieldDeclaration,
   FieldsDeclaration,
   OptionalFieldDeclaration,
@@ -17,6 +18,9 @@ import generateOptions from '../helpers/generateOptions'
 import generateFieldDeclaration from '../helpers/generateFieldDeclaration'
 import generateDebouncedValidateField from '../helpers/generateDebouncedValidateField'
 import { objectToFormData } from '../utils'
+import { Rule } from './Rule'
+import { RuleValidationError } from '../errors/RuleValidationError'
+import createRuleMessageFunction from '../factories/RuleMessageFunctionFactory'
 
 export class Form {
   /**
@@ -370,7 +374,51 @@ export class Form {
     return this
   }
 
-  public $validateField(fieldKey: string): void {}
+  public async $validateField(fieldKey: string): Promise<any> {
+    warn(this.$hasField(fieldKey), `'${fieldKey}' is not a valid field`)
+
+    const defaultMessage = createRuleMessageFunction(
+      this.$options.validation.defaultMessage
+    )
+
+    let fieldRulesChain: Rule[] = Array.from(this.$rules.get(fieldKey))
+    const field: Field = this.$getField(fieldKey)
+
+    while (fieldRulesChain.length) {
+      let rule = fieldRulesChain.shift()
+
+      if (rule === undefined) {
+        continue
+      }
+
+      this.$validating.push(fieldKey)
+
+      try {
+        await rule.validate(field, this, defaultMessage)
+      } catch (error) {
+        // If the error is not a RuleValidationError - the error will bubble up
+        if (!(error instanceof RuleValidationError)) {
+          throw error
+        }
+
+        this.$errors.push(fieldKey, error.message)
+
+        this.$options.validation.stopAfterFirstRuleFailed &&
+          (fieldRulesChain = [])
+      }
+
+      this.$validating.unset(fieldKey)
+    }
+  }
 
   public $debouncedValidateField(fieldKey: string): void {}
+
+  public $getField(fieldKey: string): Field {
+    return {
+      key: fieldKey,
+      label: this.$labels[fieldKey],
+      value: this[fieldKey],
+      extra: this.$extra[fieldKey],
+    }
+  }
 }

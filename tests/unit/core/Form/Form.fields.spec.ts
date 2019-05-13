@@ -148,4 +148,22 @@ describe('core/Form.ts - Fields', (): void => {
 
     expect(form.$getFields()).toEqual(['name', 'a'])
   })
+
+  it('should return a Field object', (): void => {
+    const form = Form.create({
+      name: null,
+    })
+
+    const nameFakeData = mocked(generateFieldDeclaration).mock.results[0].value
+
+    expect(form.$getField('name')).toEqual(
+      expect.objectContaining({
+        key: 'name',
+        label: nameFakeData.label,
+        value: nameFakeData.value,
+        extra: nameFakeData.extra,
+      })
+    )
+    expect(form.$getField('name').extra).toBe(nameFakeData.extra)
+  })
 })

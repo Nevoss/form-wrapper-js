@@ -17,6 +17,18 @@ export class Errors extends FieldsCollection<string[]> {
   }
 
   /**
+   * push an error message to specific key
+   *
+   * @param key
+   * @param message
+   */
+  public push(key: string, message: string): this {
+    this.items[key] = [...this.get(key), message]
+
+    return this
+  }
+
+  /**
    * override `get` method to return an empty array if there is no errors
    * for the requested field
    *

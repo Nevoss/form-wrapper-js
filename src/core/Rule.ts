@@ -48,14 +48,23 @@ export class Rule {
    *
    * @param field
    * @param form
+   * @param defaultMessage
    */
-  public validate(field: Field, form: FormWithFields): Promise<any> {
+  public validate(
+    field: Field,
+    form: FormWithFields,
+    defaultMessage: RuleMessageFunction
+  ): Promise<any> {
     const passesResponse = this.passes(field, form)
 
     if (isBoolean(passesResponse)) {
       return passesResponse
         ? Promise.resolve()
-        : Promise.reject(new RuleValidationError())
+        : Promise.reject(
+            new RuleValidationError(
+              this.invokeErrorMessage(field, form, defaultMessage)
+            )
+          )
     }
 
     if (isPromise(passesResponse)) {
@@ -64,6 +73,27 @@ export class Rule {
 
     return passesResponse
       ? Promise.resolve()
-      : Promise.reject(new RuleValidationError())
+      : Promise.reject(
+          new RuleValidationError(
+            this.invokeErrorMessage(field, form, defaultMessage)
+          )
+        )
+  }
+
+  /**
+   * calls the message function or the default message function
+   *
+   * @param field
+   * @param form
+   * @param defaultMessage
+   */
+  public invokeErrorMessage(
+    field: Field,
+    form: FormWithFields,
+    defaultMessage: RuleMessageFunction
+  ): string {
+    return this.message !== null
+      ? this.message(field, form)
+      : defaultMessage(field, form)
   }
 }

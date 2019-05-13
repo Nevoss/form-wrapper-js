@@ -3,6 +3,8 @@ import defaultOptions from '../src/default-options'
 import { Field, FieldDeclaration } from '../src/types/fields'
 import { Options } from '../src/types/options'
 import { FormCollection } from '../src/core/FormCollection'
+import { RuleMessageFunction } from '../src/types/validation'
+import { FormWithFields } from '../src/types/form'
 
 /**
  * creates a fake Field declaration
@@ -30,6 +32,15 @@ export const createFakeField = (): Field => {
     key: faker.lorem.word(),
     extras: {},
   }
+}
+
+/**
+ * Creates a fake rule message function
+ */
+export const createFakeRuleMessageFunction = (): RuleMessageFunction => {
+  return jest.fn(
+    (field: Field, form: FormWithFields): string => faker.lorem.words()
+  )
 }
 
 /**

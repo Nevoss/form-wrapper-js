@@ -1,9 +1,12 @@
+import faker from 'faker'
 import { Rule } from '../../../src/core/Rule'
 import createRule from '../../../src/factories/RuleFactory'
 import { RulePassesFunction } from '../../../src/types/validation'
 import { Form } from '../../../src/core/Form'
 import { Field } from '../../../src/types/fields'
 import { RuleValidationError } from '../../../src/errors/RuleValidationError'
+import { createFakeRuleMessageFunction } from '../../fake-data'
+import { mocked } from 'ts-jest/utils'
 
 jest.mock('../../../src/core/Form')
 jest.mock(
@@ -49,7 +52,9 @@ describe('core/Rule.ts', (): void => {
 
     const rule = new Rule(passes)
 
-    await expect(rule.validate(fakeField, fakeForm)).resolves
+    await expect(
+      rule.validate(fakeField, fakeForm, createFakeRuleMessageFunction())
+    ).resolves
 
     expect(passes).toHaveBeenCalledTimes(1)
     expect(passes).toHaveBeenCalledWith(fakeField, fakeForm)
@@ -61,13 +66,24 @@ describe('core/Rule.ts', (): void => {
     const passes: RulePassesFunction = jest.fn((): boolean => false)
 
     const rule = new Rule(passes)
+    rule.invokeErrorMessage = jest.fn((): string => faker.lorem.words())
 
-    expect.assertions(3)
+    expect.assertions(5)
+
+    const fakeDefaultMessage = createFakeRuleMessageFunction()
 
     try {
-      await rule.validate(fakeField, fakeForm)
+      await rule.validate(fakeField, fakeForm, fakeDefaultMessage)
     } catch (e) {
       expect(e).toBeInstanceOf(RuleValidationError)
+      expect(rule.invokeErrorMessage).toHaveBeenCalledWith(
+        fakeField,
+        fakeForm,
+        fakeDefaultMessage
+      )
+      expect(e.message).toBe(
+        mocked(rule.invokeErrorMessage).mock.results[0].value
+      )
     }
 
     expect(passes).toHaveBeenCalledTimes(1)
@@ -82,7 +98,9 @@ describe('core/Rule.ts', (): void => {
 
     const rule = new Rule(passes)
 
-    await expect(rule.validate(fakeField, fakeForm)).toBe(promise)
+    await expect(
+      rule.validate(fakeField, fakeForm, createFakeRuleMessageFunction())
+    ).toBe(promise)
 
     expect(passes).toHaveBeenCalledTimes(1)
     expect(passes).toHaveBeenCalledWith(fakeField, fakeForm)
@@ -96,15 +114,27 @@ describe('core/Rule.ts', (): void => {
 
     // @ts-ignore
     const rule = new Rule(passes)
+    rule.invokeErrorMessage = jest.fn((): string => faker.lorem.words())
+
     // @ts-ignore
     const rule2 = new Rule(passes2)
 
-    expect.assertions(5)
+    expect.assertions(7)
+
+    const fakeDefaultMessage = createFakeRuleMessageFunction()
 
     try {
-      await rule.validate(fakeField, fakeForm)
+      await rule.validate(fakeField, fakeForm, fakeDefaultMessage)
     } catch (e) {
       expect(e).toBeInstanceOf(RuleValidationError)
+      expect(rule.invokeErrorMessage).toHaveBeenCalledWith(
+        fakeField,
+        fakeForm,
+        fakeDefaultMessage
+      )
+      expect(e.message).toBe(
+        mocked(rule.invokeErrorMessage).mock.results[0].value
+      )
     }
 
     await expect(rule2.validate(fakeField, fakeForm)).resolves
@@ -114,5 +144,39 @@ describe('core/Rule.ts', (): void => {
 
     expect(passes2).toHaveBeenCalledTimes(1)
     expect(passes2).toHaveBeenCalledWith(fakeField, fakeForm)
+  })
+
+  it('should invoke the rule message function', (): void => {
+    const fakeMessageFunction = createFakeRuleMessageFunction()
+    const fakeDefaultMessageFunction = createFakeRuleMessageFunction()
+
+    const rule = new Rule(jest.fn(), fakeMessageFunction)
+
+    const message = rule.invokeErrorMessage(
+      fakeField,
+      fakeForm,
+      fakeDefaultMessageFunction
+    )
+
+    expect(fakeMessageFunction).toHaveBeenCalledWith(fakeField, fakeForm)
+    expect(fakeDefaultMessageFunction).not.toHaveBeenCalled()
+    expect(message).toBe(mocked(fakeMessageFunction).mock.results[0].value)
+  })
+
+  it('should invoke the default message function', (): void => {
+    const fakeDefaultMessageFunction = createFakeRuleMessageFunction()
+
+    const rule = new Rule(jest.fn(), null)
+
+    const message = rule.invokeErrorMessage(
+      fakeField,
+      fakeForm,
+      fakeDefaultMessageFunction
+    )
+
+    expect(fakeDefaultMessageFunction).toHaveBeenCalledWith(fakeField, fakeForm)
+    expect(message).toBe(
+      mocked(fakeDefaultMessageFunction).mock.results[0].value
+    )
   })
 })
