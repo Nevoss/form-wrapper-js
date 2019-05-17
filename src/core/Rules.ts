@@ -1,8 +1,9 @@
 import { FieldsCollection } from '../helpers/FieldsCollection'
 import { RuleDeclaration, RulePassesFunction } from '../types/validation'
 import { Rule } from './Rule'
+import { ConditionalRules } from './ConditionalRules'
 
-export class Rules extends FieldsCollection<Rule[]> {
+export class Rules extends FieldsCollection<(Rule | ConditionalRules)[]> {
   /**
    * generate a field Rules from RuleDeclaration or RulePassesFunction array
    *
@@ -11,10 +12,13 @@ export class Rules extends FieldsCollection<Rule[]> {
    */
   public generateFieldRules(
     key: string,
-    rules: (RuleDeclaration | RulePassesFunction)[]
+    rules: (RuleDeclaration | RulePassesFunction | ConditionalRules)[]
   ): this {
     this.items[key] = rules.map(
-      (rule: RuleDeclaration | RulePassesFunction): Rule => Rule.create(rule)
+      (
+        rule: RuleDeclaration | RulePassesFunction | ConditionalRules
+      ): Rule | ConditionalRules =>
+        rule instanceof ConditionalRules ? rule : Rule.create(rule)
     )
 
     return this
@@ -25,7 +29,7 @@ export class Rules extends FieldsCollection<Rule[]> {
    *
    * @param key
    */
-  public get(key: string): Rule[] {
+  public get(key: string): (Rule | ConditionalRules)[] {
     return super.get(key, [])
   }
 }

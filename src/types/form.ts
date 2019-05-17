@@ -14,4 +14,12 @@ export interface FormDefaults {
   }
 }
 
+/**
+ * Submit callback interface,
+ * the function the should pass to submit method in Form class
+ */
+export interface SubmitCallback {
+  (form: Form): Promise<any>
+}
+
 export type FormWithFields = Form & { [key: string]: any }

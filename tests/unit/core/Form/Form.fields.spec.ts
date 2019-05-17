@@ -146,7 +146,7 @@ describe('core/Form.ts - Fields', (): void => {
       a: null,
     })
 
-    expect(form.$getFields()).toEqual(['name', 'a'])
+    expect(form.$getFieldKeys()).toEqual(['name', 'a'])
   })
 
   it('should return a Field object', (): void => {

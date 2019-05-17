@@ -1,10 +1,10 @@
 import { Errors } from './Errors'
 import { Rules } from './Rules'
 import { Interceptors } from './Interceptors'
-import { FieldKeysCollection } from '../helpers/FieldKeysCollection'
+import { Collection } from '../helpers/Collection'
 import { FormCollection } from './FormCollection'
 import { OptionalOptions, Options } from '../types/options'
-import { FormDefaults, FormWithFields } from '../types/form'
+import { FormDefaults, FormWithFields, SubmitCallback } from '../types/form'
 import {
   Field,
   FieldDeclaration,
@@ -21,6 +21,8 @@ import { objectToFormData } from '../utils'
 import { Rule } from './Rule'
 import { RuleValidationError } from '../errors/RuleValidationError'
 import createRuleMessageFunction from '../factories/RuleMessageFunctionFactory'
+import { ConditionalRules } from './ConditionalRules'
+import { Interceptor } from '../types/interceptors'
 
 export class Form {
   /**
@@ -87,12 +89,12 @@ export class Form {
   /**
    * holds all the fields that was touched
    */
-  public $touched: FieldKeysCollection
+  public $touched: Collection<string>
 
   /**
    * holds all the fields keys that are in validation right now
    */
-  public $validating: FieldKeysCollection
+  public $validating: Collection<string>
 
   /**
    * Options of the Form
@@ -115,6 +117,11 @@ export class Form {
   public $extra: { [key: string]: any } = {}
 
   /**
+   * determine if the form is on submitting mode
+   */
+  public $submitting: boolean = false
+
+  /**
    * Form Constructor
    *
    * @param id
@@ -135,8 +142,8 @@ export class Form {
     this.$rules = rules
     this.$errors = errors
     this.$interceptors = interceptors
-    this.$touched = new FieldKeysCollection()
-    this.$validating = new FieldKeysCollection()
+    this.$touched = new Collection()
+    this.$validating = new Collection()
   }
 
   /**
@@ -226,8 +233,23 @@ export class Form {
   /**
    * return all the field keys of the form
    */
-  public $getFields(): string[] {
+  public $getFieldKeys(): string[] {
     return Object.keys(this.$initialValues)
+  }
+
+  /**
+   * get Field
+   * returns data about the field, mostly used for validation
+   *
+   * @param fieldKey
+   */
+  public $getField(fieldKey: string): Field {
+    return {
+      key: fieldKey,
+      label: this.$labels[fieldKey],
+      value: this[fieldKey],
+      extra: this.$extra[fieldKey],
+    }
   }
 
   /**
@@ -251,7 +273,7 @@ export class Form {
   public $values(): { [key: string]: any } {
     const values = {}
 
-    this.$getFields().forEach(
+    this.$getFieldKeys().forEach(
       (fieldKey: string): void => {
         values[fieldKey] =
           this[fieldKey] instanceof FormCollection
@@ -346,7 +368,7 @@ export class Form {
    * if one of the fields is dirty thw whole form consider as dirty
    */
   public $isFormDirty(): boolean {
-    return this.$getFields().some(
+    return this.$getFieldKeys().some(
       (fieldKey: string): boolean => this.$isFieldDirty(fieldKey)
     )
   }
@@ -374,6 +396,11 @@ export class Form {
     return this
   }
 
+  /**
+   * validate a specific field
+   *
+   * @param fieldKey
+   */
   public async $validateField(fieldKey: string): Promise<any> {
     warn(this.$hasField(fieldKey), `'${fieldKey}' is not a valid field`)
 
@@ -381,7 +408,9 @@ export class Form {
       this.$options.validation.defaultMessage
     )
 
-    let fieldRulesChain: Rule[] = Array.from(this.$rules.get(fieldKey))
+    let fieldRulesChain: (Rule | ConditionalRules)[] = Array.from(
+      this.$rules.get(fieldKey)
+    )
     const field: Field = this.$getField(fieldKey)
 
     while (fieldRulesChain.length) {
@@ -394,7 +423,18 @@ export class Form {
       this.$validating.push(fieldKey)
 
       try {
+        if (rule instanceof ConditionalRules) {
+          rule.condition(field, this) &&
+            (fieldRulesChain = [...rule.all(), ...fieldRulesChain])
+
+          continue
+        }
+
         await rule.validate(field, this, defaultMessage)
+
+        if (field.value instanceof FormCollection) {
+          await field.value.validate()
+        }
       } catch (error) {
         // If the error is not a RuleValidationError - the error will bubble up
         if (!(error instanceof RuleValidationError)) {
@@ -411,14 +451,81 @@ export class Form {
     }
   }
 
+  /**
+   * Debounced version $validateField method
+   *
+   * @param fieldKey
+   */
   public $debouncedValidateField(fieldKey: string): void {}
 
-  public $getField(fieldKey: string): Field {
-    return {
-      key: fieldKey,
-      label: this.$labels[fieldKey],
-      value: this[fieldKey],
-      extra: this.$extra[fieldKey],
+  /**
+   * validate all the fields of the form
+   */
+  public $validateForm(): Promise<any> {
+    const promises = this.$getFieldKeys().map(
+      (fieldKey: string): Promise<any> => {
+        return this.$validateField(fieldKey)
+      }
+    )
+
+    return Promise.all(promises)
+  }
+
+  /**
+   * validate specific key or the whole form.
+   *
+   * @param fieldKey
+   */
+  public $validate(fieldKey: string | null = null): Promise<any> {
+    return fieldKey ? this.$validateField(fieldKey) : this.$validateForm()
+  }
+
+  /**
+   * returns if is validating the field or the whole form
+   *
+   * @param fieldKey
+   */
+  public $isValidating(fieldKey: string | null = null): boolean {
+    warn(
+      !fieldKey || this.$hasField(fieldKey),
+      `\`${fieldKey}\` is not a valid field`
+    )
+
+    return fieldKey ? this.$validating.has(fieldKey) : this.$validating.any()
+  }
+
+  /**
+   * submit the form.
+   * this method received a callback that must return a Promise.
+   *
+   * @param callback
+   */
+  public $submit(callback: SubmitCallback): Promise<any> {
+    let chain: any[] = [
+      (): Promise<any> => callback(this),
+      null,
+      (response): Promise<any> => Promise.resolve({ response, form: this }),
+      (error): Promise<any> => Promise.reject({ error, form: this }),
+    ]
+
+    this.$interceptors.beforeSubmission.forEach(
+      (handler: Interceptor): void => {
+        chain.unshift(handler.fulfilled, handler.rejected)
+      }
+    )
+
+    this.$interceptors.submissionComplete.forEach(
+      (handler: Interceptor): void => {
+        chain.push(handler.fulfilled, handler.rejected)
+      }
+    )
+
+    let promise: Promise<any> = Promise.resolve(this)
+
+    while (chain.length) {
+      promise = promise.then(chain.shift(), chain.shift())
     }
+
+    return promise
   }
 }

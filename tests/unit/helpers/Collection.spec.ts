@@ -1,22 +1,22 @@
-import { FieldKeysCollection } from '../../../src/helpers/FieldKeysCollection'
+import { Collection } from '../../../src/helpers/Collection'
 
-describe('core/helpers/fieldKeysCollection.ts', (): void => {
+describe('core/helpers/Collection.ts', (): void => {
   it('should returns all the field keys array', (): void => {
-    let fieldKeysCollection = new FieldKeysCollection()
+    let fieldKeysCollection = new Collection()
     fieldKeysCollection.keys = ['a', 'b']
 
     expect(fieldKeysCollection.all()).toEqual(['a', 'b'])
   })
 
   it('should fill keys', (): void => {
-    let fieldKeysCollection = new FieldKeysCollection()
+    let fieldKeysCollection = new Collection()
     fieldKeysCollection.fill(['a', 'b'])
 
     expect(fieldKeysCollection.all()).toEqual(['a', 'b'])
   })
 
   it('should check if key is exists', (): void => {
-    let fieldKeysCollection = new FieldKeysCollection()
+    let fieldKeysCollection = new Collection()
     fieldKeysCollection.fill(['a', 'b'])
 
     expect(fieldKeysCollection.has('a')).toBe(true)
@@ -25,7 +25,7 @@ describe('core/helpers/fieldKeysCollection.ts', (): void => {
   })
 
   it('should add key to the keys', (): void => {
-    let fieldKeysCollection = new FieldKeysCollection()
+    let fieldKeysCollection = new Collection()
     fieldKeysCollection.fill(['a', 'b'])
 
     fieldKeysCollection.push('c')
@@ -35,7 +35,7 @@ describe('core/helpers/fieldKeysCollection.ts', (): void => {
   })
 
   it('should clear all the keys', (): void => {
-    let fieldKeysCollection = new FieldKeysCollection()
+    let fieldKeysCollection = new Collection()
     fieldKeysCollection.fill(['a', 'b'])
 
     fieldKeysCollection.clear()
@@ -44,7 +44,7 @@ describe('core/helpers/fieldKeysCollection.ts', (): void => {
   })
 
   it('should check if there is any key', (): void => {
-    let fieldKeysCollection = new FieldKeysCollection()
+    let fieldKeysCollection = new Collection()
 
     expect(fieldKeysCollection.any()).toBe(false)
 
@@ -54,7 +54,7 @@ describe('core/helpers/fieldKeysCollection.ts', (): void => {
   })
 
   it('should unset key from the keys', (): void => {
-    let fieldKeysCollection = new FieldKeysCollection()
+    let fieldKeysCollection = new Collection()
     fieldKeysCollection.fill(['a', 'b'])
 
     fieldKeysCollection.unset('a')

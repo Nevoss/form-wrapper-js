@@ -33,9 +33,9 @@ export class FormCollection {
   public forms: FormWithFields[] = []
 
   /**
-   * Holds the ids of the form that was declared as initials forms.
+   * Holds the ids of the forms that was declared as initials forms.
    * The main reason is to make a compare between the new forms and the initials
-   * forms and then see if this form collection is dirty or not
+   * forms and then see if the form collection is dirty or not
    * (take a look at `isDirty` method)
    */
   private _initialFormsIds: string[] = []
@@ -166,5 +166,18 @@ export class FormCollection {
    */
   public getInitialFormsIds(): string[] {
     return this._initialFormsIds
+  }
+
+  /**
+   * validate all the forms inside the collection
+   */
+  public validate(): Promise<any> {
+    const promises = this.forms.map(
+      (form: Form): Promise<any> => {
+        return form.$validateForm()
+      }
+    )
+
+    return Promise.all(promises)
   }
 }

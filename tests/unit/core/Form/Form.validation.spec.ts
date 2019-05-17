@@ -5,25 +5,28 @@ import { FormWithFields } from '../../../../src/types/form'
 import { Errors } from '../../../../src/core/Errors'
 import { Interceptors } from '../../../../src/core/Interceptors'
 import warn from '../../../../src/warn'
-import { createFakeField } from '../../../fake-data'
+import { createFakeField, createFakeRule } from '../../../fake-data'
 import { mocked } from 'ts-jest/utils'
 import createRuleMessageFunction from '../../../../src/factories/RuleMessageFunctionFactory'
 import { RuleValidationError } from '../../../../src/errors/RuleValidationError'
 import { OptionalOptions } from '../../../../src/types/options'
+import { FormCollection } from '../../../../src/core/FormCollection'
+import { ConditionalRules } from '../../../../src/core/ConditionalRules'
 
 jest.mock('../../../../src/core/Interceptors')
 jest.mock('../../../../src/factories/RuleMessageFunctionFactory')
+jest.mock('../../../../src/core/FormCollection')
 jest.mock('../../../../src/warn')
 jest.mock('../../../../src/core/Rule')
 
 describe('core/Form.ts - validation', (): void => {
   const createForm = (
-    fieldName: string,
-    rules: Rule[] = [],
+    field: { name: string; value?: any },
+    rules: (Rule | ConditionalRules)[] = [],
     options: OptionalOptions = {}
   ): FormWithFields => {
     const rulesObject = new Rules({
-      [fieldName]: rules,
+      [field.name]: rules,
     })
 
     const form = new Form('1', new Rules(), new Errors(), {
@@ -31,11 +34,11 @@ describe('core/Form.ts - validation', (): void => {
       beforeSubmission: new Interceptors(),
     })
 
-    form.$addField(fieldName, null)
+    form.$addField(field.name, field.value)
     form.$assignOptions(options)
     form.$rules = rulesObject
 
-    form.$getField = jest.fn(() => createFakeField())
+    form.$getField = jest.fn(() => createFakeField(field.value))
 
     return form
   }
@@ -43,13 +46,14 @@ describe('core/Form.ts - validation', (): void => {
   afterEach(
     (): void => {
       mocked(createRuleMessageFunction).mockClear()
+      mocked(warn).mockClear()
     }
   )
 
   it('should validate field and warn if the field not exists', async (): Promise<
     any
   > => {
-    const form = createForm('name')
+    const form = createForm({ name: 'name' })
 
     await form.$validateField('last_name')
 
@@ -69,7 +73,7 @@ describe('core/Form.ts - validation', (): void => {
     const rule1 = new Rule(jest.fn())
     const rule2 = new Rule(jest.fn())
 
-    const form = createForm('name', [rule1, rule2])
+    const form = createForm({ name: 'name' }, [rule1, rule2])
 
     await form.$validateField('name')
 
@@ -106,7 +110,7 @@ describe('core/Form.ts - validation', (): void => {
       throw new RuleValidationError('error2')
     })
 
-    const form = createForm('name', [rule1, rule2, rule3], {
+    const form = createForm({ name: 'name' }, [rule1, rule2, rule3], {
       validation: {
         stopAfterFirstRuleFailed: false,
       },
@@ -119,6 +123,70 @@ describe('core/Form.ts - validation', (): void => {
     expect(errors.length).toBe(2)
     expect(errors[0]).toBe('error1')
     expect(errors[1]).toBe('error2')
+  })
+
+  it('should also validate the form collection if the field is a FormCollection', async (): Promise<
+    any
+  > => {
+    const rule = new Rule(jest.fn())
+    const formCollection = new FormCollection()
+
+    const form = createForm({ name: 'name', value: formCollection }, [rule])
+
+    await form.$validateField('name')
+
+    const getFieldResult = mocked(form.$getField).mock.results[0].value
+    const defaultMessage = mocked(createRuleMessageFunction).mock.results[0]
+      .value
+
+    expect(rule.validate).toHaveBeenCalledWith(
+      getFieldResult,
+      form,
+      defaultMessage
+    )
+    expect(formCollection.validate).toHaveBeenCalled()
+  })
+
+  it('should validate ConditionalRules rules if the condition returns true', async (): Promise<
+    any
+  > => {
+    const rule = createFakeRule()
+    const rule2 = createFakeRule()
+    const conditionalRules = new ConditionalRules(() => true, [rule, rule2])
+
+    const form = createForm({ name: 'name', value: null }, [conditionalRules])
+
+    await form.$validateField('name')
+
+    const getFieldResult = mocked(form.$getField).mock.results[0].value
+    const defaultMessage = mocked(createRuleMessageFunction).mock.results[0]
+      .value
+
+    expect(rule.validate).toHaveBeenCalledWith(
+      getFieldResult,
+      form,
+      defaultMessage
+    )
+    expect(rule2.validate).toHaveBeenCalledWith(
+      getFieldResult,
+      form,
+      defaultMessage
+    )
+  })
+
+  it('should not validate ConditionalRules rules if the condition returns true', async (): Promise<
+    any
+  > => {
+    const rule = createFakeRule()
+    const rule2 = createFakeRule()
+    const conditionalRules = new ConditionalRules(() => false, [rule, rule2])
+
+    const form = createForm({ name: 'name', value: null }, [conditionalRules])
+
+    await form.$validateField('name')
+
+    expect(rule.validate).not.toHaveBeenCalled()
+    expect(rule2.validate).not.toHaveBeenCalled()
   })
 
   it('should stop after first error if `stopAfterFirstRuleFailed` set to true', async (): Promise<
@@ -136,7 +204,7 @@ describe('core/Form.ts - validation', (): void => {
       throw new RuleValidationError('error2')
     })
 
-    const form = createForm('name', [rule1, rule2, rule3], {
+    const form = createForm({ name: 'name' }, [rule1, rule2, rule3], {
       validation: {
         stopAfterFirstRuleFailed: true,
       },
@@ -159,7 +227,7 @@ describe('core/Form.ts - validation', (): void => {
       throw new Error('error')
     })
 
-    const form = createForm('name', [rule])
+    const form = createForm({ name: 'name' }, [rule])
 
     expect.assertions(2)
 
@@ -173,10 +241,81 @@ describe('core/Form.ts - validation', (): void => {
 
   it('should mark the field as validating when validating', (): void => {
     const rule = new Rule(jest.fn())
-    const form = createForm('name', [rule])
+    const form = createForm({ name: 'name' }, [rule])
 
     form.$validateField('name')
 
     expect(form.$validating.has('name')).toBe(true)
+  })
+
+  it('should validate all the fields of the form', async (): Promise<any> => {
+    const form = Form.create({
+      name: null,
+      last_name: null,
+    })
+
+    form.$validateField = jest.fn()
+
+    await form.$validateForm()
+
+    expect(form.$validateField).toHaveBeenNthCalledWith(1, 'name')
+    expect(form.$validateField).toHaveBeenNthCalledWith(2, 'last_name')
+  })
+
+  it('should invoke $validateField or $validateForm', async () => {
+    const form = Form.create({ name: null })
+
+    form.$validateForm = jest.fn()
+    form.$validateField = jest.fn()
+
+    await form.$validate()
+
+    expect(form.$validateForm).toHaveBeenCalledTimes(1)
+    expect(form.$validateField).toHaveBeenCalledTimes(0)
+
+    mocked(form.$validateForm).mockClear()
+    mocked(form.$validateField).mockClear()
+
+    await form.$validate('name')
+
+    expect(form.$validateForm).toHaveBeenCalledTimes(0)
+    expect(form.$validateField).toHaveBeenCalledWith('name')
+  })
+
+  it('should checks if validating the field', (): void => {
+    const form = Form.create({ name: null })
+
+    expect(form.$isValidating('name')).toBe(false)
+
+    form.$validating.push('name')
+
+    expect(form.$isValidating('name')).toBe(true)
+
+    expect(warn).toHaveBeenCalledTimes(3)
+    expect(warn).toHaveBeenLastCalledWith(true, expect.stringContaining('name'))
+  })
+
+  it('should check if the whole form is on validation mode', (): void => {
+    const form = Form.create({ name: null, last_name: null })
+
+    expect(form.$isValidating()).toBe(false)
+
+    form.$validating.push('last_name')
+
+    expect(form.$isValidating()).toBe(true)
+
+    expect(warn).toHaveBeenCalledTimes(4)
+    expect(warn).toHaveBeenLastCalledWith(true, expect.stringContaining('null'))
+  })
+
+  it('should warn if the field is not exists in the form and try to check if isValidating', (): void => {
+    const form = Form.create()
+
+    form.$isValidating('name')
+
+    expect(warn).toHaveBeenLastCalledWith(
+      false,
+      expect.stringContaining('name')
+    )
   })
 })

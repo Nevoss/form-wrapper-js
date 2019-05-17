@@ -214,4 +214,24 @@ describe('core/FormCollection.ts', (): void => {
 
     expect(formCollection.isDirty()).toBe(true)
   })
+
+  it('should validate the forms inside the collection', async (): Promise<
+    any
+  > => {
+    const mockValues = [{ name: '1' }, { name: '2' }, { name: '3' }]
+    jest.spyOn(Form.prototype, '$validateForm')
+
+    const formCollection = new FormCollection(prototype, prototypeOptions)
+    formCollection.fill(mockValues)
+
+    await formCollection.validate()
+
+    expect.assertions(3)
+
+    formCollection.all().forEach(
+      (form: Form): void => {
+        expect(form.$validateForm).toHaveBeenCalled()
+      }
+    )
+  })
 })

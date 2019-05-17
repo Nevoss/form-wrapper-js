@@ -16,6 +16,13 @@ export interface RuleMessageFunction {
 }
 
 /**
+ * Interface of an conditional function on the ConditionalRules class
+ */
+export interface ConditionalRulesConditionFunction {
+  (field: Field, form: FormWithFields): boolean
+}
+
+/**
  * A Base declaration of a rule
  */
 export interface RuleDeclaration {

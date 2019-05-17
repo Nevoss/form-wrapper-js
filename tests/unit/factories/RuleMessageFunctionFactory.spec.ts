@@ -1,5 +1,6 @@
 import createRuleMessage from '../../../src/factories/RuleMessageFunctionFactory'
 import { Form } from '../../../src/core/Form'
+import { createFakeField } from '../../fake-data'
 
 jest.mock('../../../src/core/Form')
 
@@ -18,11 +19,8 @@ describe('factories/RuleMessageFunctionFactory.ts', (): void => {
     const resultMessageFunc = createRuleMessage(messageString)
 
     expect(typeof resultMessageFunc === 'function').toBe(true)
-    expect(
-      resultMessageFunc(
-        { label: 'a', value: 'a', extras: 'a', key: 'a' },
-        Form.create()
-      )
-    ).toBe(messageString)
+    expect(resultMessageFunc(createFakeField(), Form.create())).toBe(
+      messageString
+    )
   })
 })

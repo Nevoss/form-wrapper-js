@@ -1,13 +1,13 @@
-export class FieldKeysCollection {
+export class Collection<T> {
   /**
-   * field keys
+   * items
    */
-  public keys: string[] = []
+  public keys: T[] = []
 
   /**
    * returns all the field keys
    */
-  public all(): string[] {
+  public all(): T[] {
     return this.keys
   }
 
@@ -16,7 +16,7 @@ export class FieldKeysCollection {
    *
    * @param keys
    */
-  public fill(keys: string[]): FieldKeysCollection {
+  public fill(keys: T[]): this {
     this.keys = [...keys]
 
     return this
@@ -27,7 +27,7 @@ export class FieldKeysCollection {
    *
    * @param key
    */
-  public has(key: string): boolean {
+  public has(key: T): boolean {
     return this.keys.indexOf(key) > -1
   }
 
@@ -36,7 +36,7 @@ export class FieldKeysCollection {
    *
    * @param key
    */
-  public push(key: string): FieldKeysCollection {
+  public push(key: T): this {
     if (!this.has(key)) {
       this.keys.push(key)
     }
@@ -47,7 +47,7 @@ export class FieldKeysCollection {
   /**
    * Clear the keys
    */
-  public clear(): FieldKeysCollection {
+  public clear(): this {
     this.keys = []
 
     return this
@@ -65,10 +65,10 @@ export class FieldKeysCollection {
    *
    * @param key
    */
-  public unset(key: string): FieldKeysCollection {
+  public unset(key: T): this {
     if (this.has(key)) {
       this.keys = this.keys.filter(
-        (existingKey: string): boolean => existingKey !== key
+        (existingKey: T): boolean => existingKey !== key
       )
     }
 
