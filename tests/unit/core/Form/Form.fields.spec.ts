@@ -70,6 +70,8 @@ describe('core/Form.ts - Fields', (): void => {
     expect(form.$initialValues.emails).toEqual(
       fakeFieldDeclaration.value.values()
     )
+    expect(form.emails.parent).toBe(form)
+    expect(form.emails.fieldKey).toBe('emails')
   })
 
   it('should warn if try to add field that exist in the form', (): void => {

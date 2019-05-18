@@ -33,6 +33,16 @@ export class FormCollection {
   public forms: FormWithFields[] = []
 
   /**
+   * The Form that is the parent of the collection of forms
+   */
+  public parent: Form | null = null
+
+  /**
+   * the field on the parent form that holds the collection
+   */
+  public fieldKey: string = ''
+
+  /**
    * Holds the ids of the forms that was declared as initials forms.
    * The main reason is to make a compare between the new forms and the initials
    * forms and then see if the form collection is dirty or not
@@ -76,7 +86,12 @@ export class FormCollection {
   public add(): FormWithFields {
     const form = Form.create(this.prototype, this.prototypeOptions)
 
-    this.forms.push(form)
+    const formsLength = this.forms.push(form)
+
+    if (this.parent) {
+      form.$errors = this.parent.$errors
+      form.$fieldsPrefix = `${this.fieldKey}.${formsLength - 1}.`
+    }
 
     return form
   }

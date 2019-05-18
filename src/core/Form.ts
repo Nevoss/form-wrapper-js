@@ -26,6 +26,17 @@ import { Interceptor } from '../types/interceptors'
 
 export class Form {
   /**
+   * holds all the defaults for the forms
+   */
+  public static defaults: FormDefaults = {
+    options: defaultOptions,
+    interceptors: {
+      beforeSubmission: new Interceptors(),
+      submissionComplete: new Interceptors(),
+    },
+  }
+
+  /**
    * trigger the FormFactory to create a Form object
    *
    * @param fields
@@ -46,17 +57,6 @@ export class Form {
    */
   public static assignDefaultOptions(options: OptionalOptions): void {
     Form.defaults.options = generateOptions(Form.defaults.options, options)
-  }
-
-  /**
-   * holds all the defaults for the forms
-   */
-  public static defaults: FormDefaults = {
-    options: defaultOptions,
-    interceptors: {
-      beforeSubmission: new Interceptors(),
-      submissionComplete: new Interceptors(),
-    },
   }
 
   /**
@@ -122,6 +122,11 @@ export class Form {
   public $submitting: boolean = false
 
   /**
+   * specific for FormCollection to fill the error with the prefix of the parent field
+   */
+  public $fieldsPrefix: string = ''
+
+  /**
    * Form Constructor
    *
    * @param id
@@ -185,15 +190,20 @@ export class Form {
       fieldKey,
       value
     )
+    const isFormCollection = fieldDeclaration.value instanceof FormCollection
 
     this[fieldKey] = fieldDeclaration.value
     this.$rules.generateFieldRules(fieldKey, fieldDeclaration.rules)
     this.$extra[fieldKey] = fieldDeclaration.extra
     this.$labels[fieldKey] = fieldDeclaration.label
-    this.$initialValues[fieldKey] =
-      fieldDeclaration.value instanceof FormCollection
-        ? fieldDeclaration.value.values()
-        : fieldDeclaration.value
+    this.$initialValues[fieldKey] = isFormCollection
+      ? fieldDeclaration.value.values()
+      : fieldDeclaration.value
+
+    if (isFormCollection) {
+      this[fieldKey].parent = this
+      this[fieldKey].fieldKey = fieldKey
+    }
 
     return this
   }
@@ -404,14 +414,17 @@ export class Form {
   public async $validateField(fieldKey: string): Promise<any> {
     warn(this.$hasField(fieldKey), `'${fieldKey}' is not a valid field`)
 
+    this.$errors.unset(this.$fieldsPrefix + fieldKey)
+    this.$validating.push(fieldKey)
+
     const defaultMessage = createRuleMessageFunction(
       this.$options.validation.defaultMessage
     )
+    const field: Field = this.$getField(fieldKey)
 
     let fieldRulesChain: (Rule | ConditionalRules)[] = Array.from(
       this.$rules.get(fieldKey)
     )
-    const field: Field = this.$getField(fieldKey)
 
     while (fieldRulesChain.length) {
       let rule = fieldRulesChain.shift()
@@ -419,8 +432,6 @@ export class Form {
       if (rule === undefined) {
         continue
       }
-
-      this.$validating.push(fieldKey)
 
       try {
         if (rule instanceof ConditionalRules) {
@@ -431,24 +442,22 @@ export class Form {
         }
 
         await rule.validate(field, this, defaultMessage)
-
-        if (field.value instanceof FormCollection) {
-          await field.value.validate()
-        }
       } catch (error) {
         // If the error is not a RuleValidationError - the error will bubble up
         if (!(error instanceof RuleValidationError)) {
           throw error
         }
 
-        this.$errors.push(fieldKey, error.message)
+        this.$errors.push(this.$fieldsPrefix + fieldKey, error.message)
 
         this.$options.validation.stopAfterFirstRuleFailed &&
           (fieldRulesChain = [])
       }
-
-      this.$validating.unset(fieldKey)
     }
+
+    field.value instanceof FormCollection && (await field.value.validate())
+
+    this.$validating.unset(fieldKey)
   }
 
   /**

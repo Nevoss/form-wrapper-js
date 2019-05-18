@@ -23,9 +23,14 @@ describe('core/FormCollection.ts', (): void => {
   })
 
   it('should add a form to the forms array', (): void => {
+    const mockParentForm = Form.create()
+    const mockFieldKey = 'aaa'
+
     const createSpy = jest.spyOn(Form, 'create')
     const formCollection = new FormCollection()
 
+    formCollection.parent = mockParentForm
+    formCollection.fieldKey = mockFieldKey
     formCollection.prototype = prototype
     formCollection.prototypeOptions = prototypeOptions
 
@@ -40,6 +45,8 @@ describe('core/FormCollection.ts', (): void => {
 
     expect(formCollection.forms.length).toBe(1)
     expect(formCollection.forms[0]).toBeInstanceOf(Form)
+    expect(formCollection.forms[0].$errors).toBe(formCollection.parent.$errors)
+    expect(formCollection.forms[0].$fieldsPrefix).toBe(`${mockFieldKey}.0.`)
     expect(form).toBeInstanceOf(Form)
   })
 

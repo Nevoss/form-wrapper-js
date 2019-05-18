@@ -67,6 +67,19 @@ describe('core/Form.ts - validation', (): void => {
     expect(warn).toHaveBeenLastCalledWith(true, expect.stringContaining('name'))
   })
 
+  it('should validate the field and clear its previous  errors', async (): Promise<
+    any
+  > => {
+    const form = createForm({ name: 'name' })
+    form.$errors.fill({
+      name: ['a', 'b'],
+    })
+
+    await form.$validateField('name')
+
+    expect(form.$errors.get('name').length).toBe(0)
+  })
+
   it('should validate field and run over all of the rules', async (): Promise<
     any
   > => {
@@ -125,13 +138,35 @@ describe('core/Form.ts - validation', (): void => {
     expect(errors[1]).toBe('error2')
   })
 
+  it('should set prefix to the errors key if the form has field prefix', async (): Promise<
+    any
+  > => {
+    const rule = new Rule(jest.fn())
+
+    rule.validate = jest.fn(() => {
+      throw new RuleValidationError('error1')
+    })
+
+    const form = createForm({ name: 'name' }, [rule])
+    form.$fieldsPrefix = 'field.0.'
+
+    await form.$validateField('name')
+
+    expect(form.$errors.get('name').length).toBe(0)
+    expect(form.$errors.get('field.0.name').length).toBe(1)
+  })
+
   it('should also validate the form collection if the field is a FormCollection', async (): Promise<
     any
   > => {
     const rule = new Rule(jest.fn())
+    const rule2 = new Rule(jest.fn())
     const formCollection = new FormCollection()
 
-    const form = createForm({ name: 'name', value: formCollection }, [rule])
+    const form = createForm({ name: 'name', value: formCollection }, [
+      rule,
+      rule2,
+    ])
 
     await form.$validateField('name')
 
@@ -144,7 +179,14 @@ describe('core/Form.ts - validation', (): void => {
       form,
       defaultMessage
     )
-    expect(formCollection.validate).toHaveBeenCalled()
+
+    expect(rule2.validate).toHaveBeenCalledWith(
+      getFieldResult,
+      form,
+      defaultMessage
+    )
+
+    expect(formCollection.validate).toHaveBeenCalledTimes(1)
   })
 
   it('should validate ConditionalRules rules if the condition returns true', async (): Promise<
