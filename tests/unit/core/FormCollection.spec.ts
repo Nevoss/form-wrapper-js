@@ -9,14 +9,23 @@ describe('core/FormCollection.ts', (): void => {
     validation: { onSubmission: true },
   }
 
+  const createFormCollection = () => {
+    const mockParentForm = Form.create()
+    const formCollection = new FormCollection(prototype, prototypeOptions)
+
+    formCollection.parent = mockParentForm
+
+    return formCollection
+  }
+
   it('should create FormCollection from the create static method', (): void => {
-    const formCollection = FormCollection.create(prototype, prototypeOptions)
+    const formCollection = createFormCollection()
 
     expect(formCollection).toBeInstanceOf(FormCollection)
   })
 
   it('should construct correctly', (): void => {
-    const formCollection = new FormCollection(prototype, prototypeOptions)
+    const formCollection = createFormCollection()
 
     expect(formCollection.prototype).toEqual(prototype)
     expect(formCollection.prototypeOptions).toEqual(prototypeOptions)
@@ -26,7 +35,6 @@ describe('core/FormCollection.ts', (): void => {
     const mockParentForm = Form.create()
     const mockFieldKey = 'aaa'
 
-    const createSpy = jest.spyOn(Form, 'create')
     const formCollection = new FormCollection()
 
     formCollection.parent = mockParentForm
@@ -38,20 +46,34 @@ describe('core/FormCollection.ts', (): void => {
 
     let form = formCollection.add()
 
-    expect(createSpy).toHaveBeenCalledWith(
-      formCollection.prototype,
-      formCollection.prototypeOptions
-    )
-
     expect(formCollection.forms.length).toBe(1)
     expect(formCollection.forms[0]).toBeInstanceOf(Form)
     expect(formCollection.forms[0].$errors).toBe(formCollection.parent.$errors)
+    expect(formCollection.forms[0].$touched).toBe(
+      formCollection.parent.$touched
+    )
+    expect(formCollection.forms[0].$validating).toBe(
+      formCollection.parent.$validating
+    )
     expect(formCollection.forms[0].$fieldsPrefix).toBe(`${mockFieldKey}.0.`)
     expect(form).toBeInstanceOf(Form)
   })
 
+  it('should throw an error if calling `add` and the collection does not have parent', (): void => {
+    const formCollection = new FormCollection()
+
+    expect.assertions(2)
+
+    try {
+      formCollection.add()
+    } catch (e) {
+      expect(e).toBeInstanceOf(Error)
+      expect(e.message).toEqual(expect.stringContaining(''))
+    }
+  })
+
   it('should remove a form by his index', (): void => {
-    const formCollection = new FormCollection(prototype, prototypeOptions)
+    const formCollection = createFormCollection()
 
     formCollection.add()
     formCollection.add()
@@ -68,7 +90,7 @@ describe('core/FormCollection.ts', (): void => {
   })
 
   it('should remove a form by his id', (): void => {
-    const formCollection = new FormCollection(prototype, prototypeOptions)
+    const formCollection = createFormCollection()
 
     formCollection.add()
     formCollection.add()
@@ -85,7 +107,7 @@ describe('core/FormCollection.ts', (): void => {
   })
 
   it('should return all the forms in the collection', (): void => {
-    const formCollection = new FormCollection(prototype, prototypeOptions)
+    const formCollection = createFormCollection()
 
     formCollection.add()
     formCollection.add()
@@ -103,7 +125,7 @@ describe('core/FormCollection.ts', (): void => {
   })
 
   it('should remove all the forms from the array', (): void => {
-    const formCollection = new FormCollection(prototype, prototypeOptions)
+    const formCollection = createFormCollection()
 
     formCollection.add()
     formCollection.add()
@@ -118,7 +140,7 @@ describe('core/FormCollection.ts', (): void => {
 
     const mockValues = [{ name: '1' }, { name: '2' }, { name: '3' }]
 
-    const formCollection = new FormCollection(prototype, prototypeOptions)
+    const formCollection = createFormCollection()
 
     formCollection.clear = jest.fn()
 
@@ -146,7 +168,7 @@ describe('core/FormCollection.ts', (): void => {
     const fillSpy = jest.spyOn(Form.prototype, '$fill')
     const mockValues = [{ name: '1' }, { name: '2' }, { name: '3' }]
 
-    const formCollection = new FormCollection(prototype, prototypeOptions)
+    const formCollection = createFormCollection()
 
     formCollection.fill(mockValues, true)
 
@@ -177,7 +199,7 @@ describe('core/FormCollection.ts', (): void => {
     const valuesSpy = jest.spyOn(Form.prototype, '$values')
     const mockValues = [{ name: '1' }, { name: '2' }, { name: '3' }]
 
-    const formCollection = new FormCollection(prototype, prototypeOptions)
+    const formCollection = createFormCollection()
     formCollection.fill(mockValues)
 
     const values = formCollection.values()
@@ -190,7 +212,7 @@ describe('core/FormCollection.ts', (): void => {
   it('should return that the form is not dirty', (): void => {
     const mockValues = [{ name: '1' }, { name: '2' }, { name: '3' }]
 
-    const formCollection = new FormCollection(prototype, prototypeOptions)
+    const formCollection = createFormCollection()
     formCollection.fill(mockValues, true)
 
     expect(formCollection.isDirty()).toBe(false)
@@ -199,7 +221,7 @@ describe('core/FormCollection.ts', (): void => {
   it('should return that the forms are dirty when adding or removing forms', (): void => {
     const mockValues = [{ name: '1' }, { name: '2' }, { name: '3' }]
 
-    const formCollection = new FormCollection(prototype, prototypeOptions)
+    const formCollection = createFormCollection()
     formCollection.fill(mockValues, true)
 
     formCollection.add()
@@ -214,7 +236,7 @@ describe('core/FormCollection.ts', (): void => {
   it('should return that the forms are dirty when field of one of the forms was changed ', (): void => {
     const mockValues = [{ name: '1' }, { name: '2' }, { name: '3' }]
 
-    const formCollection = new FormCollection(prototype, prototypeOptions)
+    const formCollection = createFormCollection()
     formCollection.fill(mockValues, true)
 
     formCollection.forms[0].name = 'ABC'
@@ -228,7 +250,7 @@ describe('core/FormCollection.ts', (): void => {
     const mockValues = [{ name: '1' }, { name: '2' }, { name: '3' }]
     jest.spyOn(Form.prototype, '$validateForm')
 
-    const formCollection = new FormCollection(prototype, prototypeOptions)
+    const formCollection = createFormCollection()
     formCollection.fill(mockValues)
 
     await formCollection.validate()

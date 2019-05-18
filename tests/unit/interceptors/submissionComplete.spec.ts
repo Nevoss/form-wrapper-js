@@ -8,13 +8,21 @@ import { Form } from '../../../src'
 import { Rules } from '../../../src/core/Rules'
 import { Errors } from '../../../src/core/Errors'
 import { Interceptors } from '../../../src/core/Interceptors'
+import { Collection } from '../../../src/helpers/Collection'
 
 describe('interceptors/submissionComplete.ts', (): void => {
   const createForm = (options: OptionalOptions = {}): FormWithFields => {
-    const form = new Form('1', new Rules(), new Errors(), {
-      submissionComplete: new Interceptors(),
-      beforeSubmission: new Interceptors(),
-    })
+    const form = new Form(
+      '1',
+      new Rules(),
+      new Errors(),
+      new Collection(),
+      new Collection(),
+      {
+        submissionComplete: new Interceptors(),
+        beforeSubmission: new Interceptors(),
+      }
+    )
 
     form.$assignOptions(options)
 
@@ -53,17 +61,69 @@ describe('interceptors/submissionComplete.ts', (): void => {
     }
   })
 
-  // it('should clear the form errors if the option is set as true', async (): Promise<
-  //   any
-  // > => {
-  //   const form = createForm({
-  //     successfulSubmission: {
-  //       clearErrors: true,
-  //       clearTouched: false,
-  //       resetValues: false,
-  //     },
-  //   })
-  //
-  //   form.$errors.clear = jest.fn()
-  // })
+  it('should clear the form errors if the option is set as true', async (): Promise<
+    any
+  > => {
+    const form = createForm({
+      successfulSubmission: {
+        clearErrors: true,
+        clearTouched: false,
+        resetValues: false,
+      },
+    })
+
+    form.$errors.clear = jest.fn()
+    form.$touched.clear = jest.fn()
+    form.$resetValues = jest.fn()
+
+    await clearForm.fulfilled({ form, response: null })
+
+    expect(form.$errors.clear).toHaveBeenCalled()
+    expect(form.$touched.clear).not.toHaveBeenCalled()
+    expect(form.$resetValues).not.toHaveBeenCalled()
+  })
+
+  it('should clear the form touched if the option is set as true', async (): Promise<
+    any
+  > => {
+    const form = createForm({
+      successfulSubmission: {
+        clearErrors: false,
+        clearTouched: true,
+        resetValues: false,
+      },
+    })
+
+    form.$errors.clear = jest.fn()
+    form.$touched.clear = jest.fn()
+    form.$resetValues = jest.fn()
+
+    await clearForm.fulfilled({ form, response: null })
+
+    expect(form.$errors.clear).not.toHaveBeenCalled()
+    expect(form.$touched.clear).toHaveBeenCalled()
+    expect(form.$resetValues).not.toHaveBeenCalled()
+  })
+
+  it('should rest form values if the option is set as true', async (): Promise<
+    any
+  > => {
+    const form = createForm({
+      successfulSubmission: {
+        clearErrors: false,
+        clearTouched: false,
+        resetValues: true,
+      },
+    })
+
+    form.$errors.clear = jest.fn()
+    form.$touched.clear = jest.fn()
+    form.$resetValues = jest.fn()
+
+    await clearForm.fulfilled({ form, response: null })
+
+    expect(form.$errors.clear).not.toHaveBeenCalled()
+    expect(form.$touched.clear).not.toHaveBeenCalled()
+    expect(form.$resetValues).toHaveBeenCalled()
+  })
 })

@@ -25,7 +25,7 @@ jobs:
 
             - run:
                 name: Run tests
-                command: npm test:prod
+                command: npm run test:prod
 
             - run:
                 name: Uplodad code coverage

@@ -77,16 +77,6 @@ export class Form {
   public $errors: Errors
 
   /**
-   * Object of interceptors:
-   * beforeSubmission: interceptors that will be handled before submission
-   * submissionComplete: interceptors that will be handled after submission
-   */
-  public $interceptors: {
-    beforeSubmission: Interceptors
-    submissionComplete: Interceptors
-  }
-
-  /**
    * holds all the fields that was touched
    */
   public $touched: Collection<string>
@@ -95,6 +85,16 @@ export class Form {
    * holds all the fields keys that are in validation right now
    */
   public $validating: Collection<string>
+
+  /**
+   * Object of interceptors:
+   * beforeSubmission: interceptors that will be handled before submission
+   * submissionComplete: interceptors that will be handled after submission
+   */
+  public $interceptors: {
+    beforeSubmission: Interceptors
+    submissionComplete: Interceptors
+  }
 
   /**
    * Options of the Form
@@ -132,12 +132,16 @@ export class Form {
    * @param id
    * @param rules
    * @param errors
+   * @param touched
+   * @param validating
    * @param interceptors
    */
   public constructor(
     id: string,
     rules: Rules,
     errors: Errors,
+    touched: Collection<string>,
+    validating: Collection<string>,
     interceptors: {
       beforeSubmission: Interceptors
       submissionComplete: Interceptors
@@ -146,9 +150,9 @@ export class Form {
     this.$id = id
     this.$rules = rules
     this.$errors = errors
+    this.$touched = touched
+    this.$validating = validating
     this.$interceptors = interceptors
-    this.$touched = new Collection()
-    this.$validating = new Collection()
   }
 
   /**
@@ -415,7 +419,7 @@ export class Form {
     warn(this.$hasField(fieldKey), `'${fieldKey}' is not a valid field`)
 
     this.$errors.unset(this.$fieldsPrefix + fieldKey)
-    this.$validating.push(fieldKey)
+    this.$validating.push(this.$fieldsPrefix + fieldKey)
 
     const defaultMessage = createRuleMessageFunction(
       this.$options.validation.defaultMessage
@@ -457,7 +461,7 @@ export class Form {
 
     field.value instanceof FormCollection && (await field.value.validate())
 
-    this.$validating.unset(fieldKey)
+    this.$validating.unset(this.$fieldsPrefix + fieldKey)
   }
 
   /**

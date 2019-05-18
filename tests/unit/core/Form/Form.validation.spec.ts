@@ -12,6 +12,7 @@ import { RuleValidationError } from '../../../../src/errors/RuleValidationError'
 import { OptionalOptions } from '../../../../src/types/options'
 import { FormCollection } from '../../../../src/core/FormCollection'
 import { ConditionalRules } from '../../../../src/core/ConditionalRules'
+import { Collection } from '../../../../src/helpers/Collection'
 
 jest.mock('../../../../src/core/Interceptors')
 jest.mock('../../../../src/factories/RuleMessageFunctionFactory')
@@ -29,10 +30,17 @@ describe('core/Form.ts - validation', (): void => {
       [field.name]: rules,
     })
 
-    const form = new Form('1', new Rules(), new Errors(), {
-      submissionComplete: new Interceptors(),
-      beforeSubmission: new Interceptors(),
-    })
+    const form = new Form(
+      '1',
+      new Rules(),
+      new Errors(),
+      new Collection(),
+      new Collection(),
+      {
+        submissionComplete: new Interceptors(),
+        beforeSubmission: new Interceptors(),
+      }
+    )
 
     form.$addField(field.name, field.value)
     form.$assignOptions(options)
@@ -67,7 +75,7 @@ describe('core/Form.ts - validation', (): void => {
     expect(warn).toHaveBeenLastCalledWith(true, expect.stringContaining('name'))
   })
 
-  it('should validate the field and clear its previous  errors', async (): Promise<
+  it('should validate the field and clear its previous errors', async (): Promise<
     any
   > => {
     const form = createForm({ name: 'name' })
@@ -138,7 +146,7 @@ describe('core/Form.ts - validation', (): void => {
     expect(errors[1]).toBe('error2')
   })
 
-  it('should set prefix to the errors key if the form has field prefix', async (): Promise<
+  it('should set prefix to the field key in errors if the form has field prefix', async (): Promise<
     any
   > => {
     const rule = new Rule(jest.fn())
@@ -288,6 +296,18 @@ describe('core/Form.ts - validation', (): void => {
     form.$validateField('name')
 
     expect(form.$validating.has('name')).toBe(true)
+  })
+
+  it('should mark the field as validating and add a prefix if the form has fieldsPrefix', (): void => {
+    const rule = new Rule(jest.fn())
+    const form = createForm({ name: 'name' }, [rule])
+
+    form.$fieldsPrefix = 'emails.0.'
+
+    form.$validateField('name')
+
+    expect(form.$validating.has('name')).toBe(false)
+    expect(form.$validating.has('emails.0.name')).toBe(true)
   })
 
   it('should validate all the fields of the form', async (): Promise<any> => {

@@ -1,4 +1,5 @@
 import { Form } from './Form'
+import createForm from '../factories/FormFactory'
 import { OptionalOptions } from '../types/Options'
 import { FieldsDeclaration } from '../types/fields'
 import { FormWithFields } from '../types/form'
@@ -84,14 +85,21 @@ export class FormCollection {
    * Add new form to the forms array
    */
   public add(): FormWithFields {
-    const form = Form.create(this.prototype, this.prototypeOptions)
+    if (!this.parent) {
+      throw new Error(
+        'FormCollection must have parent Form, something went wrong.'
+      )
+    }
+
+    const form = createForm(this.prototype, this.prototypeOptions, {
+      errors: this.parent.$errors,
+      touched: this.parent.$touched,
+      validating: this.parent.$validating,
+    })
 
     const formsLength = this.forms.push(form)
 
-    if (this.parent) {
-      form.$errors = this.parent.$errors
-      form.$fieldsPrefix = `${this.fieldKey}.${formsLength - 1}.`
-    }
+    form.$fieldsPrefix = `${this.fieldKey}.${formsLength - 1}.`
 
     return form
   }

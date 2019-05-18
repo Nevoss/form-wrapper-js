@@ -7,6 +7,7 @@ import { FieldsDeclaration } from '../types/fields'
 import { OptionalOptions } from '../types/options'
 import { FormWithFields } from '../types/form'
 import basicInterceptors from '../interceptors/index'
+import { Collection } from '../helpers/Collection'
 
 const createInterceptors = (): {
   beforeSubmission: Interceptors
@@ -29,12 +30,24 @@ const createInterceptors = (): {
 
 export default (
   fields: FieldsDeclaration = {},
-  options: OptionalOptions = {}
+  options: OptionalOptions = {},
+  overrideDependencies: {
+    rules?: Rules
+    errors?: Errors
+    touched?: Collection<string>
+    validating?: Collection<string>
+  } = {}
 ): FormWithFields => {
   const form = new Form(
     uniqueId(),
-    new Rules(),
-    new Errors(),
+    overrideDependencies.rules ? overrideDependencies.rules : new Rules(),
+    overrideDependencies.errors ? overrideDependencies.errors : new Errors(),
+    overrideDependencies.touched
+      ? overrideDependencies.touched
+      : new Collection(),
+    overrideDependencies.validating
+      ? overrideDependencies.validating
+      : new Collection(),
     createInterceptors()
   )
 

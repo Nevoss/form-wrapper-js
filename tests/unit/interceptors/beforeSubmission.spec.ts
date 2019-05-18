@@ -8,6 +8,7 @@ import { Errors } from '../../../src/core/Errors'
 import { Interceptors } from '../../../src/core/Interceptors'
 import { FormWithFields } from '../../../src/types/form'
 import { OptionalOptions } from '../../../src/types/options'
+import { Collection } from '../../../src/helpers/Collection'
 
 jest.mock('../../../src/core/Rules')
 jest.mock('../../../src/core/Errors')
@@ -15,10 +16,17 @@ jest.mock('../../../src/core/Interceptors')
 
 describe('interceptors/beforeSubmission.ts', (): void => {
   const createForm = (options: OptionalOptions = {}): FormWithFields => {
-    const form = new Form('1', new Rules(), new Errors(), {
-      submissionComplete: new Interceptors(),
-      beforeSubmission: new Interceptors(),
-    })
+    const form = new Form(
+      '1',
+      new Rules(),
+      new Errors(),
+      new Collection(),
+      new Collection(),
+      {
+        submissionComplete: new Interceptors(),
+        beforeSubmission: new Interceptors(),
+      }
+    )
 
     form.$assignOptions(options)
 
