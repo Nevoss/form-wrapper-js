@@ -24,7 +24,8 @@ describe('core/Form.ts - validation', (): void => {
   const createForm = (
     field: { name: string; value?: any },
     rules: (Rule | ConditionalRules)[] = [],
-    options: OptionalOptions = {}
+    options: OptionalOptions = {},
+    extraField?: { name: string; value?: any }
   ): FormWithFields => {
     const rulesObject = new Rules({
       [field.name]: rules,
@@ -43,6 +44,9 @@ describe('core/Form.ts - validation', (): void => {
     )
 
     form.$addField(field.name, field.value)
+    if (extraField) {
+      form.$addField(extraField.name, extraField.value)
+    }
     form.$assignOptions(options)
     form.$rules = rulesObject
 
@@ -311,10 +315,7 @@ describe('core/Form.ts - validation', (): void => {
   })
 
   it('should validate all the fields of the form', async (): Promise<any> => {
-    const form = Form.create({
-      name: null,
-      last_name: null,
-    })
+    const form = createForm({ name: 'name' }, [], {}, { name: 'last_name' })
 
     form.$validateField = jest.fn()
 
@@ -325,7 +326,7 @@ describe('core/Form.ts - validation', (): void => {
   })
 
   it('should invoke $validateField or $validateForm', async () => {
-    const form = Form.create({ name: null })
+    const form = createForm({ name: 'name' })
 
     form.$validateForm = jest.fn()
     form.$validateField = jest.fn()
@@ -345,7 +346,7 @@ describe('core/Form.ts - validation', (): void => {
   })
 
   it('should checks if validating the field', (): void => {
-    const form = Form.create({ name: null })
+    const form = createForm({ name: 'name' })
 
     expect(form.$isValidating('name')).toBe(false)
 
@@ -358,7 +359,7 @@ describe('core/Form.ts - validation', (): void => {
   })
 
   it('should check if the whole form is on validation mode', (): void => {
-    const form = Form.create({ name: null, last_name: null })
+    const form = createForm({ name: 'name' }, [], {}, { name: 'last_name' })
 
     expect(form.$isValidating()).toBe(false)
 
@@ -371,7 +372,7 @@ describe('core/Form.ts - validation', (): void => {
   })
 
   it('should warn if the field is not exists in the form and try to check if isValidating', (): void => {
-    const form = Form.create()
+    const form = createForm({ name: 'last_name' })
 
     form.$isValidating('name')
 

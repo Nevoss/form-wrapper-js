@@ -21,7 +21,7 @@ jest.mock(
 
 describe('core/Rule.ts', (): void => {
   let fakeForm: Form = Form.create()
-  let fakeField: Field = { key: 'a', label: 'a', value: 'a', extras: 'a' }
+  let fakeField: Field = { key: 'a', label: 'a', value: 'a', extra: 'a' }
 
   it('should construct correctly', (): void => {
     const passesFunc = (): boolean => true
