@@ -75,3 +75,17 @@ export const createFakeOptions = (): Options => {
     },
   }
 }
+
+/**
+ * creates a fake fulfilled Interceptor
+ */
+export const createFakeFulfilledInterceptor = () => {
+  return jest.fn((result: any) => Promise.resolve(result))
+}
+
+/**
+ * creates a fake rejected Interceptor
+ */
+export const createFakeRejectedInterceptor = () => {
+  return jest.fn((error: any) => Promise.reject(error))
+}

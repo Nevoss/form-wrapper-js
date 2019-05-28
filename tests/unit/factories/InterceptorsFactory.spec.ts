@@ -29,8 +29,8 @@ describe('factories/InterceptorsFactory.ts', (): void => {
 
     const chain = interceptors.beforeSubmission.all()
 
-    expect(chain[0]).toBe(setSubmittingToTrue)
-    expect(chain[1]).toBe(validateForm)
+    expect(chain[0]).toBe(validateForm)
+    expect(chain[1]).toBe(setSubmittingToTrue)
     expect(chain[2].fulfilled).toBe(firstInterceptor)
     expect(chain[3].fulfilled).toBe(secondInterceptor)
   })

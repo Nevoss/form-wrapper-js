@@ -514,31 +514,39 @@ export class Form {
    * @param callback
    */
   public $submit(callback: SubmitCallback): Promise<any> {
-    let chain: any[] = [
-      (): Promise<any> => callback(this),
-      null,
-      (response): Promise<any> => Promise.resolve({ response, form: this }),
-      (error): Promise<any> => Promise.reject({ error, form: this }),
+    const chain: Interceptor[] = [
+      ...this.$interceptors.beforeSubmission.all(),
+      ...this._getRequiredInterceptors(callback),
+      ...this.$interceptors.submissionComplete.all(),
     ]
 
-    this.$interceptors.beforeSubmission.forEach(
-      (handler: Interceptor): void => {
-        chain.unshift(handler.fulfilled, handler.rejected)
-      }
-    )
+    let promise = Promise.resolve(this)
 
-    this.$interceptors.submissionComplete.forEach(
-      (handler: Interceptor): void => {
-        chain.push(handler.fulfilled, handler.rejected)
-      }
-    )
-
-    let promise: Promise<any> = Promise.resolve(this)
-
-    while (chain.length) {
-      promise = promise.then(chain.shift(), chain.shift())
+    for (let interceptor of chain) {
+      promise = promise.then(interceptor.fulfilled, interceptor.rejected)
     }
 
     return promise
+  }
+
+  /**
+   * return the submit interceptors
+   * the submit itself, and 2 interceptors to normalize fulfilled and rejected
+   *
+   * @param callback
+   */
+  private _getRequiredInterceptors(callback: SubmitCallback): Interceptor[] {
+    return [
+      {
+        fulfilled: (): Promise<any> => callback(this),
+        rejected: null,
+      },
+      {
+        fulfilled: (response): Promise<any> =>
+          Promise.resolve({ response, form: this }),
+        rejected: (error): Promise<any> =>
+          Promise.reject({ error, form: this }),
+      },
+    ]
   }
 }
