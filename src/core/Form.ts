@@ -117,6 +117,11 @@ export class Form {
   public $extra: { [key: string]: any } = {}
 
   /**
+   * hold the input that is on focus right now
+   */
+  public $onFocus: string | null = null
+
+  /**
    * determine if the form is on submitting mode
    */
   public $submitting: boolean = false
@@ -505,6 +510,53 @@ export class Form {
     )
 
     return fieldKey ? this.$validating.has(fieldKey) : this.$validating.any()
+  }
+
+  /**
+   * handle change/input event
+   *
+   * @param fieldKey
+   */
+  public $fieldChanged(fieldKey: string): FormWithFields {
+    warn(this.$hasField(fieldKey), `'${fieldKey}' is not a valid field`)
+
+    this.$options.validation.unsetFieldErrorsOnFieldChange &&
+      this.$errors.unset(fieldKey)
+    this.$options.validation.onFieldChanged &&
+      this.$debouncedValidateField(fieldKey)
+
+    return this
+  }
+
+  /**
+   * handle focus on field
+   *
+   * @param fieldKey
+   */
+  public $fieldFocused(fieldKey: string): FormWithFields {
+    warn(this.$hasField(fieldKey), `'${fieldKey}' is not a valid field`)
+
+    this.$touched.push(fieldKey)
+    this.$onFocus = fieldKey
+
+    return this
+  }
+
+  /**
+   * handle blur on field
+   *
+   * @param fieldKey
+   */
+  public $fieldBlurred(fieldKey: string): FormWithFields {
+    warn(this.$hasField(fieldKey), `'${fieldKey}' is not a valid field`)
+
+    if (this.$onFocus === fieldKey) {
+      this.$onFocus = null
+    }
+
+    this.$options.validation.onFieldBlurred && this.$validateField(fieldKey)
+
+    return this
   }
 
   /**
