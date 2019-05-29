@@ -64,7 +64,7 @@ import axios from 'axios'
 export default {
   data() {
     return {
-      form: new Form({
+      form: Form.create({
         email: null,
         name: null,
         password: null,

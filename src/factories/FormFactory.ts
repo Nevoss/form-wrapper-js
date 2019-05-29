@@ -22,8 +22,8 @@ export default (
     uniqueId(),
     overrideDependencies.rules || new Rules(),
     overrideDependencies.errors || new Errors(),
-    overrideDependencies.touched || new Collection(),
-    overrideDependencies.validating || new Collection(),
+    overrideDependencies.touched || new Collection<string>(),
+    overrideDependencies.validating || new Collection<string>(),
     createInterceptors()
   )
 
