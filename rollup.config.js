@@ -1,5 +1,6 @@
 import typescript from 'rollup-plugin-typescript2';
 import sourceMaps from 'rollup-plugin-sourcemaps'
+const license = require('rollup-plugin-license');
 import pkg from './package.json'
 
 export default {
@@ -10,6 +11,9 @@ export default {
   ],
   plugins: [
     typescript({ useTsconfigDeclarationDir: true }),
-    sourceMaps()
+    sourceMaps(),
+    license({
+      banner: `Form Wrapper Js (v<%= pkg.version %>) - Written by <%= pkg.author %> (<%= moment().format('YYYY-MM-DD') %>)`,
+    })
   ]
 }

@@ -1,3 +1,5 @@
+const versioning = require('./lib/versioning.js')
+
 module.exports = {
   base: '/form-wrapper-js/',
   title: 'Form Wrapper JS',
@@ -10,23 +12,17 @@ module.exports = {
     lastUpdated: 'Last Updated',
     docsDir: 'docs',
     editLinks: true,
+    versions: {
+      latest: versioning.versions.latest,
+      selected: versioning.versions.latest,
+      all: versioning.versions.all
+    },
     nav: [
-      { text: 'Guide', link: '/guide/' },
-    ],
-    sidebar: [
       {
-        title: 'Guide',
-        collapsable: false,
-        children: [
-          [ 'guide/', 'Getting started' ],
-          [ 'guide/field-property', 'Field' ],
-          [ 'guide/validation', 'Validation' ],
-          [ 'guide/field-events', 'Field Events' ],
-          [ 'guide/options', 'Options' ],
-          [ 'guide/form-submission', 'Form Submission' ],
-          [ 'guide/interceptors', 'Interceptors' ],
-        ]
+        text: `Docs`,
+        items: versioning.linksFor('guide/')
       },
-    ]
+    ],
+    sidebar: versioning.sidebars
   }
 }
