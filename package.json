@@ -1,6 +1,6 @@
 {
   "name": "form-wrapper-js",
-  "version": "1.0.0",
+  "version": "1.0.0-beta.0",
   "description": "JS abstraction for forms",
   "main": "dist/index.js",
   "module": "dist/index.es.js",
@@ -54,6 +54,8 @@
     "rollup-plugin-sourcemaps": "^0.4.2",
     "rollup-plugin-typescript2": "^0.21.1",
     "ts-jest": "^24.0.2",
+    "typedoc": "^0.14.2",
+    "typedoc-plugin-markdown": "^1.2.1",
     "typescript": "^3.4.5"
   },
   "dependencies": {},

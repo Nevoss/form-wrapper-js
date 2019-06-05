@@ -4,18 +4,25 @@ Before we getting started it's necessary to understand that this guide is writte
 just because the library was written in the same context.
 **BUT** you can use it in any any context you likes, even in vanilla JS.
 
+## Status: BETA
+
+The current version is in beta, most of the feature are stable, but there are may still be bugs, and api may change a little bit.
+
+for 0.x use the [0.x version](/0.x/guide) guide
+
+
 ## Installation
 
 Yarn:
 
 ```bash
-yarn add form-wrapper-js
+yarn add form-wrapper-js@next  # for version 1.x
 ```
 
 Npm:
 
 ```bash
-npm install --save form-wrapper-js
+npm install --save form-wrapper-js@next  # for version 1.x 
 ```
 
 ## Basic Usage
@@ -39,7 +46,7 @@ import axios from 'axios'
 export default {
   data() {
     return {
-      form: new Form({
+      form: Form.create({
         name: null,
         last_name: null,
       }),
@@ -67,7 +74,7 @@ import { Form } from 'form-wrapper-js'
 export default {
   data() {
     return {
-      form: new Form({
+      form: Form.create({
         name: null,
         last_name: null,
       }),

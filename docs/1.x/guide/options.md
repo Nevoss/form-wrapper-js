@@ -10,7 +10,7 @@ There is Three main way to change the default options.
 - As a second parameter of the `Form` constructor.
 
 ```js
-const form = new Form(
+const form = Form.create(
   {
     name: null,
   },
@@ -23,7 +23,7 @@ const form = new Form(
 - In run time:
 
 ```js
-const form = new Form({ name: null })
+const form = Form.create({ name: null })
 
 form.$assignOptions({
   // override options object

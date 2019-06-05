@@ -9,7 +9,7 @@ import { Form } from 'form-wrapper-js'
 export default {
   data() {
     return {
-      form: new Form({
+      form: Form.create({
         name: null,
       }),
     }
@@ -17,7 +17,7 @@ export default {
 }
 ```
 
-But there is cases that you will want to set up some configuration to the field, like: `label`, `rules` (validation rules) and `extras`.
+But there is cases that you will want to set up some configuration to the field, like: `label`, `rules` (validation rules) and `extra`.
 for this purpose there is another way you can declare a form field.
 
 ```js
@@ -33,7 +33,7 @@ export default {
           rules: [
             // validation rules will be here
           ],
-          extras: {
+          extra: {
             // any thing you like
           },
         },
@@ -55,7 +55,7 @@ field properties.
 The value property will hold the initial value of the field:
 
 ```js
-new Form({
+Form.create({
   name: {
     value: null, // null is the initial property of `name`
   },
@@ -63,7 +63,7 @@ new Form({
 
 // same as
 
-new Form({
+Form.create({
   name: null,
 })
 ```
@@ -73,7 +73,7 @@ new Form({
 The label property is the display name of you field. the label will be used in validation error messages. you can also use it in your code:
 
 ```js
-const form = new Form({
+const form = Form.create({
   name: {
     value: null,
     label: 'Your name',
@@ -88,9 +88,9 @@ form.$labels.last_name // -> 'Last name'
 As you can see if label is not exists in the field, the library will generate a default one (uppercase the first word and every underscore
 will become a space)
 
-## Extras Property
+## Extra Property
 
-"extras" property will be used to anything that related to the field, and can be useful later in the code, 
+"extra" property will be used to anything that related to the field, and can be useful later in the code, 
 One good example for that is an `options` property. field `options` can be declared and used later in the template.
 
 ```vue
@@ -98,7 +98,7 @@ One good example for that is an `options` property. field `options` can be decla
 <form>
   <select v-model="form.job_title">
     <option 
-      v-for="option in form.$extras.job_title.options" 
+      v-for="option in form.$extra.job_title.options" 
       :key="option.value"
       :value="option.value"
     > {{ options.label }} </option>
@@ -107,13 +107,15 @@ One good example for that is an `options` property. field `options` can be decla
 </template>
 
 <script >
+import { Form } from 'form-wrapper-js'
+
 export default {
   data() {
     return {
-      form: new Form({
+      form: Form.create({
         job_title: {
           value: null,
-          extras: {
+          extra: {
             options: [
               { value: 1, label: 'Developer' },
               { value: 2, label: 'Manager' },
@@ -127,7 +129,7 @@ export default {
 </script>
 ```
 
-It is important to understand that you can set any property you like in `extras`.
+It is important to understand that you can set any property you like in `extra`.
 
 ---
 
@@ -136,14 +138,14 @@ It is important to understand that you can set any property you like in `extras`
 
 
 ## Adding and removing fields
-When you need to add or remove fields dynamicly from your form, there is 4 methods that can help you with that.
+When you need to add or remove fields dynamically from your form, there is 4 methods that can help you with that.
 
 1. Add single field
 
 ```js 
 import { Form } from 'form-wrapper-js' 
 
-const form = new Form({email: null})
+const form = Form.create({email: null})
 
 form.$addField('first_name', null)
 
@@ -163,7 +165,7 @@ form.$values() // -> { email: null, first_name: null, last_name: null }
 ```js
 import { Form } from 'form-wrapper-js' 
 
-const form = new Form({ email: null })
+const form = Form.create({ email: null })
 
 form.$addFields({
   first_name: null,
@@ -181,7 +183,7 @@ form.$values() // -> { first_name: null, last_name: null, email: null }
 ```js
 import { Form } from 'form-wrapper-js' 
 
-const form = new Form({ first_name: null, last_name: null })
+const form = Form.create({ first_name: null, last_name: null })
 
 form.$removeField('first_name');
 
@@ -193,7 +195,7 @@ form.$values() // -> { last_name: null }
 ```js
 import { Form } from 'form-wrapper-js' 
 
-const form = new Form({ first_name: null, last_name: null, email: null })
+const form = Form.create({ first_name: null, last_name: null, email: null })
 
 form.$removeFields(['first_name', 'last_name'])
 

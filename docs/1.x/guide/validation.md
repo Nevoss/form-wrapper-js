@@ -12,7 +12,7 @@ import { Form } from 'form-wrapper-js'
 import { required, email } from '@/form/validation.js'
 
 export default {
-  form: new Form({
+  form: Form.create({
     email: {
       value: null,
       rules: [required, email],
@@ -93,7 +93,7 @@ import { sameAs } from '@/helpers/validation.js'
 export default {
   data() {
     return {
-      form: new Form({
+      form: Form.create({
         password: null,
         password_again: {
           value: null,
@@ -143,88 +143,6 @@ One thing to understand, you must reject with **`RuleValidationError`**! otherwi
 You can use `form.$isValidating('email')` In case that your `Promise` base validating take some time, the function will
 return `true` if the `Promise` base validation is still running and `false` if not.
 
-## Dynamic validation
-
-Dynamic validation is useful when there is a field validation that depend on another field, to solve this problem there are 2 options.
-
-1. **This is the recommended way**, create a function that wraps the validation rule (object or function) inside another validation rule:
-```js
-// This example demonstrates a case that a validation rule is an object and not a function
-
-// In your validation file
-export const userRuleIf = (conditionCallback, rule) => {
-  return {
-    passes: (field, form) => {
-      if (!conditionCallback(field, form)) {
-        return true
-      }
-
-      return rule.passes(field, form)
-    },
-    message: rule.message,
-  }  
-}
-
-// In your vue file
-import { Form } from 'form-wrapper-js'
-import { required, useRuleIf } from '@/form/validation.js'
-
-export default {
-  data() {
-    return {
-      form: new Form({
-        is_developer: false,
-        programing_languages: {
-          value: [],
-          rules: [
-            userRuleIf((field, form) => form.is_developer === true, required),
-          ]
-        }
-      })
-    }
-  },
-  // ...Your vue stuff
-}
-```
-
-Of course, you can extend this function and make it more flexible, one way to do so is to support also function validation rules
-and not only objects.
-
-2. Another way is to rebuild the whole rules for the specific field, you can do so with the method `form.$rules.buildFieldRules('fieldName', [rule, rule])`. 
-   this option is less performance because there is some process that the library does to build those rules into something that the library can use. 
-   but sometimes there are cases that your rule depend on data that lives outside the scope of the Form.
-
-```js
-// In your vue file
-import { Form } from 'form-wrapper-js'
-import { required, useRuleIf } from '@/form/validation.js'
-
-export default {
-  data() {
-    return {
-      is_developer: false,
-      form: new Form({
-        programing_languages: {
-          value: [],
-          rules: []
-        }
-      })
-    }
-  },
-  methods: {
-    switchIsDeveloper(state) {
-      this.is_developer = state
-      
-      this.form.$rules.buildFieldRules(
-        'programing_languages', 
-        state ? [required] : []
-      )
-    } 
-  }
-  // ...Your vue stuff
-}
-```
-
 ## Errors
 
 The errors collector will collect errors each time validating a specific field or the whole form,
@@ -260,7 +178,7 @@ form.$errors.unset('name') // will clear only `name` field errors
 
 form.$errors.all() // will return all the fields with an array of errors for each of them.
 
-form.$errors.record({
+form.$errors.fill({
   name: ['some errors', 'another one'],
   last_name: ['and another one again'],
 }) // will fill fields errors

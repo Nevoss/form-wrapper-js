@@ -32,7 +32,7 @@ Make sure to read `$fieldBlurred` method explanation when you are using `$fieldF
 
 `$fieldBlurred` method is useful for 2 things:
 
-- It will release `$onFocus` -  if you will bind `EfieldFocused` event without bind `$fieldBlurred` event,
+- It will release `$onFocus` -  if you will bind `$fieldFocused` event without bind `$fieldBlurred` event,
   the field will remain `$onFocus` until you will call `$fieldFocused` again.
 - It will validate the field if declared in the [options](/guide/options)
 

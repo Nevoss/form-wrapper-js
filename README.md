@@ -1,48 +1,49 @@
-<p align="center">
-  <a href="https://nevoss.github.io/form-wrapper-js" target="_blank">
-    <img src="https://nevoss.github.io/form-wrapper-js/logo.svg" alt="Form Wrapper JS" width="120"/>
-  </a>
-</p>
-<h1 align="center">
-  Form wrapper js
-</h1>
 
-<p align="center">
-  <a href="https://www.npmjs.com/package/form-wrapper-js" target="_blank">
-    <img src="https://img.shields.io/npm/v/form-wrapper-js.svg?style=shield" alt="npm"/>
-  </a>
-  <img src="https://img.shields.io/github/license/Nevoss/form-wrapper-js.svg" alt="MIT"/>
-  <a href="(https://codecov.io/gh/Nevoss/form-wrapper-js" target="_blank">
-    <img src="https://codecov.io/gh/Nevoss/form-wrapper-js/branch/master/graph/badge.svg" alt="codecov"/>
-  </a>
-  <a href="(https://circleci.com/gh/Nevoss/form-wrapper-js" target="_blank">
-    <img src="https://circleci.com/gh/Nevoss/form-wrapper-js.svg?style=shield" alt="CircleCI"/>
-  </a>
-</p>
+ [![Form Wrapper JS](https://nevoss.github.io/form-wrapper-js/logo.svg)](https://nevoss.github.io/form-wrapper-js) 
+
+Form wrapper js
+===============
+
+ [![npm](https://img.shields.io/npm/v/form-wrapper-js.svg?style=shield)](https://www.npmjs.com/package/form-wrapper-js) ![MIT](https://img.shields.io/github/license/Nevoss/form-wrapper-js.svg) [ ![codecov](https://codecov.io/gh/Nevoss/form-wrapper-js/branch/master/graph/badge.svg) ]((https://codecov.io/gh/Nevoss/form-wrapper-js) [![CircleCI](https://circleci.com/gh/Nevoss/form-wrapper-js.svg?style=shield)]((https://circleci.com/gh/Nevoss/form-wrapper-js) 
 
 > A lightweight library that creates forms systems in a convenient and easy way, without dependencies and magic code.
 
-## :art: Playground
 
-- Vue - https://codesandbox.io/s/5x96q83yvp?module=%2Fsrc%2FApp.vue
+Status: BETA
+----------------
+The current version is in beta, most of the feature are stable, but there are may still be bugs, and api may change a little bit.
 
-## :cd: Installation
+for 0.x move to 0.x branch.
+
+:art: Playground
+----------------
+
+*   Vue - [https://codesandbox.io/s/5x96q83yvp?module=%2Fsrc%2FApp.vue](https://codesandbox.io/s/5x96q83yvp?module=%2Fsrc%2FApp.vue)
+
+:cd: Installation
+-----------------
 
 ```
-npm install --save form-wrapper-js
+npm install --save form-wrapper-js@next  # for 1.x
+// or
+npm install --save form-wrapper-js  # for 0.x
 ```
 
 **or**
 
 ```
-yarn add form-wrapper-js
+yarn add form-wrapper-js@next  # for 1.x
+// or
+yarn add form-wrapper-js  # for 0.x
 ```
 
-## :book: Documentation
+:book: Documentation
+--------------------
 
 Please check out the [Form Wrapper JS website](https://nevoss.github.io/form-wrapper-js).
 
-## :rocket: Basic Usage
+:rocket: Basic Usage
+--------------------
 
 This is a quick example, please check out [the website](https://nevoss.github.io/form-wrapper-js) for full documentation.
 
@@ -53,7 +54,7 @@ This is a quick example, please check out [the website](https://nevoss.github.io
     <input type="text" v-model="form.name" />
     <input type="text" v-model="form.password" />
 
-    <button type="submit" :disabled="form.$submitting">
+    <button type="submit" :disabled="form.$submitting" />
   </form>
 </template>
 
@@ -80,12 +81,24 @@ export default {
 </script>
 ```
 
-## :beers: Contribute
+:beers: Contribute
+------------------
 
 **Code, Docs, Bug reports, Ideas - are more the welcome.** ⭐
 
 the installation is very easy, take a look at CONTRIBUTING.md file and follow the instructions.
 
-## :lock: License
+:lock: License
+--------------
 
 The MIT License (MIT). Please see License File for more information.
+
+## Index
+
+### Classes
+
+* [Form](classes/form.md)
+* [FormCollection](classes/formcollection.md)
+
+---
+

@@ -19,7 +19,7 @@ import axios from 'axios'
 export default {
   data() {
     return {
-      form: new Form({
+      form: Form.create({
         // Form fields...
       }),
     }

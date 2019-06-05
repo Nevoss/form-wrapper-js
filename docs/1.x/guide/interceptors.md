@@ -90,7 +90,7 @@ Form.defaults.interceptors.beforeSubmission.use(form => {
 You can also use interceptors after the `Form` instantiated.
 
 ```js
-const form = new Form({
+const form = Form.create({
   name: null,
 })
 

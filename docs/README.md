@@ -1,6 +1,6 @@
 ---
 home: true
-heroImage: /logo.svg
+heroImage: /new-logo.svg
 actionText: Get Started →
 actionLink: /guide/latest
 features:
