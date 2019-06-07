@@ -22,20 +22,30 @@
 
 > A lightweight library that creates forms systems in a convenient and easy way, without dependencies and magic code.
 
+## Status: BETA
+
+The current version is in beta, most of the feature are stable, but there are may still be bugs, and api may change a little bit.
+
+for 0.x move to 0.x branch.
+
 ## :art: Playground
 
-- Vue - https://codesandbox.io/s/5x96q83yvp?module=%2Fsrc%2FApp.vue
+- Vue - [https://codesandbox.io/s/5x96q83yvp?module=%2Fsrc%2FApp.vue](https://codesandbox.io/s/5x96q83yvp?module=%2Fsrc%2FApp.vue)
 
 ## :cd: Installation
 
 ```
-npm install --save form-wrapper-js
+npm install --save form-wrapper-js@next  # for 1.x
+// or
+npm install --save form-wrapper-js  # for 0.x
 ```
 
 **or**
 
 ```
-yarn add form-wrapper-js
+yarn add form-wrapper-js@next  # for 1.x
+// or
+yarn add form-wrapper-js  # for 0.x
 ```
 
 ## :book: Documentation
@@ -44,7 +54,7 @@ Please check out the [Form Wrapper JS website](https://nevoss.github.io/form-wra
 
 ## :rocket: Basic Usage
 
-This is a quick example, please check out [the website](https://nevoss.github.io/form-wrapper-js) for full documentation.
+This is a quick example with **VUE**, please check out [the website](https://nevoss.github.io/form-wrapper-js) for full documentation.
 
 ```vue
 <template>
@@ -53,7 +63,7 @@ This is a quick example, please check out [the website](https://nevoss.github.io
     <input type="text" v-model="form.name" />
     <input type="text" v-model="form.password" />
 
-    <button type="submit" :disabled="form.$submitting">
+    <button type="submit" :disabled="form.$submitting" />
   </form>
 </template>
 
@@ -64,7 +74,7 @@ import axios from 'axios'
 export default {
   data() {
     return {
-      form: new Form({
+      form: Form.create({
         email: null,
         name: null,
         password: null,
@@ -73,8 +83,10 @@ export default {
   },
   methods: {
     async submit() {
-      const { response } = await this.form.$submit(form => axios.post('some-url', form.$values()))
-    }
+      const { response } = await this.form.$submit(form =>
+        axios.post('some-url', form.$values())
+      )
+    },
   },
 }
 </script>
@@ -89,3 +101,12 @@ the installation is very easy, take a look at CONTRIBUTING.md file and follow th
 ## :lock: License
 
 The MIT License (MIT). Please see License File for more information.
+
+## Index
+
+### Classes
+
+- [Form](classes/form.md)
+- [FormCollection](classes/formcollection.md)
+
+---

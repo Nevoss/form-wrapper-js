@@ -1,0 +1,17 @@
+{
+  "name": "form-wrapper-js-website",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vuepress dev .",
+    "build": "vuepress build .",
+    "deploy": "npm run build && gh-pages -m 'Auto deploy [ci skip]' -d docs/.vuepress/dist"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "gh-pages": "^2.0.1",
+    "vuepress": "^1.0.0-alpha.48"
+  }
+}

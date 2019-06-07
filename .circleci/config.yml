@@ -1,101 +1,81 @@
 version: 2
 
 defaults: &defaults
-    working_directory: ~/repo
-    docker:
-        - image: circleci/node:10.13
+  working_directory: ~/repo
+  docker:
+    - image: circleci/node:10.15
 
 jobs:
-    test:
-        <<: *defaults
-        steps:
-            - checkout
+  test:
+    <<: *defaults
+    steps:
+      - checkout
 
-            - restore_cache:
-                keys:
-                    - v1-dependencies-{{ checksum "package.json" }}
-                    - v1-dependencies-
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "package.json" }}
+            - v1-dependencies-
 
-            - run: npm install
+      - run: npm install
 
-            - save_cache:
-                paths:
-                    - node_modules
-                key: v1-dependencies-{{ checksum "package.json" }}
+      - save_cache:
+          paths:
+            - node_modules
+          key: v1-dependencies-{{ checksum "package.json" }}
 
-            - run:
-                name: Run tests
-                command: npm test
+      - run:
+          name: Run tests
+          command: npm run test:prod
 
-            - run:
-                name: Uplodad code coverage
-                command: npm run codecov
+      - run:
+          name: Uplodad code coverage
+          command: npm run codecov
 
-            - persist_to_workspace:
-                root: ~/repo
-                paths: .
+      - persist_to_workspace:
+          root: ~/repo
+          paths: .
 
-    deploy:
-        <<: *defaults
-        steps:
-            - attach_workspace:
-                at: ~/repo
+  docs-build-deploy:
+    <<: *defaults
+    steps:
+      - checkout
 
-            - run:
-                name: Authenticate with registry
-                command: echo "//registry.npmjs.org/:_authToken=$npm_TOKEN" > ~/repo/.npmrc
+      - cd_docs:
+          run: cd ./docs
 
-            - run:
-                name: Publish package
-                command: npm publish
+      - restore_cache:
+          keys:
+            - docs-dependencies-{{ checksum "package.json" }}
+            - docs-dependencies-
 
-    docs-build-deploy:
-        <<: *defaults
-        steps:
-            - checkout
+      - run: npm install
 
-            - restore_cache:
-                keys:
-                    - v1-dependencies-{{ checksum "package.json" }}
-                    - v1-dependencies-
+      - save_cache:
+          paths:
+            - node_modules
+          key: docs-dependencies-{{ checksum "package.json" }}
 
-            - run: npm install
+      - run:
+          name: Configure dependencies
+          command: |
+            git config --global user.email $GH_EMAIL
+            git config --global user.name $GH_NAME
 
-            - save_cache:
-                paths:
-                    - node_modules
-                key: v1-dependencies-{{ checksum "package.json" }}
-
-            - run:
-                name: Configure dependencies
-                command: |
-                    git config --global user.email $GH_EMAIL
-                    git config --global user.name $GH_NAME
-
-            - run:
-                name: Deploy docs to gh-pages branch
-                command: npm run docs:deploy
+      - run:
+          name: Deploy docs to gh-pages branch
+          command: npm run docs:deploy
 
 workflows:
-    version: 2
-    test-deploy:
-        jobs:
-            - test:
-                filters:
-                    tags:
-                        only: /^v.*/
-            - deploy:
-                requires:
-                    - test
-                filters:
-                    tags:
-                        only: /^v.*/
-                    branches:
-                        ignore: /.*/
-
-    docs:
-        jobs:
-            - docs-build-deploy:
-                filters:
-                    branches:
-                        only: master
+  version: 2
+  test:
+    jobs:
+      - test:
+          filters:
+            tags:
+              only: /^v.*/
+  docs:
+    jobs:
+      - docs-build-deploy:
+          filters:
+            branches:
+              only: master

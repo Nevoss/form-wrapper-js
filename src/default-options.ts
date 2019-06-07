@@ -1,7 +1,7 @@
-import { Options } from './types/Options'
+import { Options } from './types/options'
 
 /**
- * Default options that provide to Form instance
+ * Default options for a new instance of a `Form`
  */
 const defaultOptions: Options = {
   successfulSubmission: {
@@ -12,11 +12,11 @@ const defaultOptions: Options = {
   validation: {
     onFieldBlurred: false,
     onFieldChanged: false,
-    debouncedValidateFieldTime: 0,
     onSubmission: true,
+    debouncedValidateFieldTime: 0,
     unsetFieldErrorsOnFieldChange: false,
     stopAfterFirstRuleFailed: true,
-    defaultMessage: ({ label }) => `${label} is invalid.`,
+    defaultMessage: ({ label }): string => `${label} is invalid.`,
   },
 }
 

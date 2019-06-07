@@ -4,19 +4,25 @@
   "description": "JS abstraction for forms",
   "main": "dist/index.js",
   "module": "dist/index.es.js",
-  "types": "dist/index.d.ts",
+  "types": "dist/types/index.d.ts",
   "files": [
     "dist"
   ],
   "scripts": {
+    "lint": "eslint src/**/*.ts",
     "test": "jest",
-    "build": "rollup -c",
-    "watch": "rollup -cw",
+    "test:prod": "jest --collectCoverage --maxWorkers 2 && npm run lint",
     "codecov": "codecov",
+    "watch": "rollup -cw",
+    "build": "tsc --module commonjs && rollup -c rollup.config.js",
+    "prebuild": "rimraf dist",
     "prepublishOnly": "npm run build",
-    "docs:dev": "vuepress dev docs",
-    "docs:build": "vuepress build docs",
-    "docs:deploy": "npm run docs:build && gh-pages -m 'Auto deploy [ci skip]' -d docs/.vuepress/dist"
+    "release": "release-it"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "pretty-quick --staged"
+    }
   },
   "repository": {
     "type": "git",
@@ -25,7 +31,7 @@
   "bugs": {
     "url": "https://github.com/Nevoss/form-wrapper-js/issues"
   },
-  "homepage": "https://github.com/Nevoss/form-wrapper-js",
+  "homepage": "https://nevoss.github.io/form-wrapper-js/",
   "keywords": [
     "forms",
     "form",
@@ -37,17 +43,30 @@
   "author": "Nevo Golan <nevos12@gmail.com>",
   "license": "MIT",
   "devDependencies": {
-    "@types/jest": "^23.3.10",
-    "codecov": "^3.1.0",
-    "gh-pages": "^2.0.1",
-    "jest": "^23.6.0",
-    "jest-extended": "^0.11.0",
-    "prettier": "1.15.3",
-    "rollup": "^0.67.4",
-    "rollup-plugin-typescript2": "^0.18.1",
-    "ts-jest": "^23.10.5",
-    "typescript": "^3.2.2",
-    "vuepress": "^0.14.8"
+    "@types/faker": "^4.1.5",
+    "@types/jest": "^24.0.13",
+    "@typescript-eslint/eslint-plugin": "^1.9.0",
+    "@typescript-eslint/parser": "^1.9.0",
+    "codecov": "^3.5.0",
+    "eslint": "^5.16.0",
+    "eslint-config-prettier": "^4.3.0",
+    "eslint-plugin-prettier": "^3.1.0",
+    "faker": "^4.1.0",
+    "husky": "^2.4.0",
+    "jest": "^24.8.0",
+    "prettier": "^1.17.1",
+    "pretty-quick": "^1.11.0",
+    "release-it": "^12.3.0",
+    "rimraf": "^2.6.3",
+    "rollup": "^1.13.1",
+    "rollup-plugin-license": "^0.8.1",
+    "rollup-plugin-sourcemaps": "^0.4.2",
+    "rollup-plugin-typescript2": "^0.21.1",
+    "ts-jest": "^24.0.2",
+    "typedoc": "^0.14.2",
+    "typedoc-plugin-markdown": "^1.2.1",
+    "typescript": "^3.4.5"
   },
-  "dependencies": {}
+  "dependencies": {},
+  "peerDependencies": {}
 }
