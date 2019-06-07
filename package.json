@@ -13,7 +13,7 @@
     "build": "tsc --module commonjs && rollup -c rollup.config.js",
     "lint": "eslint src/**/*.ts",
     "test": "jest",
-    "test:prod": "jest --collectCoverage && npm run lint",
+    "test:prod": "jest --collectCoverage --maxWorkers 2 && npm run lint",
     "watch": "rollup -cw",
     "codecov": "codecov",
     "prepublishOnly": "npm run build"
