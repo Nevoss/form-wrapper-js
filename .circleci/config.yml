@@ -40,21 +40,11 @@ jobs:
     steps:
       - checkout
 
+      # Need to find better way to build and deploy the docs.
+
       - run:
-          name: cd docs
-          command: cd ./docs
-
-      - restore_cache:
-          keys:
-            - docs-dependencies-{{ checksum "package.json" }}
-            - docs-dependencies-
-
-      - run: npm install
-
-      - save_cache:
-          paths:
-            - node_modules
-          key: docs-dependencies-{{ checksum "package.json" }}
+          name: Install docs dependencies
+          command: cd docs && npm install
 
       - run:
           name: Configure dependencies
@@ -64,7 +54,7 @@ jobs:
 
       - run:
           name: Deploy docs to gh-pages branch
-          command: npm run docs:deploy
+          command: cd docs && npm run deploy
 
 workflows:
   version: 2

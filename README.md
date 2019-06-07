@@ -11,6 +11,9 @@
   <a href="https://www.npmjs.com/package/form-wrapper-js" target="_blank">
     <img src="https://img.shields.io/npm/v/form-wrapper-js.svg?style=shield" alt="npm"/>
   </a>
+  <a href="https://www.npmjs.com/package/form-wrapper-js" target="_blank">
+      <img src="https://img.shields.io/npm/v/form-wrapper-js/next.svg?style=shield" alt="npm"/>
+  </a>
   <img src="https://img.shields.io/github/license/Nevoss/form-wrapper-js.svg" alt="MIT"/>
   <a href="(https://codecov.io/gh/Nevoss/form-wrapper-js" target="_blank">
     <img src="https://codecov.io/gh/Nevoss/form-wrapper-js/branch/master/graph/badge.svg" alt="codecov"/>
