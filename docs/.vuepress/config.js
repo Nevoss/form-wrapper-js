@@ -2,12 +2,13 @@ const versioning = require('./lib/versioning.js')
 
 module.exports = {
   base: '/form-wrapper-js/',
-  title: 'Form Wrapper JS',
-  description: 'A lightweight library that creates forms systems in a convenient and easy way, without dependencies and magic code.',
-  head: [
-    ['link', { rel: 'icon', href: '/favicon.ico' }]
-  ],
+  title: 'Form Wrapper',
+  description:
+    'A lightweight library that creates forms systems in a convenient and easy way, without dependencies and magic code.',
+  head: [['link', { rel: 'icon', href: '/favicon.ico' }]],
   themeConfig: {
+    logo: '/logo.svg',
+    search: false,
     repo: 'Nevoss/form-wrapper-js',
     lastUpdated: 'Last Updated',
     docsDir: 'docs',
@@ -15,14 +16,14 @@ module.exports = {
     versions: {
       latest: versioning.versions.latest,
       selected: versioning.versions.latest,
-      all: versioning.versions.all
+      all: versioning.versions.all,
     },
     nav: [
       {
         text: `Docs`,
-        items: versioning.linksFor('guide/')
+        items: versioning.linksFor('guide/'),
       },
     ],
-    sidebar: versioning.sidebars
-  }
+    sidebar: versioning.sidebars,
+  },
 }
