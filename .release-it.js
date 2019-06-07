@@ -4,5 +4,6 @@ module.exports = {
   },
   github: {
     release: true,
+    releaseNotes: false,
   },
 }
