@@ -40,8 +40,9 @@ jobs:
     steps:
       - checkout
 
-      - cd_docs:
-          run: cd ./docs
+      - run:
+          name: cd docs
+          command: cd ./docs
 
       - restore_cache:
           keys:
