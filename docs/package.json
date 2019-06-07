@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vuepress dev .",
     "build": "vuepress build .",
-    "deploy": "npm run build && gh-pages -m 'Auto deploy [ci skip]' -d docs/.vuepress/dist"
+    "deploy": "npm run build && gh-pages -m 'Auto deploy [ci skip]' -d .vuepress/dist"
   },
   "author": "",
   "license": "ISC",
