@@ -1,6 +1,6 @@
 {
   "name": "form-wrapper-js",
-  "version": "1.0.0-beta.0",
+  "version": "0.8.0",
   "description": "JS abstraction for forms",
   "main": "dist/index.js",
   "module": "dist/index.es.js",
@@ -16,7 +16,8 @@
     "watch": "rollup -cw",
     "build": "tsc --module commonjs && rollup -c rollup.config.js",
     "prebuild": "rimraf dist",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "release": "release-it --dry-run"
   },
   "husky": {
     "hooks": {
@@ -55,6 +56,7 @@
     "jest": "^24.8.0",
     "prettier": "^1.17.1",
     "pretty-quick": "^1.11.0",
+    "release-it": "^12.3.0",
     "rimraf": "^2.6.3",
     "rollup": "^1.13.1",
     "rollup-plugin-license": "^0.8.1",
