@@ -104,12 +104,3 @@ the installation is very easy, take a look at CONTRIBUTING.md file and follow th
 ## :lock: License
 
 The MIT License (MIT). Please see License File for more information.
-
-## Index
-
-### Classes
-
-- [Form](classes/form.md)
-- [FormCollection](classes/formcollection.md)
-
----
