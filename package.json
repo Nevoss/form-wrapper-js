@@ -9,14 +9,19 @@
     "dist"
   ],
   "scripts": {
-    "prebuild": "rimraf dist",
-    "build": "tsc --module commonjs && rollup -c rollup.config.js",
     "lint": "eslint src/**/*.ts",
     "test": "jest",
     "test:prod": "jest --collectCoverage --maxWorkers 2 && npm run lint",
-    "watch": "rollup -cw",
     "codecov": "codecov",
+    "watch": "rollup -cw",
+    "build": "tsc --module commonjs && rollup -c rollup.config.js",
+    "prebuild": "rimraf dist",
     "prepublishOnly": "npm run build"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "pretty-quick --staged"
+    }
   },
   "repository": {
     "type": "git",
@@ -46,8 +51,10 @@
     "eslint-config-prettier": "^4.3.0",
     "eslint-plugin-prettier": "^3.1.0",
     "faker": "^4.1.0",
+    "husky": "^2.4.0",
     "jest": "^24.8.0",
     "prettier": "^1.17.1",
+    "pretty-quick": "^1.11.0",
     "rimraf": "^2.6.3",
     "rollup": "^1.13.1",
     "rollup-plugin-license": "^0.8.1",
