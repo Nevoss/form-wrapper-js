@@ -17,7 +17,7 @@
     "build": "tsc --module commonjs && rollup -c rollup.config.js",
     "prebuild": "rimraf dist",
     "prepublishOnly": "npm run build",
-    "release": "release-it --dry-run"
+    "release": "release-it"
   },
   "husky": {
     "hooks": {
