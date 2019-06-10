@@ -28,11 +28,12 @@
 
 ## :cd: Installation
 
+### Using `npm`
 ```
 npm install --save form-wrapper-js
 ```
 
-**or**
+### Using `yarn`
 
 ```
 yarn add form-wrapper-js
@@ -44,7 +45,9 @@ Please check out the [Form Wrapper JS website](https://nevoss.github.io/form-wra
 
 ## :rocket: Basic Usage
 
-This is a quick example, please check out [the website](https://nevoss.github.io/form-wrapper-js) for full documentation.
+Here's a quick example.
+
+For the full documentation, please check out [the website](https://nevoss.github.io/form-wrapper-js).
 
 ```vue
 <template>
@@ -73,7 +76,7 @@ export default {
   },
   methods: {
     async submit() {
-      const { response } = await this.form.submit(form => axios.post('some-url', form.values()))
+      const { response } = await this.form.submit(form => axios.post('https//api.example/', form.values()))
     }
   },
 }
@@ -84,7 +87,7 @@ export default {
 
 **Code, Docs, Bug reports, Ideas - are more the welcome.** ⭐
 
-the installation is very easy, take a look at CONTRIBUTING.md file and follow the instructions.
+The installation is very easy, take a look at CONTRIBUTING.md file and follow the instructions.
 
 ## :lock: License
 
