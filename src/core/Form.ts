@@ -1,22 +1,28 @@
 import { Errors } from './Errors'
-import { Validator } from './Validator'
-import { FieldKeysCollection } from './FieldKeysCollection'
-import { InterceptorManager } from './InterceptorManager'
-import { isObject, warn } from '../utils'
-import generateDebouncedValidateField from '../helpers/generateDebouncedValidateField'
-import generateDefaultLabel from '../helpers/generateDefaultLabel'
-import generateOptions from '../helpers/generateOptions'
-import defaultOptions from '../default-options'
-import basicInterceptors from '../interceptors/index'
-import { Field } from '../types/Field'
-import { FormDefaults } from '../types/Form'
-import { Options } from '../types/Options'
-import { SubmitCallback } from '../types/Form'
+import { Rules } from './Rules'
+import { Interceptors } from './Interceptors'
+import { Collection } from '../helpers/Collection'
+import { FormCollection } from './FormCollection'
+import { OptionalOptions, Options } from '../types/options'
+import { FormDefaults, FormWithFields, SubmitCallback } from '../types/form'
 import {
-  InterceptorHandler,
-  InterceptorManagersObject,
-} from '../types/Interceptors'
-import { FieldValidationError } from '../errors/FieldValidationError'
+  Field,
+  FieldDeclaration,
+  FieldsDeclaration,
+  OptionalFieldDeclaration,
+} from '../types/fields'
+import warn from '../warn'
+import createForm from '../factories/FormFactory'
+import defaultOptions from '../default-options'
+import generateOptions from '../helpers/generateOptions'
+import generateFieldDeclaration from '../helpers/generateFieldDeclaration'
+import generateDebouncedValidateField from '../helpers/generateDebouncedValidateField'
+import { objectToFormData } from '../utils'
+import { Rule } from './Rule'
+import { RuleValidationError } from '../errors/RuleValidationError'
+import createRuleMessageFunction from '../factories/RuleMessageFunctionFactory'
+import { ConditionalRules } from './ConditionalRules'
+import { Interceptor } from '../types/interceptors'
 
 export class Form {
   /**
@@ -25,50 +31,70 @@ export class Form {
   public static defaults: FormDefaults = {
     options: defaultOptions,
     interceptors: {
-      beforeSubmission: new InterceptorManager(),
-      submissionComplete: new InterceptorManager(),
+      beforeSubmission: new Interceptors(),
+      submissionComplete: new Interceptors(),
     },
   }
-  /**
-   * determine if the form is on submitting mode
-   */
-  public $submitting: boolean = false
 
   /**
-   * Errors class - handling all the errors of the fields
+   * trigger the FormFactory to create a Form object
+   *
+   * @param fields
+   * @param options
+   */
+  public static create(
+    fields: FieldsDeclaration = {},
+    options: OptionalOptions = {}
+  ): FormWithFields {
+    return createForm(fields, options)
+  }
+
+  /**
+   * Assign default options to the Form class in more
+   * convenient way then "Form.defaults.options.validation.something = something"
+   *
+   * @param options
+   */
+  public static assignDefaultOptions(options: OptionalOptions): void {
+    Form.defaults.options = generateOptions(Form.defaults.options, options)
+  }
+
+  /**
+   * Unique ID for the Form instance.
+   * the main use case is in the FormCollection
+   * to set a unique ID for every Form there
+   */
+  public $id: string
+
+  /**
+   * RulesManager - hold all the fields rules.
+   */
+  public $rules: Rules
+
+  /**
+   * Errors class - holds all the fields errors
    */
   public $errors: Errors
 
   /**
-   * Validator class - handling all the validations stuff
+   * holds all the fields that was touched
    */
-  public $validator: Validator
+  public $touched: Collection<string>
 
   /**
-   * Touched - holds all the fields that was touched
+   * holds all the fields keys that are in validation right now
    */
-  public $touched: FieldKeysCollection
+  public $validating: Collection<string>
 
   /**
-   * Holds all the labels of the fields
+   * Object of interceptors:
+   * beforeSubmission: interceptors that will be handled before submission
+   * submissionComplete: interceptors that will be handled after submission
    */
-  public $labels: Object
-
-  /**
-   * hold the input that is on focus right now
-   */
-  public $onFocus: string | null = null
-
-  /**
-   * The initiate values that was provide to the form
-   */
-  public $initialValues: Object
-
-  /**
-   * all the extra values that provide in the construction of this class
-   * will be hold here.
-   */
-  public $extra: Object
+  public $interceptors: {
+    beforeSubmission: Interceptors
+    submissionComplete: Interceptors
+  }
 
   /**
    * Options of the Form
@@ -76,201 +102,268 @@ export class Form {
   public $options: Options = Form.defaults.options
 
   /**
-   * holds the interceptor managers
+   * The initiate values of the fields
    */
-  public $interceptors: InterceptorManagersObject
+  public $initialValues: { [key: string]: any } = {}
 
   /**
-   * holds the debounced version of `validateField` method the debounce time is
-   * pre defined in the `$options` prop
+   * Holds all the labels of the fields
    */
-  public debouncedValidateField: Function
+  public $labels: { [key: string]: string } = {}
 
   /**
-   * constructor of the class
+   * Holds all the extra data of a field
+   */
+  public $extra: { [key: string]: any } = {}
+
+  /**
+   * hold the input that is on focus right now
+   */
+  public $onFocus: string | null = null
+
+  /**
+   * determine if the form is on submitting mode
+   */
+  public $submitting: boolean = false
+
+  /**
+   * specific for FormCollection to fill the error with the prefix of the parent field
+   */
+  public $fieldsPrefix: string = ''
+
+  /**
+   * Form Constructor
    *
-   * @param data
-   * @param options
+   * @param id
+   * @param rules
+   * @param errors
+   * @param touched
+   * @param validating
+   * @param interceptors
    */
-  constructor(data: Object, options: Options = {}) {
-    this.assignOptions(options)
-      ._init(data)
-      .resetValues()
+  public constructor(
+    id: string,
+    rules: Rules,
+    errors: Errors,
+    touched: Collection<string>,
+    validating: Collection<string>,
+    interceptors: {
+      beforeSubmission: Interceptors
+      submissionComplete: Interceptors
+    }
+  ) {
+    this.$id = id
+    this.$rules = rules
+    this.$errors = errors
+    this.$touched = touched
+    this.$validating = validating
+    this.$interceptors = interceptors
   }
 
   /**
-   * setting up default options for the Form class in more
-   * convenient way then "Form.defaults.options.validation.something = something"
+   * assign options to the form
+   * also generate again the debouncedValidationField method
+   * in case the `debouncedValidateFieldTime` was changed
    *
    * @param options
    */
-  public static assignDefaultOptions(options: Options = {}): void {
-    Form.defaults.options = generateOptions(Form.defaults.options, options)
-  }
-
-  /**
-   * assign options to Options object
-   *
-   * @param options
-   */
-  public assignOptions(options: Options) {
+  public $assignOptions(options: OptionalOptions): FormWithFields {
     this.$options = generateOptions(this.$options, options)
-    this.debouncedValidateField = generateDebouncedValidateField(this)
+    this.$debouncedValidateField = generateDebouncedValidateField(this)
 
     return this
   }
 
   /**
-   * checks if field exits or not in the form class
+   * checks if field key is exists in the form
    *
    * @param fieldKey
    */
-  public hasField(fieldKey: string): boolean {
+  public $hasField(fieldKey: string): boolean {
     return this.hasOwnProperty(fieldKey)
   }
 
   /**
-   * Set all the fields value same as $initialValues fields value
+   * Add a field to the form
+   *
+   * @param fieldKey
+   * @param value
    */
-  public resetValues(): Form {
-    for (let fieldName in this.$initialValues) {
-      if (this.$initialValues.hasOwnProperty(fieldName)) {
-        this[fieldName] = this.$initialValues[fieldName]
-      }
+  public $addField(
+    fieldKey: string,
+    value: any | OptionalFieldDeclaration
+  ): FormWithFields {
+    warn(!this.$hasField(fieldKey), `'${fieldKey}' is already exists`)
+
+    const fieldDeclaration: FieldDeclaration = generateFieldDeclaration(
+      fieldKey,
+      value
+    )
+    const isFormCollection = fieldDeclaration.value instanceof FormCollection
+
+    this[fieldKey] = fieldDeclaration.value
+    this.$rules.generateFieldRules(fieldKey, fieldDeclaration.rules)
+    this.$extra[fieldKey] = fieldDeclaration.extra
+    this.$labels[fieldKey] = fieldDeclaration.label
+    this.$initialValues[fieldKey] = isFormCollection
+      ? fieldDeclaration.value.values()
+      : fieldDeclaration.value
+
+    if (isFormCollection) {
+      this[fieldKey].parent = this
+      this[fieldKey].fieldKey = fieldKey
     }
 
     return this
   }
 
   /**
-   * reset the form state (values, errors and touched)
+   * Add number of fields to the form
+   *
+   * @param fields
    */
-  public reset(): Form {
-    this.resetValues()
-    this.$errors.clear()
-    this.$touched.clear()
+  public $addFields(fields: FieldsDeclaration): FormWithFields {
+    Object.keys(fields).forEach(
+      (fieldKey: string): void => {
+        this.$addField(fieldKey, fields[fieldKey])
+      }
+    )
 
     return this
   }
 
   /**
-   * get all the values of the form
+   * Remove a field from the form
+   *
+   * @param fieldKey
    */
-  public values(): Object {
-    let dataObj = {}
+  public $removeField(fieldKey: string): FormWithFields {
+    warn(this.$hasField(fieldKey), `'${fieldKey}' is not a valid field`)
 
-    Object.keys(this.$initialValues).forEach(fieldKey => {
-      if (this.hasField(fieldKey)) {
-        dataObj[fieldKey] = this[fieldKey]
+    delete this[fieldKey]
+    delete this.$initialValues[fieldKey]
+    delete this.$extra[fieldKey]
+    delete this.$labels[fieldKey]
+    this.$rules.unset(fieldKey)
+
+    return this
+  }
+
+  /**
+   * return all the field keys of the form
+   */
+  public $getFieldKeys(): string[] {
+    return Object.keys(this.$initialValues)
+  }
+
+  /**
+   * get Field
+   * returns data about the field, mostly used for validation
+   *
+   * @param fieldKey
+   */
+  public $getField(fieldKey: string): Field {
+    return {
+      key: fieldKey,
+      label: this.$labels[fieldKey],
+      value: this[fieldKey],
+      extra: this.$extra[fieldKey],
+    }
+  }
+
+  /**
+   * Remove number of fields
+   *
+   * @param fieldKeys
+   */
+  public $removeFields(fieldKeys: string[]): FormWithFields {
+    fieldKeys.forEach(
+      (fieldKey: string): void => {
+        this.$removeField(fieldKey)
       }
-    })
+    )
 
-    return dataObj
+    return this
+  }
+
+  /**
+   * return the values of the fields in the form
+   */
+  public $values(): { [key: string]: any } {
+    const values = {}
+
+    this.$getFieldKeys().forEach(
+      (fieldKey: string): void => {
+        values[fieldKey] =
+          this[fieldKey] instanceof FormCollection
+            ? this[fieldKey].values()
+            : this[fieldKey]
+      }
+    )
+
+    return values
+  }
+
+  /**
+   * Returns FormData object with the form values,
+   * this one is for the use of file upload ot something similar.
+   */
+  public $valuesAsFormData(): FormData {
+    return objectToFormData(this.$values())
+  }
+
+  /**
+   * returns the form values as a json string.
+   */
+  public $valuesAsJson(): string {
+    return JSON.stringify(this.$values())
   }
 
   /**
    * fill the Form values with new values.
    * without remove another fields values.
+   * if `updateInitialValues` is sets to true the $initialValues of the form
+   * will be updated to the new values
    *
-   * @param newData
+   * @param data
+   * @param updateInitialValues
    */
-  public fill(newData: Object): Form {
-    for (let fieldName in newData) {
-      if (newData.hasOwnProperty(fieldName) && this.hasField(fieldName)) {
-        this[fieldName] = newData[fieldName]
+  public $fill(
+    data: { [key: string]: any },
+    updateInitialValues: boolean = false
+  ): FormWithFields {
+    Object.keys(data).forEach(
+      (fieldKey: string): void => {
+        if (!this.$hasField(fieldKey)) {
+          return
+        }
+
+        const isFormCollection = this[fieldKey] instanceof FormCollection
+
+        const value = isFormCollection
+          ? this[fieldKey].fill(data[fieldKey], updateInitialValues)
+          : data[fieldKey]
+
+        if (updateInitialValues) {
+          this.$initialValues[fieldKey] = isFormCollection
+            ? value.values()
+            : value
+        }
+
+        this[fieldKey] = value
       }
-    }
+    )
 
     return this
   }
 
   /**
-   * validate specific key or the whole form.
-   *
-   * @param fieldKey
+   * Set all the fields value same as the $initialValues fields value
    */
-  public validate(fieldKey: string | null = null): Promise<any> {
-    return fieldKey ? this.validateField(fieldKey) : this.validateAll()
-  }
+  public $resetValues(): FormWithFields {
+    this.$fill(this.$initialValues)
 
-  /**
-   * validate specific field
-   *
-   * @param fieldKey
-   */
-  public async validateField(fieldKey: string): Promise<any> {
-    if (!this.hasField(fieldKey)) {
-      warn(`\`${fieldKey}\` is not a valid field`)
-
-      return Promise.resolve()
-    }
-
-    this.$errors.unset(fieldKey)
-
-    try {
-      await this.$validator.validateField(
-        this._buildFieldObject(fieldKey),
-        this
-      )
-    } catch (error) {
-      if (!(error instanceof FieldValidationError)) {
-        return Promise.reject(error)
-      }
-
-      this.$errors.push({ [fieldKey]: error.messages })
-    }
-
-    return Promise.resolve()
-  }
-
-  /**
-   * validate all the fields of the form
-   */
-  public validateAll(): Promise<any> {
-    const promises = Object.keys(this.$initialValues).map(fieldKey => {
-      return this.validateField(fieldKey)
-    })
-
-    return Promise.all(promises)
-  }
-
-  /**
-   * returns if validator is validating the field or the whole form
-   *
-   * @param fieldKey
-   */
-  public isValidating(fieldKey: string | null = null) {
-    if (fieldKey && !this.hasField(fieldKey)) {
-      warn(`\`${fieldKey}\` is not a valid field`)
-    }
-
-    return fieldKey
-      ? this.$validator.$validating.has(fieldKey)
-      : this.$validator.$validating.any()
-  }
-
-  /**
-   * its run isFieldDirty if "fieldKey" is passed
-   * if not its check all the fields and if one is dirty the whole form
-   * is dirty
-   *
-   * @param fieldKey
-   */
-  public isDirty(fieldKey: string | null = null): boolean {
-    if (fieldKey) {
-      return this.isFieldDirty(fieldKey)
-    }
-
-    let dirty = false
-
-    for (let originalFieldKey in this.$initialValues) {
-      if (this.isFieldDirty(originalFieldKey)) {
-        dirty = true
-        break
-      }
-    }
-
-    return dirty
+    return this
   }
 
   /**
@@ -278,32 +371,159 @@ export class Form {
    *
    * @param fieldKey
    */
-  public isFieldDirty(fieldKey: string): boolean {
-    if (!this.hasField(fieldKey)) {
-      warn(`\`${fieldKey}\` is not a valid field`)
+  public $isFieldDirty(fieldKey: string): boolean {
+    warn(this.$hasField(fieldKey), `'${fieldKey}' is not a valid field`)
 
-      return false
-    }
-
-    return this[fieldKey] !== this.$initialValues[fieldKey]
+    return (
+      this.$hasField(fieldKey) &&
+      (this[fieldKey] instanceof FormCollection
+        ? this[fieldKey].isDirty()
+        : this[fieldKey] !== this.$initialValues[fieldKey])
+    )
   }
 
   /**
-   * handle change/input on field
+   * determine if the form is dirty.
+   * if one of the fields is dirty thw whole form consider as dirty
+   */
+  public $isFormDirty(): boolean {
+    return this.$getFieldKeys().some(
+      (fieldKey: string): boolean => this.$isFieldDirty(fieldKey)
+    )
+  }
+
+  /**
+   * if fieldKey is passed as argument it checks if the field is dirty
+   * if not it checks if the whole form is dirty
    *
    * @param fieldKey
    */
-  public fieldChanged(fieldKey: string): Form {
-    if (!this.hasField(fieldKey)) {
-      warn(`\`${fieldKey}\` is not a valid field`)
+  public $isDirty(fieldKey: string | null = null): boolean {
+    return fieldKey !== null
+      ? this.$isFieldDirty(fieldKey)
+      : this.$isFormDirty()
+  }
 
-      return this
+  /**
+   * reset the form state (values, errors and touched)
+   */
+  public $reset(): FormWithFields {
+    this.$resetValues()
+    this.$errors.clear()
+    this.$touched.clear()
+
+    return this
+  }
+
+  /**
+   * validate a specific field
+   *
+   * @param fieldKey
+   */
+  public async $validateField(fieldKey: string): Promise<any> {
+    warn(this.$hasField(fieldKey), `'${fieldKey}' is not a valid field`)
+
+    this.$errors.unset(this.$fieldsPrefix + fieldKey)
+    this.$validating.push(this.$fieldsPrefix + fieldKey)
+
+    const defaultMessage = createRuleMessageFunction(
+      this.$options.validation.defaultMessage
+    )
+    const field: Field = this.$getField(fieldKey)
+
+    let fieldRulesChain: (Rule | ConditionalRules)[] = Array.from(
+      this.$rules.get(fieldKey)
+    )
+
+    while (fieldRulesChain.length) {
+      let rule = fieldRulesChain.shift()
+
+      if (rule === undefined) {
+        continue
+      }
+
+      try {
+        if (rule instanceof ConditionalRules) {
+          rule.condition(field, this) &&
+            (fieldRulesChain = [...rule.all(), ...fieldRulesChain])
+
+          continue
+        }
+
+        await rule.validate(field, this, defaultMessage)
+      } catch (error) {
+        // If the error is not a RuleValidationError - the error will bubble up
+        if (!(error instanceof RuleValidationError)) {
+          throw error
+        }
+
+        this.$errors.push(this.$fieldsPrefix + fieldKey, error.message)
+
+        this.$options.validation.stopAfterFirstRuleFailed &&
+          (fieldRulesChain = [])
+      }
     }
+
+    field.value instanceof FormCollection && (await field.value.validate())
+
+    this.$validating.unset(this.$fieldsPrefix + fieldKey)
+  }
+
+  /**
+   * Debounced version $validateField method
+   *
+   * @param fieldKey
+   */
+  public $debouncedValidateField(fieldKey: string): void {}
+
+  /**
+   * validate all the fields of the form
+   */
+  public $validateForm(): Promise<any> {
+    const promises = this.$getFieldKeys().map(
+      (fieldKey: string): Promise<any> => {
+        return this.$validateField(fieldKey)
+      }
+    )
+
+    return Promise.all(promises)
+  }
+
+  /**
+   * validate specific key or the whole form.
+   *
+   * @param fieldKey
+   */
+  public $validate(fieldKey: string | null = null): Promise<any> {
+    return fieldKey ? this.$validateField(fieldKey) : this.$validateForm()
+  }
+
+  /**
+   * returns if is validating the field or the whole form
+   *
+   * @param fieldKey
+   */
+  public $isValidating(fieldKey: string | null = null): boolean {
+    warn(
+      !fieldKey || this.$hasField(fieldKey),
+      `\`${fieldKey}\` is not a valid field`
+    )
+
+    return fieldKey ? this.$validating.has(fieldKey) : this.$validating.any()
+  }
+
+  /**
+   * handle change/input event
+   *
+   * @param fieldKey
+   */
+  public $fieldChanged(fieldKey: string): FormWithFields {
+    warn(this.$hasField(fieldKey), `'${fieldKey}' is not a valid field`)
 
     this.$options.validation.unsetFieldErrorsOnFieldChange &&
       this.$errors.unset(fieldKey)
     this.$options.validation.onFieldChanged &&
-      this.debouncedValidateField(fieldKey)
+      this.$debouncedValidateField(fieldKey)
 
     return this
   }
@@ -313,12 +533,8 @@ export class Form {
    *
    * @param fieldKey
    */
-  public fieldFocused(fieldKey: string): Form {
-    if (!this.hasField(fieldKey)) {
-      warn(`\`${fieldKey}\` is not a valid field`)
-
-      return this
-    }
+  public $fieldFocused(fieldKey: string): FormWithFields {
+    warn(this.$hasField(fieldKey), `'${fieldKey}' is not a valid field`)
 
     this.$touched.push(fieldKey)
     this.$onFocus = fieldKey
@@ -331,116 +547,58 @@ export class Form {
    *
    * @param fieldKey
    */
-  public fieldBlurred(fieldKey: string): Form {
-    if (!this.hasField(fieldKey)) {
-      warn(`\`${fieldKey}\` is not a valid field`)
-
-      return this
-    }
+  public $fieldBlurred(fieldKey: string): FormWithFields {
+    warn(this.$hasField(fieldKey), `'${fieldKey}' is not a valid field`)
 
     if (this.$onFocus === fieldKey) {
       this.$onFocus = null
     }
 
-    this.$options.validation.onFieldBlurred && this.validateField(fieldKey)
+    this.$options.validation.onFieldBlurred && this.$validateField(fieldKey)
 
     return this
   }
 
   /**
-   * submit the form, this method received a callback that
-   * will submit the form and must return a Promise.
+   * submit the form.
+   * this method received a callback that must return a Promise.
    *
    * @param callback
    */
-  public submit(callback: SubmitCallback): Promise<any> {
-    let chain: any[] = [
-      () => callback(this),
-      null,
-      response => Promise.resolve({ response, form: this }),
-      error => Promise.reject({ error, form: this }),
+  public $submit(callback: SubmitCallback): Promise<any> {
+    const chain: Interceptor[] = [
+      ...this.$interceptors.beforeSubmission.all(),
+      ...this._getRequiredInterceptors(callback),
+      ...this.$interceptors.submissionComplete.all(),
     ]
 
-    this.$interceptors.beforeSubmission
-      .merge(basicInterceptors.beforeSubmission)
-      .forEach((handler: InterceptorHandler) =>
-        chain.unshift(handler.fulfilled, handler.rejected)
-      )
+    let promise = Promise.resolve(this)
 
-    this.$interceptors.submissionComplete
-      .merge(basicInterceptors.submissionComplete)
-      .forEach((handler: InterceptorHandler) =>
-        chain.push(handler.fulfilled, handler.rejected)
-      )
-
-    let promise: Promise<any> = Promise.resolve(this)
-
-    while (chain.length) {
-      promise = promise.then(chain.shift(), chain.shift())
+    for (let interceptor of chain) {
+      promise = promise.then(interceptor.fulfilled, interceptor.rejected)
     }
 
     return promise
   }
 
   /**
-   * Init the form
-   * fill all the values that should be filled (Validator, OriginalData etc..)
+   * return the submit interceptors
+   * the submit itself, and 2 interceptors to normalize fulfilled and rejected
    *
-   * @param data
-   * @private
+   * @param callback
    */
-  private _init(data: Object): Form {
-    let rules = {}
-    let originalData = {}
-    let labels = {}
-    let extra = {}
-
-    Object.keys(data).forEach(key => {
-      let isKeyObject = isObject(data[key])
-
-      originalData[key] = isKeyObject ? data[key].value : data[key]
-      labels[key] =
-        isKeyObject && data[key].hasOwnProperty('label')
-          ? data[key].label
-          : generateDefaultLabel(key)
-      extra[key] =
-        isKeyObject && data[key].hasOwnProperty('extra') ? data[key].extra : {}
-      rules = {
-        ...rules,
-        ...(isKeyObject &&
-          data[key].hasOwnProperty('rules') && { [key]: data[key].rules }),
-      }
-    })
-
-    this.$initialValues = originalData
-    this.$labels = labels
-    this.$extra = extra
-    this.$validator = new Validator(rules, this.$options.validation)
-    this.$errors = new Errors()
-    this.$touched = new FieldKeysCollection()
-    this.$interceptors = {
-      beforeSubmission: new InterceptorManager(
-        Form.defaults.interceptors.beforeSubmission.all()
-      ),
-      submissionComplete: new InterceptorManager(
-        Form.defaults.interceptors.submissionComplete.all()
-      ),
-    }
-
-    return this
-  }
-
-  /**
-   * build Field object
-   *
-   * @param fieldKey
-   * @private
-   */
-  private _buildFieldObject(fieldKey: string): Field {
-    return {
-      key: fieldKey,
-      value: this[fieldKey],
-      label: this.$labels[fieldKey],
-    }
+  private _getRequiredInterceptors(callback: SubmitCallback): Interceptor[] {
+    return [
+      {
+        fulfilled: (): Promise<any> => callback(this),
+        rejected: null,
+      },
+      {
+        fulfilled: (response): Promise<any> =>
+          Promise.resolve({ response, form: this }),
+        rejected: (error): Promise<any> =>
+          Promise.reject({ error, form: this }),
+      },
+    ]
   }
 }

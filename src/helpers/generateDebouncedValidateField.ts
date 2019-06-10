@@ -7,9 +7,9 @@ import { Form } from '../core/Form'
  *
  * @param form
  */
-export default (form: Form): Function => {
+export default (form: Form): ((fieldKey: string) => void) => {
   return debounce(
-    form.validateField.bind(form),
+    form.$validateField.bind(form),
     form.$options.validation.debouncedValidateFieldTime
   )
 }

@@ -1,20 +1,16 @@
-import {
-  InterceptorHandler,
-  InvalidResponse,
-  successfulResponse,
-} from '../types/Interceptors'
+import { InvalidResponse, SuccessfulResponse } from '../types/interceptors'
 
 /**
  * set the $submitting property as false event if the submission
  * was successful or not
  */
-export const setSubmittingAsFalse: InterceptorHandler = {
-  fulfilled: (response: successfulResponse) => {
+export const setSubmittingToFalse = {
+  fulfilled: (response: SuccessfulResponse): Promise<any> => {
     response.form.$submitting = false
 
     return Promise.resolve(response)
   },
-  rejected: (error: InvalidResponse) => {
+  rejected: (error: InvalidResponse): Promise<any> => {
     error.form.$submitting = false
 
     return Promise.reject(error)
@@ -25,13 +21,13 @@ export const setSubmittingAsFalse: InterceptorHandler = {
  * clear the form (errors, touched and values) base on the options
  * that was set at the form.
  */
-export const clearForm: InterceptorHandler = {
-  fulfilled: (response: successfulResponse) => {
+export const clearForm = {
+  fulfilled: (response: SuccessfulResponse): Promise<any> => {
     const { form } = response
 
     form.$options.successfulSubmission.clearErrors && form.$errors.clear()
     form.$options.successfulSubmission.clearTouched && form.$touched.clear()
-    form.$options.successfulSubmission.resetValues && form.resetValues()
+    form.$options.successfulSubmission.resetValues && form.$resetValues()
 
     return Promise.resolve(response)
   },
@@ -39,6 +35,7 @@ export const clearForm: InterceptorHandler = {
 }
 
 /**
- * the order of the interceptors will be from the FIRST to the last
+ * NOTE IMPORTANT!
+ * The order of the interceptors will be from the FIRST to the last
  */
-export default [setSubmittingAsFalse, clearForm]
+export default [setSubmittingToFalse, clearForm]

@@ -1,117 +1,40 @@
-import { ErrorsStack } from '../types/Errors'
+import { FieldsCollection } from '../helpers/FieldsCollection'
 
-export class Errors {
+export class Errors extends FieldsCollection<string[]> {
   /**
-   * Errors stack, holds all the form errors
-   */
-  $errors: ErrorsStack
-
-  /**
-   * Construct the Errors class with errors
+   * return the first error of specific field
    *
-   * @param errors
-   */
-  constructor(errors: ErrorsStack = {}) {
-    this.record(errors)
-  }
-
-  /**
-   * Record errors to the ErrorsStack
-   *
-   * @param errors
-   */
-  public record(errors: ErrorsStack): Errors {
-    this.$errors = {
-      ...errors,
-    }
-
-    return this
-  }
-
-  /**
-   * Append errors to the ErrorsStack
-   *
-   * @param errors
-   */
-  public push(errors: ErrorsStack): Errors {
-    this.$errors = {
-      ...this.$errors,
-      ...errors,
-    }
-
-    return this
-  }
-
-  /**
-   * checks if fieldKey exists in the ErrorsStack
-   *
-   * @param fieldKey
-   */
-  public has(fieldKey: string): boolean {
-    return this.$errors.hasOwnProperty(fieldKey)
-  }
-
-  /**
-   * Returns array of errors for specific field
-   *
-   * @param fieldKey
+   * @param key
    * @param defaultValue
    */
-  public get(fieldKey: string, defaultValue: any = []): string[] {
-    if (!this.has(fieldKey)) {
-      return defaultValue
-    }
+  public getFirst<T>(
+    key: string,
+    defaultValue: T | null = null
+  ): string | T | null {
+    const errors = this.get(key)
 
-    return this.$errors[fieldKey]
+    return errors.length > 0 && Array.isArray(errors) ? errors[0] : defaultValue
   }
 
   /**
-   * returns first error of specific field key
+   * push an error message to specific key
    *
-   * @param fieldKey
-   * @param defaultValue
+   * @param key
+   * @param message
    */
-  public getFirst<T>(fieldKey: string, defaultValue: T = null): T | string {
-    const errors = this.get(fieldKey)
-
-    return errors.length <= 0 ? defaultValue : errors[0]
-  }
-
-  /**
-   * Returns all the ErrorsStack
-   */
-  public all(): ErrorsStack {
-    return this.$errors
-  }
-
-  /**
-   * delete a key from ErrorsStack
-   *
-   * @param fieldKey
-   */
-  public unset(fieldKey: string): Errors {
-    if (this.has(fieldKey)) {
-      delete this.$errors[fieldKey]
-
-      this.$errors = { ...this.$errors }
-    }
+  public push(key: string, message: string): this {
+    this.items[key] = [...this.get(key), message]
 
     return this
   }
 
   /**
-   * check if there is any error in the ErrorsStack
+   * override `get` method to return an empty array if there is no errors
+   * for the requested field
+   *
+   * @param key
    */
-  public any(): boolean {
-    return Object.keys(this.$errors).length > 0
-  }
-
-  /**
-   * Clear the ErrorsStack object
-   */
-  public clear(): Errors {
-    this.$errors = {}
-
-    return this
+  public get(key: string): string[] {
+    return super.get(key, [])
   }
 }

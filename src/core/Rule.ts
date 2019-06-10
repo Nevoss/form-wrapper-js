@@ -1,57 +1,70 @@
-import { RawRule } from '../types/Validator'
-import { MessageFunction, PassesFunction } from '../types/Errors'
-import generateMessageFunction from '../helpers/generateMessageFunction'
-import { isBoolean, isPromise, isRawRule } from '../utils'
-import { Field } from '../types/Field'
-import { Form } from './Form'
 import { RuleValidationError } from '../errors/RuleValidationError'
+import createRule from '../factories/RuleFactory'
+import { isBoolean, isPromise } from '../utils'
+import {
+  RuleDeclaration,
+  RuleMessageFunction,
+  RulePassesFunction,
+} from '../types/validation'
+import { Field } from '../types/fields'
+import { FormWithFields } from '../types/form'
 
 export class Rule {
   /**
-   * Holds the raw value before it converted to Rule
-   */
-  public $rawValue: RawRule | Function
-
-  /**
-   * Holds PassesFunction - the main function of the class
-   */
-  public passes: PassesFunction
-
-  /**
-   * Holds MessageFunction - the error message of the class
-   */
-  public message: MessageFunction
-
-  /**
-   * Constructor of Rule Class
+   * Create Rule
    *
-   * @param passes
-   * @param message
-   * @param rawValue
+   * @param value
    */
-  constructor(
-    passes: PassesFunction,
-    message: MessageFunction,
-    rawValue?: RawRule | Function
-  ) {
-    this.passes = passes
-    this.message = message
-    this.$rawValue = rawValue
+  public static create(value: RuleDeclaration | RulePassesFunction): Rule {
+    return createRule(value)
   }
 
   /**
-   * validate field with passes function
+   * Function that decide if the rule is passes or not/
+   */
+  public passes: RulePassesFunction
+
+  /**
+   * Function that returns the rule error message
+   */
+  public message: RuleMessageFunction | null
+
+  /**
+   * Rule Constructor.
+   *
+   * @param passes
+   * @param message
+   */
+  public constructor(
+    passes: RulePassesFunction,
+    message: RuleMessageFunction | null = null
+  ) {
+    this.passes = passes
+    this.message = message
+  }
+
+  /**
+   * validate the rule
    *
    * @param field
    * @param form
+   * @param defaultMessage
    */
-  public validate(field: Field, form: Form): Promise<any> {
+  public validate(
+    field: Field,
+    form: FormWithFields,
+    defaultMessage: RuleMessageFunction
+  ): Promise<any> {
     const passesResponse = this.passes(field, form)
 
     if (isBoolean(passesResponse)) {
       return passesResponse
         ? Promise.resolve()
-        : Promise.reject(new RuleValidationError())
+        : Promise.reject(
+            new RuleValidationError(
+              this.invokeErrorMessage(field, form, defaultMessage)
+            )
+          )
     }
 
     if (isPromise(passesResponse)) {
@@ -60,32 +73,27 @@ export class Rule {
 
     return passesResponse
       ? Promise.resolve()
-      : Promise.reject(new RuleValidationError())
+      : Promise.reject(
+          new RuleValidationError(
+            this.invokeErrorMessage(field, form, defaultMessage)
+          )
+        )
   }
 
   /**
-   * building a Rule class from a raw value (RawRule interface of regular function)
+   * calls the message function or the default message function
    *
-   * @param rawValue
+   * @param field
+   * @param form
    * @param defaultMessage
    */
-  public static buildFromRawValue(
-    rawValue: RawRule | PassesFunction,
-    defaultMessage: MessageFunction
-  ): Rule {
-    let passes: PassesFunction
-    let message: MessageFunction
-
-    if (isRawRule(rawValue)) {
-      passes = rawValue.passes
-      message = rawValue.message
-        ? generateMessageFunction(rawValue.message)
-        : defaultMessage
-    } else {
-      passes = rawValue
-      message = defaultMessage
-    }
-
-    return new Rule(passes, message, rawValue)
+  public invokeErrorMessage(
+    field: Field,
+    form: FormWithFields,
+    defaultMessage: RuleMessageFunction
+  ): string {
+    return this.message !== null
+      ? this.message(field, form)
+      : defaultMessage(field, form)
   }
 }

@@ -11,6 +11,9 @@
   <a href="https://www.npmjs.com/package/form-wrapper-js" target="_blank">
     <img src="https://img.shields.io/npm/v/form-wrapper-js.svg?style=shield" alt="npm"/>
   </a>
+  <a href="https://www.npmjs.com/package/form-wrapper-js" target="_blank">
+      <img src="https://img.shields.io/npm/v/form-wrapper-js/next.svg?style=shield" alt="npm"/>
+  </a>
   <img src="https://img.shields.io/github/license/Nevoss/form-wrapper-js.svg" alt="MIT"/>
   <a href="(https://codecov.io/gh/Nevoss/form-wrapper-js" target="_blank">
     <img src="https://codecov.io/gh/Nevoss/form-wrapper-js/branch/master/graph/badge.svg" alt="codecov"/>
@@ -22,21 +25,31 @@
 
 > A lightweight library that creates forms systems in a convenient and easy way, without dependencies and magic code.
 
+## Status: BETA
+
+The current version is in beta, most of the feature are stable, but there are may still be bugs, and api may change a little bit.
+
+for 0.x move to 0.x branch.
+
 ## :art: Playground
 
-- Vue - https://codesandbox.io/s/5x96q83yvp?module=%2Fsrc%2FApp.vue
+- Vue - [https://codesandbox.io/s/5x96q83yvp?module=%2Fsrc%2FApp.vue](https://codesandbox.io/s/5x96q83yvp?module=%2Fsrc%2FApp.vue)
 
 ## :cd: Installation
 
 ### Using `npm`
 ```
-npm install --save form-wrapper-js
+npm install --save form-wrapper-js@next  # for 1.x
+// or
+npm install --save form-wrapper-js  # for 0.x
 ```
 
 ### Using `yarn`
 
 ```
-yarn add form-wrapper-js
+yarn add form-wrapper-js@next  # for 1.x
+// or
+yarn add form-wrapper-js  # for 0.x
 ```
 
 ## :book: Documentation
@@ -45,9 +58,11 @@ Please check out the [Form Wrapper JS website](https://nevoss.github.io/form-wra
 
 ## :rocket: Basic Usage
 
-Here's a quick example.
 
 For the full documentation, please check out [the website](https://nevoss.github.io/form-wrapper-js).
+=======
+
+Here's a quick example  with **VUE**.
 
 ```vue
 <template>
@@ -56,7 +71,7 @@ For the full documentation, please check out [the website](https://nevoss.github
     <input type="text" v-model="form.name" />
     <input type="text" v-model="form.password" />
 
-    <button type="submit" :disabled="form.$submitting">
+    <button type="submit" :disabled="form.$submitting" />
   </form>
 </template>
 
@@ -67,7 +82,7 @@ import axios from 'axios'
 export default {
   data() {
     return {
-      form: new Form({
+      form: Form.create({
         email: null,
         name: null,
         password: null,
@@ -76,8 +91,10 @@ export default {
   },
   methods: {
     async submit() {
-      const { response } = await this.form.submit(form => axios.post('https//api.example/', form.values()))
-    }
+      const { response } = await this.form.$submit(form =>
+        axios.post('https//api.example/', form.$values())
+      )
+    },
   },
 }
 </script>
