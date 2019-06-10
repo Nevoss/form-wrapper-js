@@ -1,4 +1,5 @@
 import { RuleDeclaration, RulePassesFunction } from './validation'
+import { FormWithFields } from './form'
 
 /**
  * Basic Field Interface
@@ -21,6 +22,7 @@ export interface FieldDeclaration {
   extra: any
   rules: (RuleDeclaration | RulePassesFunction)[]
   label: string
+  transformer: FieldTransformer
 }
 
 /**
@@ -32,6 +34,7 @@ export interface OptionalFieldDeclaration {
   extra?: any
   rules?: (RuleDeclaration | RulePassesFunction)[]
   label?: string
+  transformer?: FieldTransformer
 }
 
 /**
@@ -41,4 +44,18 @@ export interface OptionalFieldDeclaration {
  */
 export interface FieldsDeclaration {
   [fieldKey: string]: any | FieldDeclaration
+}
+
+/**
+ * FieldTransformer is and object that holds 2 function
+ * `transform` and `reverseTransform` the idea is to normalize
+ * the data that comes in and goes out
+ */
+export interface FieldTransformer {
+  transform?: {
+    (field: Field, form: FormWithFields): any
+  }
+  reverseTransform?: {
+    (field: Field, form: FormWithFields): any
+  }
 }

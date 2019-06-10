@@ -10,6 +10,7 @@ import {
   FieldDeclaration,
   FieldsDeclaration,
   OptionalFieldDeclaration,
+  FieldTransformer,
 } from '../types/fields'
 import warn from '../warn'
 import createForm from '../factories/FormFactory'
@@ -117,6 +118,11 @@ export class Form {
   public $extra: { [key: string]: any } = {}
 
   /**
+   * Hold an object of transformers
+   */
+  public $transformers: { [key: string]: FieldTransformer } = {}
+
+  /**
    * hold the input that is on focus right now
    */
   public $onFocus: string | null = null
@@ -205,6 +211,7 @@ export class Form {
     this.$rules.generateFieldRules(fieldKey, fieldDeclaration.rules)
     this.$extra[fieldKey] = fieldDeclaration.extra
     this.$labels[fieldKey] = fieldDeclaration.label
+    this.$transformers[fieldKey] = fieldDeclaration.transformer
     this.$initialValues[fieldKey] = isFormCollection
       ? fieldDeclaration.value.values()
       : fieldDeclaration.value
@@ -244,6 +251,7 @@ export class Form {
     delete this.$initialValues[fieldKey]
     delete this.$extra[fieldKey]
     delete this.$labels[fieldKey]
+    delete this.$transformers[fieldKey]
     this.$rules.unset(fieldKey)
 
     return this

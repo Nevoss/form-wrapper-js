@@ -7,7 +7,6 @@ import { RuleMessageFunction } from '../src/types/validation'
 import { FormWithFields } from '../src/types/form'
 import { Rule } from '../src/core/Rule'
 import { ConditionalRules } from '../src/core/ConditionalRules'
-import { Rules } from '../src/core/Rules'
 
 /**
  * creates a fake Field declaration
@@ -22,6 +21,7 @@ export const createFakeFieldDeclaration = (
       : faker.lorem.words(),
     rules: [],
     extra: {},
+    transformer: {},
   }
 }
 

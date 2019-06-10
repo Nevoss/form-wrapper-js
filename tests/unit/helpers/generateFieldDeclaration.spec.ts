@@ -9,6 +9,7 @@ describe('helpers/generateFieldDeclaration.ts', (): void => {
       label: 'Name',
       rules: [],
       extra: {},
+      transformer: {},
     })
   })
 
@@ -22,6 +23,7 @@ describe('helpers/generateFieldDeclaration.ts', (): void => {
       label: 'Last name',
       rules: [],
       extra: {},
+      transformer: {},
     })
   })
 
@@ -31,6 +33,7 @@ describe('helpers/generateFieldDeclaration.ts', (): void => {
       label: 'A',
       rules: [jest.fn()],
       extra: { a: 1 },
+      transformer: {},
     }
 
     const fieldDeclaration = generateFieldDeclaration(
@@ -46,6 +49,7 @@ describe('helpers/generateFieldDeclaration.ts', (): void => {
       value: 'a',
       rules: [jest.fn()],
       extra: { a: 1 },
+      transformer: {},
     }
 
     const fieldDeclaration = generateFieldDeclaration(
@@ -57,5 +61,19 @@ describe('helpers/generateFieldDeclaration.ts', (): void => {
       ...basicFieldDeclaration,
       label: 'Last name',
     })
+  })
+
+  it('should generate transformer with semi FieldDeclaration', (): void => {
+    const transformer = {
+      transform: ({ value }) => value,
+      reverseTransform: ({ value }) => value,
+    }
+
+    const fieldDeclaration = generateFieldDeclaration('name', {
+      value: 'a',
+      transformer,
+    })
+
+    expect(fieldDeclaration.transformer).toBe(transformer)
   })
 })

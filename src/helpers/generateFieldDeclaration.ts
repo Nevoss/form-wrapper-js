@@ -32,14 +32,16 @@ export default (fieldKey: string, value: any): FieldDeclaration => {
   return isOptionalFieldDeclaration(value)
     ? {
         value: value.value,
-        label: value.label ? value.label : generateDefaultLabel(fieldKey),
-        rules: value.rules ? value.rules : [],
-        extra: value.extra ? value.extra : {},
+        label: value.label || generateDefaultLabel(fieldKey),
+        rules: value.rules || [],
+        extra: value.extra || {},
+        transformer: value.transformer || {},
       }
     : {
         value,
         label: generateDefaultLabel(fieldKey),
         rules: [],
         extra: {},
+        transformer: {},
       }
 }
