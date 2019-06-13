@@ -34,7 +34,7 @@ export interface OptionalFieldDeclaration {
   extra?: any
   rules?: (RuleDeclaration | RulePassesFunction)[]
   label?: string
-  transformer?: FieldTransformer
+  transformer?: OptionalFieldTransformer
 }
 
 /**
@@ -52,10 +52,15 @@ export interface FieldsDeclaration {
  * the data that comes in and goes out
  */
 export interface FieldTransformer {
-  transform?: {
-    (field: Field, form: FormWithFields): any
+  transform: {
+    (value: any, form: FormWithFields): any
   }
-  reverseTransform?: {
-    (field: Field, form: FormWithFields): any
+  reverseTransform: {
+    (value: any, form: FormWithFields): any
   }
 }
+
+/**
+ * The partial type of a FieldTransformer
+ */
+export type OptionalFieldTransformer = Partial<FieldTransformer>

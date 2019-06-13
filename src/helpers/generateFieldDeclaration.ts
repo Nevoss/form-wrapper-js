@@ -1,5 +1,9 @@
 import { isObject } from '../utils'
-import { FieldDeclaration } from '../types/fields'
+import {
+  FieldDeclaration,
+  FieldTransformer,
+  OptionalFieldTransformer,
+} from '../types/fields'
 
 /**
  * Checks if the value implements FieldDeclaration
@@ -23,6 +27,24 @@ const generateDefaultLabel = (fieldKey: string): string =>
     .replace(/^./, (str): string => str.toUpperCase())
 
 /**
+ * generate a FieldTransformer from a OptionalFieldTransformer
+ *
+ * @param transformDeclaration
+ */
+const generateTransformer = (
+  transformDeclaration: OptionalFieldTransformer
+): FieldTransformer => {
+  return {
+    transform: transformDeclaration.transform
+      ? transformDeclaration.transform
+      : value => value,
+    reverseTransform: transformDeclaration.reverseTransform
+      ? transformDeclaration.reverseTransform
+      : value => value,
+  }
+}
+
+/**
  * returns a FieldDeclaration from value or FieldDeclaration
  *
  * @param fieldKey
@@ -35,13 +57,13 @@ export default (fieldKey: string, value: any): FieldDeclaration => {
         label: value.label || generateDefaultLabel(fieldKey),
         rules: value.rules || [],
         extra: value.extra || {},
-        transformer: value.transformer || {},
+        transformer: generateTransformer(value.transformer || {}),
       }
     : {
         value,
         label: generateDefaultLabel(fieldKey),
         rules: [],
         extra: {},
-        transformer: {},
+        transformer: generateTransformer({}),
       }
 }

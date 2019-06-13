@@ -4,7 +4,6 @@ import { Field, FieldDeclaration } from '../src/types/fields'
 import { Options } from '../src/types/options'
 import { FormCollection } from '../src/core/FormCollection'
 import { RuleMessageFunction } from '../src/types/validation'
-import { FormWithFields } from '../src/types/form'
 import { Rule } from '../src/core/Rule'
 import { ConditionalRules } from '../src/core/ConditionalRules'
 
@@ -21,7 +20,10 @@ export const createFakeFieldDeclaration = (
       : faker.lorem.words(),
     rules: [],
     extra: {},
-    transformer: {},
+    transformer: {
+      transform: jest.fn(value => value),
+      reverseTransform: jest.fn(value => value),
+    },
   }
 }
 
@@ -57,9 +59,7 @@ export const createFakeConditionalRules = (
  * Creates a fake rule message function
  */
 export const createFakeRuleMessageFunction = (): RuleMessageFunction => {
-  return jest.fn(
-    (field: Field, form: FormWithFields): string => faker.lorem.words()
-  )
+  return jest.fn((): string => faker.lorem.words())
 }
 
 /**
