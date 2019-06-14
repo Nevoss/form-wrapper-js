@@ -23,7 +23,10 @@ export class Errors extends FieldsCollection<string[]> {
    * @param message
    */
   public push(key: string, message: string): this {
-    this.items[key] = [...this.get(key), message]
+    this.items = {
+      ...this.items,
+      [key]: [...this.get(key), message],
+    }
 
     return this
   }
