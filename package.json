@@ -1,6 +1,6 @@
 {
   "name": "form-wrapper-js",
-  "version": "1.0.0-beta.3",
+  "version": "1.0.0-beta.4",
   "description": "JS abstraction for forms",
   "main": "dist/index.js",
   "module": "dist/index.es.js",
