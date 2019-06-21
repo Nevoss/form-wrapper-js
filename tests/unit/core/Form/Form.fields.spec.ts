@@ -45,6 +45,7 @@ describe('core/Form.ts - Fields', (): void => {
     expect(form.$initialValues.name).toBe(fakeFieldDeclaration.value)
     expect(form.$extra.name).toBe(fakeFieldDeclaration.extra)
     expect(form.$labels.name).toBe(fakeFieldDeclaration.label)
+    expect(form.$transformers.name).toBe(fakeFieldDeclaration.transformer)
     expect(form.$rules.generateFieldRules).toHaveBeenCalledWith(
       'name',
       fakeFieldDeclaration.rules
@@ -113,6 +114,7 @@ describe('core/Form.ts - Fields', (): void => {
     expect(form.$initialValues.hasOwnProperty('name')).toBe(false)
     expect(form.$extra.hasOwnProperty('name')).toBe(false)
     expect(form.$labels.hasOwnProperty('name')).toBe(false)
+    expect(form.$transformers.hasOwnProperty('name')).toBe(false)
     expect(form.$rules.unset).toHaveBeenCalledWith('name')
   })
 

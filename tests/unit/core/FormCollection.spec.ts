@@ -156,10 +156,27 @@ describe('core/FormCollection.ts', (): void => {
         expect(fillSpy).toHaveBeenNthCalledWith(
           index + 1,
           mockValues[index],
-          false
+          false,
+          true
         )
       }
     )
+
+    mocked(fillSpy).mockClear()
+  })
+
+  it('should fill the form with data without calling the transformers', () => {
+    const fillSpy = jest.spyOn(Form.prototype, '$fill')
+
+    const mockValues = [{ name: '1' }]
+
+    const formCollection = createFormCollection()
+
+    formCollection.clear = jest.fn()
+
+    formCollection.fill(mockValues, false, false)
+
+    expect(fillSpy).toHaveBeenNthCalledWith(1, mockValues[0], false, false)
 
     mocked(fillSpy).mockClear()
   })
@@ -183,6 +200,7 @@ describe('core/FormCollection.ts', (): void => {
         expect(fillSpy).toHaveBeenNthCalledWith(
           index + 1,
           mockValues[index],
+          true,
           true
         )
       }
@@ -204,9 +222,30 @@ describe('core/FormCollection.ts', (): void => {
 
     const values = formCollection.values()
 
+    expect.assertions(5)
+
     expect(values.length).toBe(3)
     expect(values).toEqual(mockValues)
-    expect(valuesSpy).toHaveBeenCalledTimes(3)
+
+    mockValues.forEach((value, index) => {
+      expect(valuesSpy).toHaveBeenNthCalledWith(index + 1, true)
+    })
+
+    mocked(valuesSpy).mockClear()
+  })
+
+  it('should get all the forms values as array with out transformers', () => {
+    const valuesSpy = jest.spyOn(Form.prototype, '$values')
+    const mockValues = [{ name: '1' }]
+
+    const formCollection = createFormCollection()
+    formCollection.fill(mockValues)
+
+    formCollection.values(false)
+
+    expect(valuesSpy).toHaveBeenNthCalledWith(1, false)
+
+    mocked(valuesSpy).mockClear()
   })
 
   it('should return that the form is not dirty', (): void => {

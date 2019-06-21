@@ -9,6 +9,7 @@ import {
   Field,
   FieldDeclaration,
   FieldsDeclaration,
+  FieldTransformer,
   OptionalFieldDeclaration,
 } from '../types/fields'
 import warn from '../warn'
@@ -117,6 +118,11 @@ export class Form {
   public $extra: { [key: string]: any } = {}
 
   /**
+   * Hold an object of transformers
+   */
+  public $transformers: { [key: string]: FieldTransformer } = {}
+
+  /**
    * hold the input that is on focus right now
    */
   public $onFocus: string | null = null
@@ -205,6 +211,7 @@ export class Form {
     this.$rules.generateFieldRules(fieldKey, fieldDeclaration.rules)
     this.$extra[fieldKey] = fieldDeclaration.extra
     this.$labels[fieldKey] = fieldDeclaration.label
+    this.$transformers[fieldKey] = fieldDeclaration.transformer
     this.$initialValues[fieldKey] = isFormCollection
       ? fieldDeclaration.value.values()
       : fieldDeclaration.value
@@ -244,6 +251,7 @@ export class Form {
     delete this.$initialValues[fieldKey]
     delete this.$extra[fieldKey]
     delete this.$labels[fieldKey]
+    delete this.$transformers[fieldKey]
     this.$rules.unset(fieldKey)
 
     return this
@@ -288,16 +296,24 @@ export class Form {
 
   /**
    * return the values of the fields in the form
+   *
+   * @param useTransformers
    */
-  public $values(): { [key: string]: any } {
+  public $values(useTransformers: boolean = true): { [key: string]: any } {
     const values = {}
 
     this.$getFieldKeys().forEach(
       (fieldKey: string): void => {
-        values[fieldKey] =
+        let value =
           this[fieldKey] instanceof FormCollection
-            ? this[fieldKey].values()
+            ? this[fieldKey].values(useTransformers)
             : this[fieldKey]
+
+        if (useTransformers) {
+          value = this.$transformers[fieldKey].reverseTransform(value, this)
+        }
+
+        values[fieldKey] = value
       }
     )
 
@@ -307,16 +323,20 @@ export class Form {
   /**
    * Returns FormData object with the form values,
    * this one is for the use of file upload ot something similar.
+   *
+   * @param useTransformers
    */
-  public $valuesAsFormData(): FormData {
-    return objectToFormData(this.$values())
+  public $valuesAsFormData(useTransformers: boolean = true): FormData {
+    return objectToFormData(this.$values(useTransformers))
   }
 
   /**
    * returns the form values as a json string.
+   *
+   * @param useTransformers
    */
-  public $valuesAsJson(): string {
-    return JSON.stringify(this.$values())
+  public $valuesAsJson(useTransformers: boolean = true): string {
+    return JSON.stringify(this.$values(useTransformers))
   }
 
   /**
@@ -327,10 +347,12 @@ export class Form {
    *
    * @param data
    * @param updateInitialValues
+   * @param useTransformers
    */
   public $fill(
     data: { [key: string]: any },
-    updateInitialValues: boolean = false
+    updateInitialValues: boolean = false,
+    useTransformers: boolean = true
   ): FormWithFields {
     Object.keys(data).forEach(
       (fieldKey: string): void => {
@@ -340,9 +362,17 @@ export class Form {
 
         const isFormCollection = this[fieldKey] instanceof FormCollection
 
-        const value = isFormCollection
-          ? this[fieldKey].fill(data[fieldKey], updateInitialValues)
+        let value = isFormCollection
+          ? this[fieldKey].fill(
+              data[fieldKey],
+              updateInitialValues,
+              useTransformers
+            )
           : data[fieldKey]
+
+        if (!isFormCollection && useTransformers) {
+          value = this.$transformers[fieldKey].transform(value, this)
+        }
 
         if (updateInitialValues) {
           this.$initialValues[fieldKey] = isFormCollection

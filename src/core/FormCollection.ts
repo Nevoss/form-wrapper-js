@@ -130,11 +130,13 @@ export class FormCollection {
 
   /**
    * return all the values of the forms in array
+   *
+   * @param useTransformers
    */
-  public values(): ({ [key: string]: any })[] {
+  public values(useTransformers: boolean = true): ({ [key: string]: any })[] {
     return this.forms.map(
       (form: Form): { [key: string]: any } => {
-        return form.$values()
+        return form.$values(useTransformers)
       }
     )
   }
@@ -147,10 +149,12 @@ export class FormCollection {
    *
    * @param data
    * @param updateInitialValues
+   * @param useTransformers
    */
   public fill(
     data: ({ [key: string]: any })[],
-    updateInitialValues: boolean = false
+    updateInitialValues: boolean = false,
+    useTransformers: boolean = true
   ): FormCollection {
     this.clear()
 
@@ -160,7 +164,11 @@ export class FormCollection {
 
     data.forEach(
       (data: { [key: string]: any }): void => {
-        const form = this.add().$fill(data, updateInitialValues)
+        const form = this.add().$fill(
+          data,
+          updateInitialValues,
+          useTransformers
+        )
 
         if (updateInitialValues) {
           this._initialFormsIds.push(form.$id)

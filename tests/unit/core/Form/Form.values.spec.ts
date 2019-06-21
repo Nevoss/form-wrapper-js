@@ -9,7 +9,12 @@ jest.mock('../../../../src/warn')
 describe('core/Form.ts - values', (): void => {
   it('should return all the form values as an object', (): void => {
     const form = Form.create({
-      name: null,
+      name: {
+        value: null,
+        transformer: {
+          reverseTransform: value => `${value} +`,
+        },
+      },
       last_name: null,
       emails: FormCollection.create({
         email: null,
@@ -25,12 +30,29 @@ describe('core/Form.ts - values', (): void => {
     const result = form.$values()
 
     expect(result).toEqual({
-      name: 'Nevo',
+      name: 'Nevo +',
       last_name: 'Golan',
       emails: [],
     })
     expect(form.emails.values).toHaveBeenCalledTimes(1)
     expect(result.emails).toBe(mocked(form.emails.values).mock.results[0].value)
+  })
+
+  it('should return all the form values as an object without transformers', () => {
+    const form = Form.create({
+      name: {
+        value: null,
+        transformer: {
+          reverseTransform: value => `${value} +`,
+        },
+      },
+    })
+
+    form.name = 'Nevo'
+
+    expect(form.$values(false)).toEqual({
+      name: 'Nevo',
+    })
   })
 
   it('should return all the form values as FormData object', (): void => {
@@ -46,9 +68,25 @@ describe('core/Form.ts - values', (): void => {
     expect(values).toBe(objectToFormDataSpy.mock.results[0].value)
   })
 
+  it('should return form values as JSON', (): void => {
+    const form = Form.create({
+      first_name: 'Nevo',
+      last_name: null,
+    })
+
+    const valueAsJson = form.$valuesAsJson()
+
+    expect(valueAsJson).toBe(JSON.stringify(form.$values()))
+  })
+
   it('should fill all the form values with new values', (): void => {
     const form = Form.create({
-      name: null,
+      name: {
+        value: null,
+        transformer: {
+          transform: value => `${value} +`,
+        },
+      },
       last_name: null,
       emails: FormCollection.create({
         email: null,
@@ -66,10 +104,41 @@ describe('core/Form.ts - values', (): void => {
       fake_field: null,
     })
 
-    expect(form.name).toBe('Nevo')
+    expect(form.name).toBe('Nevo +')
     expect(form.last_name).toBe(null)
-    expect(emailsFillSpy).toHaveBeenCalledWith(newEmails, false)
+    expect(emailsFillSpy).toHaveBeenCalledWith(newEmails, false, true)
     expect(form.$hasField('fake_field')).toBe(false)
+  })
+
+  it('should fill all the form values with new values and not to call the transformers', (): void => {
+    const form = Form.create({
+      name: {
+        value: null,
+        transformer: {
+          transform: value => `${value} +`,
+        },
+      },
+      emails: FormCollection.create({
+        email: null,
+        type: null,
+      }),
+    })
+
+    const emailsFillSpy = jest.spyOn(form.emails, 'fill')
+
+    const newEmails = [{ email: 'a', type: 'a' }]
+
+    form.$fill(
+      {
+        name: 'Nevo',
+        emails: newEmails,
+      },
+      false,
+      false
+    )
+
+    expect(form.name).toBe('Nevo')
+    expect(emailsFillSpy).toHaveBeenCalledWith(newEmails, false, false)
   })
 
   it('should fill the form with values and update the initial values', (): void => {
@@ -97,18 +166,7 @@ describe('core/Form.ts - values', (): void => {
     expect(form.$initialValues['name']).toBe('Nevo')
     expect(form.$initialValues['last_name']).toBe('a')
     expect(form.$initialValues['emails']).toEqual(newEmails)
-    expect(emailsFillSpy).toHaveBeenCalledWith(newEmails, true)
-  })
-
-  it('should return form values as JSON', (): void => {
-    const form = Form.create({
-      first_name: 'Nevo',
-      last_name: null,
-    })
-
-    const valueAsJson = form.$valuesAsJson()
-
-    expect(valueAsJson).toBe(JSON.stringify(form.$values()))
+    expect(emailsFillSpy).toHaveBeenCalledWith(newEmails, true, true)
   })
 
   it('should reset all the values of the form to the initial form values', (): void => {

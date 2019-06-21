@@ -1,15 +1,20 @@
 import generateFieldDeclaration from '../../../src/helpers/generateFieldDeclaration'
+import { Form } from '../../../src/core/Form'
+
+jest.mock('../../../src/core/Form')
 
 describe('helpers/generateFieldDeclaration.ts', (): void => {
   it('should generate FieldDeclaration from only value', (): void => {
     const fieldDeclaration = generateFieldDeclaration('name', 'Nevo')
 
-    expect(fieldDeclaration).toEqual({
-      value: 'Nevo',
-      label: 'Name',
-      rules: [],
-      extra: {},
-    })
+    expect(fieldDeclaration).toEqual(
+      expect.objectContaining({
+        value: 'Nevo',
+        label: 'Name',
+        rules: [],
+        extra: {},
+      })
+    )
   })
 
   it('should generate FieldDeclaration with only value in the object', (): void => {
@@ -17,12 +22,14 @@ describe('helpers/generateFieldDeclaration.ts', (): void => {
       value: 'a',
     })
 
-    expect(fieldDeclaration).toEqual({
-      value: 'a',
-      label: 'Last name',
-      rules: [],
-      extra: {},
-    })
+    expect(fieldDeclaration).toEqual(
+      expect.objectContaining({
+        value: 'a',
+        label: 'Last name',
+        rules: [],
+        extra: {},
+      })
+    )
   })
 
   it('should generate FieldDeclaration with full FieldDeclaration', (): void => {
@@ -38,7 +45,9 @@ describe('helpers/generateFieldDeclaration.ts', (): void => {
       basicFieldDeclaration
     )
 
-    expect(fieldDeclaration).toEqual(basicFieldDeclaration)
+    expect(fieldDeclaration).toEqual(
+      expect.objectContaining(basicFieldDeclaration)
+    )
   })
 
   it('should generate FieldDeclaration with full FieldDeclaration without label', (): void => {
@@ -53,9 +62,40 @@ describe('helpers/generateFieldDeclaration.ts', (): void => {
       basicFieldDeclaration
     )
 
-    expect(fieldDeclaration).toEqual({
-      ...basicFieldDeclaration,
-      label: 'Last name',
+    expect(fieldDeclaration).toEqual(
+      expect.objectContaining({
+        ...basicFieldDeclaration,
+        label: 'Last name',
+      })
+    )
+  })
+
+  it('should generate transformer with semi FieldDeclaration', (): void => {
+    const transformer = {
+      transform: value => value + 1,
+      reverseTransform: value => value - 1,
+    }
+
+    const fieldDeclaration = generateFieldDeclaration('name', {
+      value: 'a',
+      transformer,
     })
+
+    expect(fieldDeclaration.transformer).toStrictEqual(transformer)
+  })
+
+  it('should generate a default transformer if transformer not declared', () => {
+    const fieldDeclaration = generateFieldDeclaration('name', {
+      value: 'a',
+    })
+
+    const value = {}
+
+    const fakeForm = Form.create()
+
+    expect(fieldDeclaration.transformer.transform(value, fakeForm)).toBe(value)
+    expect(fieldDeclaration.transformer.reverseTransform(value, fakeForm)).toBe(
+      value
+    )
   })
 })
