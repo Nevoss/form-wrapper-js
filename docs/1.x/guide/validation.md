@@ -41,12 +41,12 @@ there are the 2 "shapes" of validation rule:
 - The first is just a function that returns a `boolean`.
   the error message that will be collect by the [Errors collector](#errors) is the default error message that has been declared in
   the [form options](/guide/options)
-- The second is an object. the object must at least have a `passes` property 
-  that should be just like a function rule. the second property is `message` (that can be also a simple `string`), 
+- The second is an object. the object must at least have a `passes` property
+  that should be just like a function rule. the second property is `message` (that can be also a simple `string`),
   it should return an error message that will collect by the [Errors collector](/guide/validation#Errors) in case the field is not valid.
 
 ::: tip
-By default the validation runs on submission. you can tweak out the [options](/guide/options) and make your validation runs on field input event or on field blurred event 
+By default the validation runs on submission. you can tweak out the [options](/guide/options) and make your validation runs on field input event or on field blurred event
 and also you can call the validation manually:
 
 - `form.$validate()` - will validate the whole form
@@ -119,22 +119,24 @@ you can use it as well by returning the `Promise` in the validation function
 import { RuleValidationError } from 'form-wrapper-js'
 import axios from 'axios'
 
-export const isValidEmail = {
-  passes: ({ value }) =>
-    axios
-      .post('https://example.com/is-valid-email', { email: value })
-      .catch(error => {
-        if (error.response.status === 422) {
-          return Promise.reject(new RuleValidationError())
-        }
-      }),
-  message: 'Email is already taken',
+export const isValidEmail = async ({ value }) => {
+  try {
+    await axios.post('https://example.com/is-valid-email', { email: value })
+  } catch (e) {
+    if (e.response.status === 422) {
+      throw new RuleValidationError(e.response.data.message)
+    }
+
+    // if the error is not validation error it just handle it
+    // as a regular exception
+    throw e
+  }
 }
 ```
 
 As you can see `passes` function will return an `Promise` from the `axios` library, if the promise will resolved
-the field will be marked as valid, if the promise will rejected and the response status will be `422` (you can do any thing you want), the function will 
-return a rejected promise with `RuleValidationError`
+the field will be marked as valid, if the promise will rejected and the response status will be `422` (simple check to asset that the error is validation error and not another error),
+the function will will throw `RuleValidationError`, the first argument of the constructor is the validation message
 
 ::: danger
 One thing to understand, you must reject with **`RuleValidationError`**! otherwise the error will bubble up.
@@ -142,6 +144,45 @@ One thing to understand, you must reject with **`RuleValidationError`**! otherwi
 
 You can use `form.$isValidating('email')` In case that your `Promise` base validating take some time, the function will
 return `true` if the `Promise` base validation is still running and `false` if not.
+
+## Dynamic validation
+
+Dynamic validation is useful when there is a field validation that depend on another field, to solve this problem there is special library function, `applyRulesIf`.
+
+```js
+// In your vue file
+import { Form, applyRulesIf } from 'form-wrapper-js'
+import { required } from '@/form/validation.js'
+
+export default {
+  data() {
+    return {
+      form: new Form({
+        is_developer: false,
+        programing_languages: {
+          value: [],
+          rules: [
+            // another rules can be here...
+            applyRulesIf((field, form) => form.is_developer === true, [
+              required,
+            ]),
+            // another rules can be here...
+          ],
+        },
+      }),
+    }
+  },
+  // ...Your vue stuff
+}
+```
+
+As you can see `applyRulesIf` takes 2 arguments,
+
+- The first argument is the condition, simple function that returns boolean
+- The second argument is an array of rules
+
+In case that the condition will return `true` the rules will be called in the validation process, in case that it will return false
+the rules will be ignored.
 
 ## Errors
 
@@ -161,7 +202,7 @@ you can display those errors out with the use of `$errors` property.
 </template>
 ```
 
-Each field have an array of errors, `form.$errors.get('email')` will return the whole array, 
+Each field have an array of errors, `form.$errors.get('email')` will return the whole array,
 `form.$errors.getFirst('email')` will return the first error from that array.
 
 Here is a quick snippet of some methods from the `$errors` property you could and should use
