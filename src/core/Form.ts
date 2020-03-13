@@ -2,7 +2,6 @@ import { Errors } from './Errors'
 import { Rules } from './Rules'
 import { Interceptors } from './Interceptors'
 import { Collection } from '../helpers/Collection'
-import { FormCollection } from './FormCollection'
 import { OptionalOptions, Options } from '../types/options'
 import { FormDefaults, FormWithFields, SubmitCallback } from '../types/form'
 import {
@@ -133,11 +132,6 @@ export class Form {
   public $submitting: boolean = false
 
   /**
-   * specific for FormCollection to fill the error with the prefix of the parent field
-   */
-  public $fieldsPrefix: string = ''
-
-  /**
    * Form Constructor
    *
    * @param id
@@ -205,21 +199,13 @@ export class Form {
       fieldKey,
       value
     )
-    const isFormCollection = fieldDeclaration.value instanceof FormCollection
 
     this[fieldKey] = fieldDeclaration.value
     this.$rules.generateFieldRules(fieldKey, fieldDeclaration.rules)
     this.$extra[fieldKey] = fieldDeclaration.extra
     this.$labels[fieldKey] = fieldDeclaration.label
     this.$transformers[fieldKey] = fieldDeclaration.transformer
-    this.$initialValues[fieldKey] = isFormCollection
-      ? fieldDeclaration.value.values()
-      : fieldDeclaration.value
-
-    if (isFormCollection) {
-      this[fieldKey].parent = this
-      this[fieldKey].fieldKey = fieldKey
-    }
+    this.$initialValues[fieldKey] = fieldDeclaration.value
 
     return this
   }
@@ -230,11 +216,9 @@ export class Form {
    * @param fields
    */
   public $addFields(fields: FieldsDeclaration): FormWithFields {
-    Object.keys(fields).forEach(
-      (fieldKey: string): void => {
-        this.$addField(fieldKey, fields[fieldKey])
-      }
-    )
+    Object.keys(fields).forEach((fieldKey: string): void => {
+      this.$addField(fieldKey, fields[fieldKey])
+    })
 
     return this
   }
@@ -285,11 +269,9 @@ export class Form {
    * @param fieldKeys
    */
   public $removeFields(fieldKeys: string[]): FormWithFields {
-    fieldKeys.forEach(
-      (fieldKey: string): void => {
-        this.$removeField(fieldKey)
-      }
-    )
+    fieldKeys.forEach((fieldKey: string): void => {
+      this.$removeField(fieldKey)
+    })
 
     return this
   }
@@ -302,20 +284,15 @@ export class Form {
   public $values(useTransformers: boolean = true): { [key: string]: any } {
     const values = {}
 
-    this.$getFieldKeys().forEach(
-      (fieldKey: string): void => {
-        let value =
-          this[fieldKey] instanceof FormCollection
-            ? this[fieldKey].values(useTransformers)
-            : this[fieldKey]
+    this.$getFieldKeys().forEach((fieldKey: string): void => {
+      let value = this[fieldKey]
 
-        if (useTransformers) {
-          value = this.$transformers[fieldKey].reverseTransform(value, this)
-        }
-
-        values[fieldKey] = value
+      if (useTransformers) {
+        value = this.$transformers[fieldKey].reverseTransform(value, this)
       }
-    )
+
+      values[fieldKey] = value
+    })
 
     return values
   }
@@ -354,35 +331,23 @@ export class Form {
     updateInitialValues: boolean = false,
     useTransformers: boolean = true
   ): FormWithFields {
-    Object.keys(data).forEach(
-      (fieldKey: string): void => {
-        if (!this.$hasField(fieldKey)) {
-          return
-        }
-
-        const isFormCollection = this[fieldKey] instanceof FormCollection
-
-        let value = isFormCollection
-          ? this[fieldKey].fill(
-              data[fieldKey],
-              updateInitialValues,
-              useTransformers
-            )
-          : data[fieldKey]
-
-        if (!isFormCollection && useTransformers) {
-          value = this.$transformers[fieldKey].transform(value, this)
-        }
-
-        if (updateInitialValues) {
-          this.$initialValues[fieldKey] = isFormCollection
-            ? value.values()
-            : value
-        }
-
-        this[fieldKey] = value
+    Object.keys(data).forEach((fieldKey: string): void => {
+      if (!this.$hasField(fieldKey)) {
+        return
       }
-    )
+
+      let value = data[fieldKey]
+
+      if (useTransformers) {
+        value = this.$transformers[fieldKey].transform(value, this)
+      }
+
+      if (updateInitialValues) {
+        this.$initialValues[fieldKey] = value
+      }
+
+      this[fieldKey] = value
+    })
 
     return this
   }
@@ -406,9 +371,7 @@ export class Form {
 
     return (
       this.$hasField(fieldKey) &&
-      (this[fieldKey] instanceof FormCollection
-        ? this[fieldKey].isDirty()
-        : this[fieldKey] !== this.$initialValues[fieldKey])
+      this[fieldKey] !== this.$initialValues[fieldKey]
     )
   }
 
@@ -417,8 +380,8 @@ export class Form {
    * if one of the fields is dirty thw whole form consider as dirty
    */
   public $isFormDirty(): boolean {
-    return this.$getFieldKeys().some(
-      (fieldKey: string): boolean => this.$isFieldDirty(fieldKey)
+    return this.$getFieldKeys().some((fieldKey: string): boolean =>
+      this.$isFieldDirty(fieldKey)
     )
   }
 
@@ -453,8 +416,8 @@ export class Form {
   public async $validateField(fieldKey: string): Promise<any> {
     warn(this.$hasField(fieldKey), `'${fieldKey}' is not a valid field`)
 
-    this.$errors.unset(this.$fieldsPrefix + fieldKey)
-    this.$validating.push(this.$fieldsPrefix + fieldKey)
+    this.$errors.unset(fieldKey)
+    this.$validating.push(fieldKey)
 
     const defaultMessage = createRuleMessageFunction(
       this.$options.validation.defaultMessage
@@ -487,16 +450,14 @@ export class Form {
           throw error
         }
 
-        this.$errors.push(this.$fieldsPrefix + fieldKey, error.message)
+        this.$errors.push(fieldKey, error.message)
 
         this.$options.validation.stopAfterFirstRuleFailed &&
           (fieldRulesChain = [])
       }
     }
 
-    field.value instanceof FormCollection && (await field.value.validate())
-
-    this.$validating.unset(this.$fieldsPrefix + fieldKey)
+    this.$validating.unset(fieldKey)
   }
 
   /**

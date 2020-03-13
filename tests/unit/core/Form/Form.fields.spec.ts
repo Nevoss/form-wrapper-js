@@ -5,7 +5,6 @@ import generateFieldDeclaration from '../../../../src/helpers/generateFieldDecla
 import { FieldDeclaration } from '../../../../src/types/fields'
 import { createFakeFieldDeclaration } from '../../../fake-data'
 import { mocked } from 'ts-jest/utils'
-import { FormCollection } from '../../../../src/core/FormCollection'
 
 jest.mock('../../../../src/core/Rules')
 jest.mock('../../../../src/warn')
@@ -14,13 +13,11 @@ jest.mock('../../../../src/helpers/generateFieldDeclaration', () =>
 )
 
 describe('core/Form.ts - Fields', (): void => {
-  beforeEach(
-    (): void => {
-      mocked(warn).mockClear()
-      mocked(generateFieldDeclaration).mockClear()
-      mocked(Rules).mockClear()
-    }
-  )
+  beforeEach((): void => {
+    mocked(warn).mockClear()
+    mocked(generateFieldDeclaration).mockClear()
+    mocked(Rules).mockClear()
+  })
 
   it('should check if field is exists in the form', (): void => {
     const form = Form.create()
@@ -50,29 +47,6 @@ describe('core/Form.ts - Fields', (): void => {
       'name',
       fakeFieldDeclaration.rules
     )
-  })
-
-  it('should add field with a type of FormCollection', (): void => {
-    const form = Form.create()
-
-    mocked(generateFieldDeclaration).mockImplementationOnce(
-      (): any => createFakeFieldDeclaration(true)
-    )
-
-    const valuesSpy = jest.spyOn(FormCollection.prototype, 'values')
-
-    form.$addField('emails', FormCollection.create())
-
-    const fakeFieldDeclaration = mocked(generateFieldDeclaration).mock
-      .results[0].value
-
-    expect(form.emails).toBe(fakeFieldDeclaration.value)
-    expect(valuesSpy).toHaveBeenCalled()
-    expect(form.$initialValues.emails).toEqual(
-      fakeFieldDeclaration.value.values()
-    )
-    expect(form.emails.parent).toBe(form)
-    expect(form.emails.fieldKey).toBe('emails')
   })
 
   it('should warn if try to add field that exist in the form', (): void => {

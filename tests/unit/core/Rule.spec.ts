@@ -9,15 +9,12 @@ import { createFakeRuleMessageFunction } from '../../fake-data'
 import { mocked } from 'ts-jest/utils'
 
 jest.mock('../../../src/core/Form')
-jest.mock(
-  '../../../src/factories/RuleFactory',
-  (): object => {
-    return {
-      __esModule: true,
-      default: jest.fn((): string => 'fakeResponse'),
-    }
+jest.mock('../../../src/factories/RuleFactory', (): object => {
+  return {
+    __esModule: true,
+    default: jest.fn((): string => 'fakeResponse'),
   }
-)
+})
 
 describe('core/Rule.ts', (): void => {
   let fakeForm: Form = Form.create()

@@ -2,7 +2,6 @@ import faker from 'faker'
 import defaultOptions from '../src/default-options'
 import { Field, FieldDeclaration } from '../src/types/fields'
 import { Options } from '../src/types/options'
-import { FormCollection } from '../src/core/FormCollection'
 import { RuleMessageFunction } from '../src/types/validation'
 import { Rule } from '../src/core/Rule'
 import { ConditionalRules } from '../src/core/ConditionalRules'
@@ -10,19 +9,15 @@ import { ConditionalRules } from '../src/core/ConditionalRules'
 /**
  * creates a fake Field declaration
  */
-export const createFakeFieldDeclaration = (
-  formCollectionAsValue = false
-): FieldDeclaration => {
+export const createFakeFieldDeclaration = (): FieldDeclaration => {
   return {
     label: faker.lorem.words(),
-    value: formCollectionAsValue
-      ? FormCollection.create()
-      : faker.lorem.words(),
+    value: faker.lorem.words(),
     rules: [],
     extra: {},
     transformer: {
-      transform: jest.fn(value => value),
-      reverseTransform: jest.fn(value => value),
+      transform: jest.fn((value): any => value),
+      reverseTransform: jest.fn((value): any => value),
     },
   }
 }
@@ -79,13 +74,13 @@ export const createFakeOptions = (): Options => {
 /**
  * creates a fake fulfilled Interceptor
  */
-export const createFakeFulfilledInterceptor = () => {
-  return jest.fn((result: any) => Promise.resolve(result))
+export const createFakeFulfilledInterceptor = (): Function => {
+  return jest.fn((result: any): Promise<any> => Promise.resolve(result))
 }
 
 /**
  * creates a fake rejected Interceptor
  */
-export const createFakeRejectedInterceptor = () => {
-  return jest.fn((error: any) => Promise.reject(error))
+export const createFakeRejectedInterceptor = (): Function => {
+  return jest.fn((error: any): Promise<any> => Promise.reject(error))
 }

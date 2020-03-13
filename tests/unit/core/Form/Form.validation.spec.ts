@@ -10,13 +10,11 @@ import { mocked } from 'ts-jest/utils'
 import createRuleMessageFunction from '../../../../src/factories/RuleMessageFunctionFactory'
 import { RuleValidationError } from '../../../../src/errors/RuleValidationError'
 import { OptionalOptions } from '../../../../src/types/options'
-import { FormCollection } from '../../../../src/core/FormCollection'
 import { ConditionalRules } from '../../../../src/core/ConditionalRules'
 import { Collection } from '../../../../src/helpers/Collection'
 
 jest.mock('../../../../src/core/Interceptors')
 jest.mock('../../../../src/factories/RuleMessageFunctionFactory')
-jest.mock('../../../../src/core/FormCollection')
 jest.mock('../../../../src/warn')
 jest.mock('../../../../src/core/Rule')
 
@@ -55,12 +53,10 @@ describe('core/Form.ts - validation', (): void => {
     return form
   }
 
-  afterEach(
-    (): void => {
-      mocked(createRuleMessageFunction).mockClear()
-      mocked(warn).mockClear()
-    }
-  )
+  afterEach((): void => {
+    mocked(createRuleMessageFunction).mockClear()
+    mocked(warn).mockClear()
+  })
 
   it('should validate field and warn if the field not exists', async (): Promise<
     any
@@ -148,57 +144,6 @@ describe('core/Form.ts - validation', (): void => {
     expect(errors.length).toBe(2)
     expect(errors[0]).toBe('error1')
     expect(errors[1]).toBe('error2')
-  })
-
-  it('should set prefix to the field key in errors if the form has field prefix', async (): Promise<
-    any
-  > => {
-    const rule = new Rule(jest.fn())
-
-    rule.validate = jest.fn(() => {
-      throw new RuleValidationError('error1')
-    })
-
-    const form = createForm({ name: 'name' }, [rule])
-    form.$fieldsPrefix = 'field.0.'
-
-    await form.$validateField('name')
-
-    expect(form.$errors.get('name').length).toBe(0)
-    expect(form.$errors.get('field.0.name').length).toBe(1)
-  })
-
-  it('should also validate the form collection if the field is a FormCollection', async (): Promise<
-    any
-  > => {
-    const rule = new Rule(jest.fn())
-    const rule2 = new Rule(jest.fn())
-    const formCollection = new FormCollection()
-
-    const form = createForm({ name: 'name', value: formCollection }, [
-      rule,
-      rule2,
-    ])
-
-    await form.$validateField('name')
-
-    const getFieldResult = mocked(form.$getField).mock.results[0].value
-    const defaultMessage = mocked(createRuleMessageFunction).mock.results[0]
-      .value
-
-    expect(rule.validate).toHaveBeenCalledWith(
-      getFieldResult,
-      form,
-      defaultMessage
-    )
-
-    expect(rule2.validate).toHaveBeenCalledWith(
-      getFieldResult,
-      form,
-      defaultMessage
-    )
-
-    expect(formCollection.validate).toHaveBeenCalledTimes(1)
   })
 
   it('should validate ConditionalRules rules if the condition returns true', async (): Promise<
@@ -302,18 +247,6 @@ describe('core/Form.ts - validation', (): void => {
     expect(form.$validating.has('name')).toBe(true)
   })
 
-  it('should mark the field as validating and add a prefix if the form has fieldsPrefix', (): void => {
-    const rule = new Rule(jest.fn())
-    const form = createForm({ name: 'name' }, [rule])
-
-    form.$fieldsPrefix = 'emails.0.'
-
-    form.$validateField('name')
-
-    expect(form.$validating.has('name')).toBe(false)
-    expect(form.$validating.has('emails.0.name')).toBe(true)
-  })
-
   it('should validate all the fields of the form', async (): Promise<any> => {
     const form = createForm({ name: 'name' }, [], {}, { name: 'last_name' })
 
@@ -325,7 +258,9 @@ describe('core/Form.ts - validation', (): void => {
     expect(form.$validateField).toHaveBeenNthCalledWith(2, 'last_name')
   })
 
-  it('should invoke $validateField or $validateForm', async () => {
+  it('should invoke $validateField or $validateForm', async (): Promise<
+    any
+  > => {
     const form = createForm({ name: 'name' })
 
     form.$validateForm = jest.fn()

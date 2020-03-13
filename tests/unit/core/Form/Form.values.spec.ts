@@ -1,6 +1,4 @@
 import { Form } from '../../../../src'
-import { FormCollection } from '../../../../src/core/FormCollection'
-import { mocked } from 'ts-jest/utils'
 import warn from '../../../../src/warn'
 import * as utils from '../../../../src/utils'
 
@@ -12,17 +10,11 @@ describe('core/Form.ts - values', (): void => {
       name: {
         value: null,
         transformer: {
-          reverseTransform: value => `${value} +`,
+          reverseTransform: (value): string => `${value} +`,
         },
       },
       last_name: null,
-      emails: FormCollection.create({
-        email: null,
-        type: null,
-      }),
     })
-
-    form.emails.values = jest.fn((): [] => [])
 
     form.name = 'Nevo'
     form.last_name = 'Golan'
@@ -32,18 +24,15 @@ describe('core/Form.ts - values', (): void => {
     expect(result).toEqual({
       name: 'Nevo +',
       last_name: 'Golan',
-      emails: [],
     })
-    expect(form.emails.values).toHaveBeenCalledTimes(1)
-    expect(result.emails).toBe(mocked(form.emails.values).mock.results[0].value)
   })
 
-  it('should return all the form values as an object without transformers', () => {
+  it('should return all the form values as an object without transformers', (): void => {
     const form = Form.create({
       name: {
         value: null,
         transformer: {
-          reverseTransform: value => `${value} +`,
+          reverseTransform: (value): string => `${value} +`,
         },
       },
     })
@@ -84,29 +73,19 @@ describe('core/Form.ts - values', (): void => {
       name: {
         value: null,
         transformer: {
-          transform: value => `${value} +`,
+          transform: (value): string => `${value} +`,
         },
       },
       last_name: null,
-      emails: FormCollection.create({
-        email: null,
-        type: null,
-      }),
     })
-
-    const emailsFillSpy = jest.spyOn(form.emails, 'fill')
-
-    const newEmails = [{ email: 'a', type: 'a' }]
 
     form.$fill({
       name: 'Nevo',
-      emails: newEmails,
       fake_field: null,
     })
 
     expect(form.name).toBe('Nevo +')
     expect(form.last_name).toBe(null)
-    expect(emailsFillSpy).toHaveBeenCalledWith(newEmails, false, true)
     expect(form.$hasField('fake_field')).toBe(false)
   })
 
@@ -115,58 +94,37 @@ describe('core/Form.ts - values', (): void => {
       name: {
         value: null,
         transformer: {
-          transform: value => `${value} +`,
+          transform: (value): string => `${value} +`,
         },
       },
-      emails: FormCollection.create({
-        email: null,
-        type: null,
-      }),
     })
-
-    const emailsFillSpy = jest.spyOn(form.emails, 'fill')
-
-    const newEmails = [{ email: 'a', type: 'a' }]
 
     form.$fill(
       {
         name: 'Nevo',
-        emails: newEmails,
       },
       false,
       false
     )
 
     expect(form.name).toBe('Nevo')
-    expect(emailsFillSpy).toHaveBeenCalledWith(newEmails, false, false)
   })
 
   it('should fill the form with values and update the initial values', (): void => {
     const form = Form.create({
       name: null,
       last_name: 'a',
-      emails: FormCollection.create({
-        email: null,
-        type: null,
-      }),
     })
-
-    const emailsFillSpy = jest.spyOn(form.emails, 'fill')
-
-    const newEmails = [{ email: 'a', type: 'a' }]
 
     form.$fill(
       {
         name: 'Nevo',
-        emails: newEmails,
       },
       true
     )
 
     expect(form.$initialValues['name']).toBe('Nevo')
     expect(form.$initialValues['last_name']).toBe('a')
-    expect(form.$initialValues['emails']).toEqual(newEmails)
-    expect(emailsFillSpy).toHaveBeenCalledWith(newEmails, true, true)
   })
 
   it('should reset all the values of the form to the initial form values', (): void => {
@@ -207,24 +165,6 @@ describe('core/Form.ts - values', (): void => {
       expect.stringContaining('another_field')
     )
     expect(form.$isFieldDirty('is_developer')).toBe(true)
-  })
-
-  it('should determine if FormCollection field is dirty', (): void => {
-    const form = Form.create({
-      emails: FormCollection.create({ email: null }),
-      phones: FormCollection.create({ phone: null }),
-    })
-
-    const emailsIsDirtySpy = jest.spyOn(form.emails, 'isDirty')
-    const phonesIsDirtySpy = jest.spyOn(form.phones, 'isDirty')
-
-    form.emails.add()
-
-    expect(form.$isFieldDirty('emails')).toBe(true)
-    expect(emailsIsDirtySpy).toHaveBeenCalled()
-
-    expect(form.$isFieldDirty('phones')).toBe(false)
-    expect(phonesIsDirtySpy).toHaveBeenCalled()
   })
 
   it('should determine if the whole form is dirty', (): void => {
