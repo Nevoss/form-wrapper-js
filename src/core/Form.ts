@@ -288,7 +288,7 @@ export class Form {
       let value = this[fieldKey]
 
       if (useTransformers) {
-        value = this.$transformers[fieldKey].reverseTransform(value, this)
+        value = this.$transformers[fieldKey].transformOut(value, this)
       }
 
       values[fieldKey] = value
@@ -339,7 +339,7 @@ export class Form {
       let value = data[fieldKey]
 
       if (useTransformers) {
-        value = this.$transformers[fieldKey].transform(value, this)
+        value = this.$transformers[fieldKey].transformIn(value, this)
       }
 
       if (updateInitialValues) {

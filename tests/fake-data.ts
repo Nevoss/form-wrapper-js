@@ -16,8 +16,8 @@ export const createFakeFieldDeclaration = (): FieldDeclaration => {
     rules: [],
     extra: {},
     transformer: {
-      transform: jest.fn((value): any => value),
-      reverseTransform: jest.fn((value): any => value),
+      transformIn: jest.fn((value): any => value),
+      transformOut: jest.fn((value): any => value),
     },
   }
 }

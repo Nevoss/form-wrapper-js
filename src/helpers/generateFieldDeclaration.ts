@@ -35,12 +35,12 @@ const generateTransformer = (
   transformDeclaration: OptionalFieldTransformer
 ): FieldTransformer => {
   return {
-    transform: transformDeclaration.transform
-      ? transformDeclaration.transform
-      : value => value,
-    reverseTransform: transformDeclaration.reverseTransform
-      ? transformDeclaration.reverseTransform
-      : value => value,
+    transformIn: transformDeclaration.transformIn
+      ? transformDeclaration.transformIn
+      : <T>(value: T): T => value,
+    transformOut: transformDeclaration.transformOut
+      ? transformDeclaration.transformOut
+      : <T>(value: T): T => value,
   }
 }
 

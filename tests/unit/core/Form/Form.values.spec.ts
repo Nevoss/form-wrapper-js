@@ -10,7 +10,7 @@ describe('core/Form.ts - values', (): void => {
       name: {
         value: null,
         transformer: {
-          reverseTransform: (value): string => `${value} +`,
+          transformOut: (value): string => `${value} +`,
         },
       },
       last_name: null,
@@ -32,7 +32,7 @@ describe('core/Form.ts - values', (): void => {
       name: {
         value: null,
         transformer: {
-          reverseTransform: (value): string => `${value} +`,
+          transformOut: (value): string => `${value} +`,
         },
       },
     })
@@ -73,7 +73,7 @@ describe('core/Form.ts - values', (): void => {
       name: {
         value: null,
         transformer: {
-          transform: (value): string => `${value} +`,
+          transformIn: (value): string => `${value} +`,
         },
       },
       last_name: null,
@@ -94,7 +94,7 @@ describe('core/Form.ts - values', (): void => {
       name: {
         value: null,
         transformer: {
-          transform: (value): string => `${value} +`,
+          transformIn: (value): string => `${value} +`,
         },
       },
     })

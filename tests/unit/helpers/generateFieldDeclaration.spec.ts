@@ -72,8 +72,8 @@ describe('helpers/generateFieldDeclaration.ts', (): void => {
 
   it('should generate transformer with semi FieldDeclaration', (): void => {
     const transformer = {
-      transform: value => value + 1,
-      reverseTransform: value => value - 1,
+      transformIn: (value): any => value + 1,
+      transformOut: (value): any => value - 1,
     }
 
     const fieldDeclaration = generateFieldDeclaration('name', {
@@ -84,7 +84,7 @@ describe('helpers/generateFieldDeclaration.ts', (): void => {
     expect(fieldDeclaration.transformer).toStrictEqual(transformer)
   })
 
-  it('should generate a default transformer if transformer not declared', () => {
+  it('should generate a default transformer if transformer not declared', (): void => {
     const fieldDeclaration = generateFieldDeclaration('name', {
       value: 'a',
     })
@@ -93,8 +93,10 @@ describe('helpers/generateFieldDeclaration.ts', (): void => {
 
     const fakeForm = Form.create()
 
-    expect(fieldDeclaration.transformer.transform(value, fakeForm)).toBe(value)
-    expect(fieldDeclaration.transformer.reverseTransform(value, fakeForm)).toBe(
+    expect(fieldDeclaration.transformer.transformIn(value, fakeForm)).toBe(
+      value
+    )
+    expect(fieldDeclaration.transformer.transformOut(value, fakeForm)).toBe(
       value
     )
   })

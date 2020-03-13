@@ -48,14 +48,17 @@ export interface FieldsDeclaration {
 
 /**
  * FieldTransformer is and object that holds 2 function
- * `transform` and `reverseTransform` the idea is to normalize
+ * `transformIn` and `transformOut` the idea is to normalize
  * the data that comes in and goes out
+ *
+ * transformIn - works when the data come inside to the form object
+ * transformOut - works when the user use $values method.
  */
 export interface FieldTransformer {
-  transform: {
+  transformIn: {
     (value: any, form: FormWithFields): any
   }
-  reverseTransform: {
+  transformOut: {
     (value: any, form: FormWithFields): any
   }
 }
