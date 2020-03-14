@@ -1,4 +1,4 @@
-import { OptionalOptions, Options } from '../types/Options'
+import { OptionalOptions, Options } from '../types/options'
 import { isObject } from '../utils'
 
 /**
@@ -13,21 +13,19 @@ const assignNewOptions = (
 ): object => {
   let options = {}
 
-  Object.keys(originOptions).forEach(
-    (key): void | undefined => {
-      if (!newOptions.hasOwnProperty(key)) {
-        options[key] = originOptions[key]
-        return
-      }
-
-      if (isObject(newOptions[key])) {
-        options[key] = assignNewOptions(originOptions[key], newOptions[key])
-        return
-      }
-
-      options[key] = newOptions[key]
+  Object.keys(originOptions).forEach((key): void | undefined => {
+    if (!newOptions.hasOwnProperty(key)) {
+      options[key] = originOptions[key]
+      return
     }
-  )
+
+    if (isObject(newOptions[key])) {
+      options[key] = assignNewOptions(originOptions[key], newOptions[key])
+      return
+    }
+
+    options[key] = newOptions[key]
+  })
 
   return options
 }
@@ -35,7 +33,7 @@ const assignNewOptions = (
 /**
  * generate Options base on the defaultOptions Options and new options
  * must ignore ts here - because I know that the result will be an Options
- * interface - Let me know if there is some way to do it withput ignore
+ * interface - Let me know if there is some way to do it without ignore
  *
  * @param defaultOptions
  * @param overwriteOptions

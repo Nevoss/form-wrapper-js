@@ -12,18 +12,4 @@ module.exports = [
       ['guide/interceptors', 'Interceptors'],
     ],
   },
-  {
-    title: 'Api Reference',
-    collapsable: true,
-    children: [
-      ['api-reference/classes/form', 'Form'],
-      ['api-reference/classes/formcollection', 'FormCollection'],
-      ['api-reference/interfaces/options', 'Options'],
-      [
-        'api-reference/interfaces/successfulsubmissionoptions',
-        'Options - Successful Submission',
-      ],
-      ['api-reference/interfaces/validationoptions', 'Options - Validation'],
-    ],
-  },
 ]

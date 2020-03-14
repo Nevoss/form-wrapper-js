@@ -79,10 +79,8 @@ export class Interceptors {
    * @param callback
    */
   public forEach(callback: Function): void {
-    this.chain.forEach(
-      (interceptor: Interceptor): void => {
-        callback(interceptor)
-      }
-    )
+    this.chain.forEach((interceptor: Interceptor): void => {
+      callback(interceptor)
+    })
   }
 }

@@ -14,7 +14,9 @@ export class Rules extends FieldsCollection<(Rule | ConditionalRules)[]> {
     key: string,
     rules: (RuleDeclaration | RulePassesFunction | ConditionalRules)[]
   ): this {
-    this.items[key] = rules.map(
+    this.items[
+      key
+    ] = rules.map(
       (
         rule: RuleDeclaration | RulePassesFunction | ConditionalRules
       ): Rule | ConditionalRules =>
